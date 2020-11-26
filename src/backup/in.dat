@@ -1,0 +1,28 @@
+# This is an input file for hsmc 
+
+# Density
+rho 0.6
+
+# Number of cells along the x, y and z directions
+# The cells are used a building block of the simulation box
+cells_x 4
+cells_y 4
+cells_z 4
+
+# Maximum displacement for MC moves
+dr_max -0.03
+
+# Type of cells 
+# 1: simple cubic, 1 particle per cell
+# 2: face-centered cubic, 4 particles per cell
+type 2
+
+# Radial distribution function 
+rdf 0.002 100 10
+
+# Number of sweeps (for N particles, 1 sweep = N moves)
+sweep_eq 10000
+sweep_stat 1000
+
+# Output interval (how often output gets printed)
+out 1000
