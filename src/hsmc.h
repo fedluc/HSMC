@@ -4,8 +4,8 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_fit.h>
-#include "read_input.h"
-#include "init.h"
+#include <time.h>
+#include "cell_list.h"
 
 void hs_nvt();
 
@@ -14,6 +14,8 @@ void run_opt();
 void run();
 
 void sweep();
+
+double compute_dist(int idx1, int idx2);
 
 bool check_overlap();
 

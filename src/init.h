@@ -17,7 +17,7 @@ struct box_info {
 
 extern struct box_info sim_box_info;
 extern struct p_info part_info;
-extern double **part;
+extern double (*part)[4];
 
 void sim_box_init(int cell_type, int nx, int ny,
 		  int nz, double rho);
