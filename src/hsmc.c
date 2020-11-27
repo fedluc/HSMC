@@ -11,7 +11,6 @@ long unsigned int r_num_max;
 // Global variables for particles moves
 int acc_moves, rej_moves;
 int r_idx;
-double x_new, y_new, z_new; 
 
 // Hard-sphere simulation in the NVT ensemble
 void hs_nvt() {
@@ -28,6 +27,9 @@ void hs_nvt() {
   // Initialize particle's positions
   part_init();
 
+  // Initialize cell lists
+  cell_list_init();
+
   // Set-up random number generator (Marsenne-Twister)
   rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
   gsl_rng_set(rng_mt,0);
@@ -37,16 +39,23 @@ void hs_nvt() {
   if (in.dr_max < 0){
     in.dr_max *= -1;
     run_opt();
+    part_init();
   }
-  
 
   // Run equilibration
+  clock_t start = clock();
   run();
-
+  clock_t end = clock();
+  printf("Elapsed time: %f seconds\n",
+	 (double)(end - start) / CLOCKS_PER_SEC);
+  
   // Free memory
   free(part);
   gsl_rng_free(rng_mt);
-  
+  free(cl_neigh);
+  free(cl_head);
+  free(cl_link);
+
 }
 
 
@@ -141,25 +150,26 @@ void run(){
     // Sweep
     sweep();
 
-    // Histograms of particles positions
-    if (ii % in.rdf_tcompute == 0) {
-      compute_hist(pos_hist, &sample_counter, rr, 
-		   rr[rdf_nn-1]+in.rdf_dr/2.); 
-    }
+    /* // Histograms of particles positions */
+    /* if (ii % in.rdf_tcompute == 0) { */
+    /*   compute_hist(pos_hist, &sample_counter, rr,  */
+    /* 		   rr[rdf_nn-1]+in.rdf_dr/2.);  */
+    /* } */
 
-    // Radial distribution function and pressure
-    if (sample_counter % in.rdf_tave == 0 && sample_counter > 0) {      
-      average_hist(pos_hist, rdf_nn);
-      compute_rdf(rdf, pos_hist, rr, rdf_nn);
-      compute_pressure(&press, rdf, rr, rdf_nn);
-      reset_hist(pos_hist, &sample_counter, rdf_nn);
-    }
+    /* // Radial distribution function and pressure */
+    /* if (sample_counter % in.rdf_tave == 0 && sample_counter > 0) {       */
+    /*   average_hist(pos_hist, rdf_nn); */
+    /*   compute_rdf(rdf, pos_hist, rr, rdf_nn); */
+    /*   compute_pressure(&press, rdf, rr, rdf_nn); */
+    /*   reset_hist(pos_hist, &sample_counter, rdf_nn); */
+    /* } */
 
     
     // Output on screen
     if (ii % in.dt_output == 0) {
-      printf("Sweep number: %d, pressure: %.8f, g[sigma]: %.8f\n",
-	     ii, press, rdf[0]);
+      //printf("Sweep number: %d, pressure: %.8f, g[sigma]: %.8f\n",
+      //ii, press, rdf[0]);
+      printf("Sweep number: %d\n", ii, press, rdf[0]);
       fflush(stdout);
     }
 
@@ -195,8 +205,9 @@ void sweep(){
 
   int ii;
   double r_x, r_y, r_z;
+  double x_old, y_old, z_old;
 
-  // Loop over the particles
+  // Create N trial moves (N = number of particles)
   for (ii=0; ii<part_info.NN; ii++){
 
     // Random number in [0, NN-1] to select the particle
@@ -207,30 +218,38 @@ void sweep(){
     r_y = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
     r_z = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
 
+    // Store old coordinates (if the move gets rejected)
+    x_old = part[r_idx][1];
+    y_old = part[r_idx][2];
+    z_old = part[r_idx][3];
+
     // Proposed move
-    x_new = part[r_idx][1] + (2.0 * r_x - 1.0)*in.dr_max;
-    y_new = part[r_idx][2] + (2.0 * r_y - 1.0)*in.dr_max;
-    z_new = part[r_idx][3] + (2.0 * r_z - 1.0)*in.dr_max;
+    part[r_idx][1] += (2.0 * r_x - 1.0)*in.dr_max;
+    part[r_idx][2] += (2.0 * r_y - 1.0)*in.dr_max;
+    part[r_idx][3] += (2.0 * r_z - 1.0)*in.dr_max;
 
     // Periodic boundary conditions
-    if (x_new > sim_box_info.lx) x_new -= sim_box_info.lx;
-    else if (x_new < 0.0)        x_new += sim_box_info.lx;
-    if (y_new > sim_box_info.ly) y_new -= sim_box_info.ly;
-    else if (y_new < 0.0)        y_new += sim_box_info.ly;
-    if (z_new > sim_box_info.lz) z_new -= sim_box_info.lz;
-    else if (z_new < 0.0)        z_new += sim_box_info.lz;
+    if (part[r_idx][1] > sim_box_info.lx) part[r_idx][1] -= sim_box_info.lx;
+    else if (part[r_idx][1] < 0.0)        part[r_idx][1] += sim_box_info.lx;
+    if (part[r_idx][2] > sim_box_info.ly) part[r_idx][2] -= sim_box_info.ly;
+    else if (part[r_idx][2] < 0.0)        part[r_idx][2] += sim_box_info.ly;
+    if (part[r_idx][3] > sim_box_info.lz) part[r_idx][3] -= sim_box_info.lz;
+    else if (part[r_idx][3] < 0.0)        part[r_idx][3] += sim_box_info.lz;
       
     // Accept or reject move according to metropolis algorithm
     if (check_overlap()){
       // Reject move
+      part[r_idx][1] = x_old;
+      part[r_idx][2] = y_old;
+      part[r_idx][3] = z_old;
       rej_moves+=1;
     }
     else {
       // Accept move
-      part[r_idx][1] = x_new;
-      part[r_idx][2] = y_new;
-      part[r_idx][3] = z_new;
       acc_moves+=1;
+      // Update cell list
+      cell_list_update();
+      
     }
  
   }
@@ -240,34 +259,32 @@ void sweep(){
 
 bool check_overlap(){
   
-  double lx_2 = sim_box_info.lx/2.0;
-  double ly_2 = sim_box_info.ly/2.0;
-  double lz_2 = sim_box_info.lz/2.0;
-  double dx, dy, dz, rr;
+  // Variable declaration
+  int cell_idx, neigh_idx, part_idx;
+  double dr;
 
-  for (int ii=0; ii<part_info.NN; ii++){
+  // Cell that contains the particle
+  cell_idx = cell_part_idx(r_idx);
+    
+  // Loop over the neighboring cells
+  for (int ii=0; ii<26; ii++){
 
-    if (ii != r_idx) {
+    neigh_idx = cl_neigh[cell_idx][ii];
+    part_idx = cl_head[neigh_idx];
 
-      // Cartesian components of the distance
-      dx = x_new - part[ii][1];
-      dy = y_new - part[ii][2];
-      dz = z_new - part[ii][3];
+    // Loop over the particles in the neighboring cells
+    while (part_idx > 0){
       
-      // Consider periodic boundary conditions
-      if (dx > lx_2)       dx -= sim_box_info.lx;
-      else if (dx < -lx_2) dx += sim_box_info.lx;
-      if (dy > ly_2)       dy -= sim_box_info.ly;
-      else if (dy < -ly_2) dy += sim_box_info.ly;
-      if (dz > lz_2)       dz -= sim_box_info.lz;
-      else if (dz< -lz_2) dz += sim_box_info.lz;
+      // Compute inter-particle distance
+      dr = compute_dist(r_idx, part_idx);
 
-      // Radial distance
-      rr = sqrt(dx*dx + dy*dy + dz*dz);
-      
       // Signal that there is overlap
-      if (rr < 1.0) return true;
+      if (dr < 1.0 && part_idx != r_idx)
+	return true;
 
+      // Update index
+      part_idx = cl_link[part_idx];
+	
     }
 
   }
@@ -276,39 +293,53 @@ bool check_overlap(){
 
 }
 
-void compute_hist(double *hist, int *counter, 
-		  double *pos, double cutoff){
-  
-  // Variable declaration
+
+double compute_dist(int idx1, int idx2){
+
   double lx_2 = sim_box_info.lx/2.0;
   double ly_2 = sim_box_info.ly/2.0;
   double lz_2 = sim_box_info.lz/2.0;
-  double dx, dy, dz, rr;
+  double dx, dy, dz, dr;
+
+  // Cartesian components of the distance
+  dx = part[idx1][1] - part[idx2][1];
+  dy = part[idx1][2] - part[idx2][2];
+  dz = part[idx1][3] - part[idx2][3];
+  
+  // Periodic boundary conditions
+  if (dx > lx_2)       dx -= sim_box_info.lx;
+  else if (dx < -lx_2) dx += sim_box_info.lx;
+  if (dy > ly_2)       dy -= sim_box_info.ly;
+  else if (dy < -ly_2) dy += sim_box_info.ly;
+  if (dz > lz_2)       dz -= sim_box_info.lz;
+  else if (dz< -lz_2) dz += sim_box_info.lz;
+  
+  // Radial distance
+  dr =  sqrt(dx*dx + dy*dy + dz*dz);
+  
+  return dr;
+
+}
+
+
+
+void compute_hist(double *hist, int *counter,
+		  double *pos, double cutoff){
+  
+  // Variable declaration
+  double dr;
   int bin;
 
   // Fill histograms
   for (int ii=0; ii<part_info.NN; ii++){
     for (int jj=ii+1; jj<part_info.NN; jj++){
- 
-      // Cartesian components of the distance
-      dx = part[jj][1] - part[ii][1];
-      dy = part[jj][2] - part[ii][2];
-      dz = part[jj][3] - part[ii][3];
-      
-      // Consider periodic boundary conditions
-      if (dx > lx_2)       dx -= sim_box_info.lx;
-      else if (dx < -lx_2) dx += sim_box_info.lx;
-      if (dy > ly_2)       dy -= sim_box_info.ly;
-      else if (dy < -ly_2) dy += sim_box_info.ly;
-      if (dz > lz_2)       dz -= sim_box_info.lz;
-      else if (dz< -lz_2) dz += sim_box_info.lz;
 
-      // Radial distance
-      rr = sqrt(dx*dx + dy*dy + dz*dz);
+      // Inter-particle distance
+      dr = compute_dist(ii, jj);
       
       // Update histogram count
-      if (rr <= cutoff) {
-      	bin = (int)((rr-1.0)/in.rdf_dr);
+      if (dr <= cutoff) {
+      	bin = (int)((dr-1.0)/in.rdf_dr);
 	hist[bin] += 2.0;
       }
  
@@ -325,7 +356,7 @@ void average_hist(double *hist, int nn){
   
   for (int ii=0; ii<nn; ii++){
      hist[ii] /= in.rdf_tave;
-  } 
+  }
 
 }
 
@@ -336,7 +367,7 @@ void reset_hist(double *hist, int *counter, int nn){
   // Reset histograms
   for (int ii=0; ii<nn; ii++){
     hist[ii] = 0.0;
-  } 
+  }
 
   // Reset counter
   *counter = 0;
@@ -386,8 +417,8 @@ void compute_pressure(double *press, double *rdf, double *rr, int nn){
 
   // Linear regression
   double c0, c1, cov00, cov01, cov11, chisq;
-  gsl_fit_linear(rr_fit, 1, rdf_fit, 1, fit_pts, 
-		 &c0, &c1, &cov00, 
+  gsl_fit_linear(rr_fit, 1, rdf_fit, 1, fit_pts,
+		 &c0, &c1, &cov00,
 		 &cov01,  &cov11, &chisq);
 
   //Pressure (ideal + excess)

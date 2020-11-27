@@ -2,7 +2,7 @@
 
 struct box_info sim_box_info;
 struct p_info part_info;
-double **part;
+double (*part)[4];
 
 void sim_box_init(int cell_type, int nx, int ny, int nz, double rho){
 
@@ -69,19 +69,10 @@ void part_alloc(){
              sim_box_info.cell_z *  part_cell;
   
   // Allocate matrix to store particle information
-  part = malloc( sizeof(double *) * part_tot);
-
+  part = malloc(part_tot * sizeof(*part));
   if (part == NULL){
     printf("ERROR: Failed particle allocation\n");
     exit(EXIT_FAILURE);
-  }
-
-  for (int ii=0; ii<part_tot; ii++){
-    (part)[ii] = malloc( sizeof(double) * 4);
-    if ((part)[ii] == NULL){
-      printf("ERROR: Failed particle allocation\n");
-      exit(EXIT_FAILURE);
-    }
   }
 
   // Output
