@@ -14,7 +14,7 @@ void cell_list_init(){
 
   // Initialize linked list
   cell_list_update();
- 
+  
   // Initialize neighbor matrix
   cell_neigh_init();
 
@@ -59,8 +59,8 @@ void cell_list_update(){
   for (int ii=0; ii<cl_cell_num; ii++){
     cl_head[ii] = 0;
   }
-  for (int ii=0; ii<part_info.NN; ii++){
-    idx = cell_part_idx(ii);
+  for (int ii=1; ii<=part_info.NN; ii++){
+    idx = cell_part_idx(ii-1);
     cl_link[ii] = cl_head[idx];
     cl_head[idx] = ii;
   }

@@ -150,26 +150,25 @@ void run(){
     // Sweep
     sweep();
 
-    /* // Histograms of particles positions */
-    /* if (ii % in.rdf_tcompute == 0) { */
-    /*   compute_hist(pos_hist, &sample_counter, rr,  */
-    /* 		   rr[rdf_nn-1]+in.rdf_dr/2.);  */
-    /* } */
+    // Histograms of particles positions
+    if (ii % in.rdf_tcompute == 0) {
+      compute_hist(pos_hist, &sample_counter, rr,
+    		   rr[rdf_nn-1]+in.rdf_dr/2.);
+    }
 
-    /* // Radial distribution function and pressure */
-    /* if (sample_counter % in.rdf_tave == 0 && sample_counter > 0) {       */
-    /*   average_hist(pos_hist, rdf_nn); */
-    /*   compute_rdf(rdf, pos_hist, rr, rdf_nn); */
-    /*   compute_pressure(&press, rdf, rr, rdf_nn); */
-    /*   reset_hist(pos_hist, &sample_counter, rdf_nn); */
-    /* } */
+    // Radial distribution function and pressure
+    if (sample_counter % in.rdf_tave == 0 && sample_counter > 0) {
+      average_hist(pos_hist, rdf_nn);
+      compute_rdf(rdf, pos_hist, rr, rdf_nn);
+      compute_pressure(&press, rdf, rr, rdf_nn);
+      reset_hist(pos_hist, &sample_counter, rdf_nn);
+    }
 
     
     // Output on screen
     if (ii % in.dt_output == 0) {
-      //printf("Sweep number: %d, pressure: %.8f, g[sigma]: %.8f\n",
-      //ii, press, rdf[0]);
-      printf("Sweep number: %d\n", ii, press, rdf[0]);
+      printf("Sweep number: %d, pressure: %.8f, g[sigma]: %.8f\n",
+      ii, press, rdf[0]);
       fflush(stdout);
     }
 
@@ -252,6 +251,7 @@ void sweep(){
       
     }
  
+    //printf("%d %d\n", acc_moves, rej_moves);
   }
 
 }
@@ -267,7 +267,7 @@ bool check_overlap(){
   cell_idx = cell_part_idx(r_idx);
     
   // Loop over the neighboring cells
-  for (int ii=0; ii<26; ii++){
+  for (int ii=0; ii<27; ii++){
 
     neigh_idx = cl_neigh[cell_idx][ii];
     part_idx = cl_head[neigh_idx];
@@ -276,20 +276,22 @@ bool check_overlap(){
     while (part_idx > 0){
       
       // Compute inter-particle distance
-      dr = compute_dist(r_idx, part_idx);
+      dr = compute_dist(r_idx, part_idx-1);
 
       // Signal that there is overlap
-      if (dr < 1.0 && part_idx != r_idx)
+      if (dr < 1.0 && (part_idx-1) != r_idx){
 	return true;
+      }
 
       // Update index
       part_idx = cl_link[part_idx];
-	
+
     }
 
   }
 
   return false;
+
 
 }
 
