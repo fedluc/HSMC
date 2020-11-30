@@ -1,12 +1,9 @@
 #ifndef CELL_LIST_H
 #define CELL_LIST_H
 
-#include "read_input.h"
-#include "init.h"
-
-extern int cl_cell_num;
-extern int (*cl_neigh)[27];
+extern int cl_cell_num, cl_neigh_num;
 extern int *cl_head, *cl_link;
+extern int (*cl_neigh)[27];
 
 void cell_list_init();
 void cell_list_alloc();

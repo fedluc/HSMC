@@ -1,13 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "init.h"
+#include "read_input.h"
 #include "cell_list.h"
 
-int cl_cell_num;
-int (*cl_neigh)[27];
+int cl_cell_num, cl_neigh_num;
 int *cl_head, *cl_link;
+int (*cl_neigh)[27];
 
 void cell_list_init(){
 
   // Number of cells (use the number of cells employed to construct the simulation box)
   cl_cell_num = sim_box_info.cell_x * sim_box_info.cell_y * sim_box_info.cell_z;
+
+  // Number of neighbor per cell
+  cl_neigh_num = 27;
+  if (cl_cell_num < 27) cl_neigh_num = cl_cell_num;
 
   // Allocate linked list and neighbor matrix
   cell_list_alloc();

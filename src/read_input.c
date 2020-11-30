@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "read_input.h"
 
 // ----------------------------------------
@@ -22,18 +25,20 @@ void print_example(){
     "# 1: simple cubic, 1 particle per cell\n"
     "# 2: face-centered cubic, 4 particles per cell\n"
     "type 2\n\n"
-    "# Radial distribution function (points, how often to compute, how often to average)\n"
-    "rdf 1000 1000 10000\n\n"
-    "# Maximum displacement for MC moves\n"
+    "# Pressure via virial (resolution, saving interval)\n"
+    "press_virial 0.002 10 \n\n"
+    "# Pressure via thermodynamics (resolution, max relative compression, saving interval)\n"
+    "press_thermo 0.0001 0.002 10 \n\n"
+    "# Maximum displacement for MC moves (use negative number to activate optimization)\n"
     "dr_max 0.05\n\n"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
     "sweep_eq 10000\n\n"
     "# Number of sweeps for statistics\n"
     "sweep_stat 10000\n\n"
-    "# Output interval (how often output gets printed)\n"
+    "# Output interval (how often to print status on screen)\n"
     "out 100\n\n";
 
-    
+   
     printf(example);
 
 }
@@ -58,10 +63,12 @@ void read_input_file(char *filename){
   in.dr_max = 0;
   in.sweep_eq = 0;
   in.sweep_stat = 0;
-  in.dt_output = 0;
-  in.rdf_dr = 0;
-  in.rdf_tcompute = 0;
-  in.rdf_tave = 0;
+  in.output_int = 0;
+  in.pressv_dr = 0;
+  in.pressv_sample_int = 0;
+  in.presst_dxi = 0;
+  in.presst_xi_max = 0;
+  in.presst_sample_int = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -154,25 +161,38 @@ void read_input_file(char *filename){
       else if (strcmp(key,"out") == 0 || strcmp(key,"out\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.dt_output = atoi(value);
+	  in.output_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
 
-      else if (strcmp(key,"rdf") == 0 || strcmp(key,"rdf\n") == 0){
+      else if (strcmp(key,"press_virial") == 0 || strcmp(key,"press_virial\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.rdf_dr = atof(value);
+	  in.pressv_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.rdf_tcompute = atoi(value);
+	  in.pressv_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"press_thermo") == 0 || strcmp(key,"press_thermo\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.presst_dxi = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+        value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  in.presst_xi_max = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.rdf_tave = atoi(value);
+	  in.presst_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -200,10 +220,12 @@ void read_input_file(char *filename){
   printf("Maximum MC displacement: %.8f\n", in.dr_max);
   printf("Number of sweeps (equilibration): %d\n", in.sweep_eq);
   printf("Number of sweeps (statistics): %d\n", in.sweep_stat);
-  printf("Output interval (sweeps): %d\n", in.dt_output);
-  printf("rdf (resolution): %.8f\n", in.rdf_dr);
-  printf("rdf (sweeps/sample): %d\n", in.rdf_tcompute);
-  printf("rdf (samples/average): %d\n", in.rdf_tave);
+  printf("Output interval (sweeps): %d\n", in.output_int);
+  printf("Pressure - virial (resolution): %.8f\n", in.pressv_dr);
+  printf("Pressure - virial (sweeps/sample): %d\n", in.pressv_sample_int);
+  printf("Pressure - thermo (resolution): %.8f\n", in.presst_dxi);
+  printf("Pressure - thermo (max compression): %.8f\n", in.presst_xi_max);
+  printf("Pressure - thermo (sweeps/sample): %d\n", in.presst_sample_int);
   fflush(stdout);
 
 }

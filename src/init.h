@@ -1,9 +1,6 @@
 #ifndef INIT_H
 #define INIT_H
 
-#include "read_input.h"
-#include <math.h>
-
 struct p_info {int NN, Ncell; };
 
 struct box_info {

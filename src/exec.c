@@ -1,4 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 #include <argp.h>
+#include "read_input.h"
 #include "hsmc.h"
 
 // ----------------------------------------
@@ -98,6 +103,7 @@ int main (int argc, char **argv){
       exit(EXIT_FAILURE);
     }
   }
+
   
   // Run simulation
   if (run){
@@ -108,9 +114,10 @@ int main (int argc, char **argv){
     // Monte-Carlo simulation of hard-spheres in the NVT ensemble
     hs_nvt();
 
+    printf("Simulation complete!\n");
+
   }
 
-  printf("Simulation complete!\n");
   return 0;
 
 }
