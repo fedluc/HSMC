@@ -41,7 +41,7 @@ void compute_pressv(bool init){
   fprintf(fid, "######################################\n");
   fprintf(fid, "# Bins, volume, number of particles\n");
   fprintf(fid, "######################################\n");
-  fprintf(fid, "%d %.8e %d\n", presst_hist_nn, 
+  fprintf(fid, "%d %.8e %d\n", pressv_hist_nn, 
 	  sim_box_info.vol, part_info.NN);
   fprintf(fid, "###############################\n");
   fprintf(fid, "# rr, rdf\n");
@@ -190,7 +190,8 @@ void presst_compute_hist(){
   // Variable declaration
   int cell_idx;
   double vol_ratio, sf;
-
+  bool overlap = false;
+  
   // Fill histograms
   for (int ii=0; ii<presst_hist_nn; ii++){
 
@@ -203,15 +204,18 @@ void presst_compute_hist(){
     for (int jj=0; jj<part_info.NN; jj++){
 
       cell_idx = cell_part_idx(jj);
- 
-      if (!check_overlap(cell_idx, sf, sf, sf)){
-    	// Update histogram if there is no overlap
-    	presst_hist[ii] += pow((1.0 - presst_xi[ii]),part_info.NN);
-	break;
-      }
+      
+      overlap = check_overlap(cell_idx, sf, sf, sf);
+
+      if (overlap) break;
 
     }
-      
+
+    // Update histogram if there is no overlap
+    if (!overlap) {
+      presst_hist[ii] += pow((1.0 - presst_xi[ii]),part_info.NN);
+    }
+
   }
     
 }
