@@ -115,6 +115,8 @@ def read_output(file_names,samples_block,lines_header,press_flag):
                 
                 # Create function to fit
                 hist[:,1] = -np.log(hist[:,1])/(hist[:,0])
+                print(hist)
+                
 
             # Fit data
             coeff[n_blocks,:] = data_fit(hist)

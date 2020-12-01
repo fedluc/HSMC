@@ -25,7 +25,7 @@ def pressure_virial(data_dir=os.getcwd(),samples_block=1):
 
     # Average and standard deviation of the pressure
     press = 1 + (2.*math.pi/3.) * n_part/vol * rdf_contact
-    print(len(coeff),np.average(press),np.var(press)/sqrt(len(coeff)))
+    print(len(coeff),np.average(press),np.var(press)/np.sqrt(len(coeff)))
     
 
 # ------ Compute pressure from virial route ------
@@ -47,7 +47,7 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1):
 
     # Average and standard deviation of the pressure
     press = 1 + p_ex
-    print(len(coeff),np.average(press),np.var(press)/sqrt(len(coeff)))
+    print(len(coeff),np.average(press),np.var(press)/np.sqrt(len(coeff)))
 
 
 # ------ Read  HSMC output -----
@@ -91,6 +91,7 @@ def read_output(file_names,samples_block,lines_header,press_flag):
             
                 # Read one sample
                 histTmp = read_sample(lines_read+lines_header, n_bins)
+
                 # Create vector with abscissa for fit 
                 if initFlag:
                     hist[:,0] = histTmp[:,0]
@@ -100,25 +101,28 @@ def read_output(file_names,samples_block,lines_header,press_flag):
 
                 # Update number of samples
                 n_samples += 1
-            
+
+                # Update the number of read lines
+                lines_read += lines_sample
+
                 
-            # Prepare function to fit
+            # Prepare data for fitting
             if (press_flag == "thermo"):
 
                 # Remove indeterminate forms
                 del_idx = np.argwhere(hist[:,1]==0)
-                hist = np.delete(hist,del_idx,axis=0)
+                hist = np.delete(hist,del_idx,axis=0) 
+                
                 # Create function to fit
                 hist[:,1] = -np.log(hist[:,1])/(hist[:,0])
+
+                
 
             # Fit data
             coeff[n_blocks,:] = data_fit(hist)
 
             # Update number of blocks 
             n_blocks+=1
-
-            # Update the number of read lines
-            lines_read += lines_block
                      
             # Reset histogram
             hist = np.zeros((n_bins,2))

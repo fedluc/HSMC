@@ -2,8 +2,8 @@
 
 import hsmc_pressure as hsp
 
-hsp.pressure_virial(data_dir="../tests",samples_block=2000)
-hsp.pressure_thermo(data_dir="../tests",samples_block=2000)
+hsp.pressure_virial(data_dir="../tests",samples_block=20000)
+hsp.pressure_thermo(data_dir="../tests",samples_block=20000)
 
 # hsp.pressure_virial(data_dir="../tests",samples_block=10)
 # hsp.pressure_virial(data_dir="../tests",samples_block=100)

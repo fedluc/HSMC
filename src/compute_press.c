@@ -212,9 +212,8 @@ void presst_compute_hist(){
     }
 
     // Update histogram if there is no overlap
-    if (!overlap) {
-      presst_hist[ii] += 1.0;
-    }
+    if (!overlap) presst_hist[ii] += 1.0;
+
 
   }
     
