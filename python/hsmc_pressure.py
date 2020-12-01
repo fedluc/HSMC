@@ -91,6 +91,7 @@ def read_output(file_names,samples_block,lines_header,press_flag):
             
                 # Read one sample
                 histTmp = read_sample(lines_read+lines_header, n_bins)
+
                 # Create vector with abscissa for fit 
                 if initFlag:
                     hist[:,0] = histTmp[:,0]
@@ -100,14 +101,18 @@ def read_output(file_names,samples_block,lines_header,press_flag):
 
                 # Update number of samples
                 n_samples += 1
-            
+
+                # Update the number of read lines
+                lines_read += lines_sample
+
                 
-            # Prepare function to fit
+            # Prepare data for fitting
             if (press_flag == "thermo"):
 
                 # Remove indeterminate forms
                 del_idx = np.argwhere(hist[:,1]==0)
-                hist = np.delete(hist,del_idx,axis=0)
+                hist = np.delete(hist,del_idx,axis=0) 
+                
                 # Create function to fit
                 hist[:,1] = -np.log(hist[:,1])/(hist[:,0])
 
@@ -116,9 +121,6 @@ def read_output(file_names,samples_block,lines_header,press_flag):
 
             # Update number of blocks 
             n_blocks+=1
-
-            # Update the number of read lines
-            lines_read += lines_block
                      
             # Reset histogram
             hist = np.zeros((n_bins,2))

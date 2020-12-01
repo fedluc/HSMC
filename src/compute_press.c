@@ -152,7 +152,7 @@ void compute_presst(bool init){
   fprintf(fid, "%d %.8e %d\n", presst_hist_nn, 
 	  sim_box_info.vol, part_info.NN);
   fprintf(fid, "######################################\n");
-  fprintf(fid, "# abs(xi), (1-abs(xi))^N*exp(-beta*U)\n");
+  fprintf(fid, "# abs(xi), exp(-beta*U)\n");
   fprintf(fid, "######################################\n");
   for (int ii = 0; ii < presst_hist_nn; ii++)
     {
@@ -213,7 +213,7 @@ void presst_compute_hist(){
 
     // Update histogram if there is no overlap
     if (!overlap) {
-      presst_hist[ii] += pow((1.0 - presst_xi[ii]),part_info.NN);
+      presst_hist[ii] += 1.0;
     }
 
   }

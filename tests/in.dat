@@ -24,8 +24,8 @@ press_virial 0.002 5
 press_thermo 0.0001 0.002 5
 
 # Number of sweeps (for N particles, 1 sweep = N moves)
-sweep_eq 100000
-sweep_stat 200000
+sweep_eq 10000
+sweep_stat 10000
 
 # Output interval (how often output gets printed)
-out 10000
+out 100
