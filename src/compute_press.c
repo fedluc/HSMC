@@ -188,7 +188,6 @@ void presst_hist_init(){
 void presst_compute_hist(){
   
   // Variable declaration
-  int cell_idx;
   double vol_ratio, sf;
   bool overlap = false;
   
@@ -202,10 +201,8 @@ void presst_compute_hist(){
     
     // Check if there is overlap
     for (int jj=0; jj<part_info.NN; jj++){
-
-      cell_idx = cell_part_idx(jj);
       
-      overlap = check_overlap(cell_idx, sf, sf, sf);
+      overlap = check_overlap(jj, sf, sf, sf);
 
       if (overlap) break;
 

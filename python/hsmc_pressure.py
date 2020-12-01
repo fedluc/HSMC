@@ -43,7 +43,7 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1):
     
     # Samples for the excess pressure
     [coeff, vol, n_part] = read_output(file_names,samples_block,lines_header,"thermo")
-    p_ex = coeff[:,0]/n_part
+    p_ex = coeff[:,1]/n_part
 
     # Average and standard deviation of the pressure
     press = 1 + p_ex
@@ -113,10 +113,8 @@ def read_output(file_names,samples_block,lines_header,press_flag):
                 del_idx = np.argwhere(hist[:,1]==0)
                 hist = np.delete(hist,del_idx,axis=0) 
                 
-                # Create function to fit
-                hist[:,1] = -np.log(hist[:,1])/(hist[:,0])
-                print(hist)
-                
+                # Create function to fit                
+                hist[:,1] = -np.log(hist[:,1])
 
             # Fit data
             coeff[n_blocks,:] = data_fit(hist)
