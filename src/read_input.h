@@ -10,7 +10,9 @@ struct input {
   int output_int;
   double pressv_dr, presst_xi_max, presst_dxi;
   int pressv_sample_int, presst_sample_int;
-  double npt_press, npt_dv_max;
+  double press, dv_max;
+  int opt_flag, opt_samples, opt_sweeps;
+  double opt_part_target, opt_vol_target;
 
 };
 

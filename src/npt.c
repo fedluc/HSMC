@@ -4,6 +4,7 @@
 #include "cell_list.h"
 #include "compute_press.h"
 #include "moves.h"
+#include "optimizer.h"
 #include "npt.h"
 
 // Hard-sphere simulation in the NpT ensemble
@@ -17,7 +18,7 @@ void hs_npt() {
   printf("Number of particles: %d\n", part_info.NN);
 
   // Pressure 
-  printf("Pressure: %.8f\n", in.npt_press);
+  printf("Pressure: %.8f\n", in.press);
   
   // Initialize particle's positions
   part_init();
@@ -28,13 +29,13 @@ void hs_npt() {
   // Set-up random number generator (Marsenne-Twister)
   rng_init();
 
-  
-  /* // Run to determine the optimal maximum displacement */
-  /* if (in.dr_max < 0){ */
-  /*   in.dr_max *= -1; */
-  /*   run_opt_npt(); */
-  /*   part_init(); */
-  /* } */
+  // Optmize maximum displacement
+  if (in.opt_flag == 1){
+    double rho_start = in.rho;
+    opt_npt();
+    sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start);
+    part_init();
+  }
 
   // Start timing
   clock_t start = clock();
@@ -82,64 +83,6 @@ void hs_npt() {
 
 }
 
-
-/* void run_opt(){ */
-
-/*   int max_iter=1000, n_samples=10, sample_iter = max_iter/n_samples; */
-/*   double acc_ratio_1, acc_ratio_2, dr_1, dr_2; */
-
-/*   printf("---------------------------------------------------\n"); */
-/*   printf("Maximum displacement optimization started ...\n"); */
-/*   printf("Sweeps for optimization: %d\n", max_iter); */
-/*   printf("Number of samples: %d\n", n_samples); */
-
-/*   // First step */
-/*   acc_part_moves=0, rej_part_moves=0; */
-/*   for (int ii=0; ii<sample_iter; ii++){ */
-/*     sweep(); */
-/*   } */
-/*   dr_1 = in.dr_max; */
-/*   acc_ratio_1 = (double)acc_part_moves/((double)sample_iter*part_info.NN); */
-
-/*   // Second step */
-/*   if (acc_ratio_1 > 0.5){ */
-/*     in.dr_max *= 2; */
-/*   } */
-/*   else { */
-/*     in.dr_max /= 2; */
-/*   } */
-/*   acc_part_moves=0, rej_part_moves=0; */
-/*   for (int ii=0; ii<sample_iter; ii++){ */
-/*     sweep(); */
-/*   } */
-/*   dr_2 = in.dr_max; */
-/*   acc_ratio_2 = (double)acc_part_moves/((double)sample_iter*part_info.NN); */
-
-/*   // Secant-method to find optimum value */
-/*   for (int ii=0; ii<n_samples; ii++){ */
-
-/*     in.dr_max = dr_2 - (acc_ratio_2 - 0.5) * (dr_2 - dr_1)/(acc_ratio_2 - acc_ratio_1); */
-/*     if (in.dr_max > 1.0) { */
-/*       in.dr_max = 1.0; */
-/*     } */
-/*     else if (in.dr_max <= 0.0) { */
-/*       printf("Error: maximum displacement is zero!\n"); */
-/*       exit(EXIT_FAILURE); */
-/*     } */
-/*     acc_part_moves=0, rej_part_moves=0; */
-/*     for (int jj=0; jj<sample_iter; jj++){ */
-/*       sweep(); */
-/*     } */
-/*     dr_1 = dr_2; */
-/*     dr_2 = in.dr_max; */
-/*     acc_ratio_1 = acc_ratio_2; */
-/*     acc_ratio_2 = (double)acc_part_moves/((double)sample_iter*part_info.NN); */
-/*   } */
-
-/*   printf("Optimal maximum displacement: %.8f. Acceptance ratio: %.8f \n", in.dr_max, acc_ratio_2); */
-/*   printf("Maximum displacement optimization completed\n"); */
-
-/* } */
 
 void run_npt(bool prod_flag){
 

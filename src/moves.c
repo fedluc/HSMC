@@ -83,7 +83,7 @@ void vol_move(){
   r_dv = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
 
   // Proposed volume move
-  log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*in.npt_dv_max;
+  log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*in.dv_max;
   vol_new = exp(log_vol_new);
 
   // Volume ratio
@@ -104,7 +104,7 @@ void vol_move(){
   // If there is no overlap accept move according to npt acceptance rule
   if (!overlap){
 
-    boltz_fact = exp(in.npt_press*(sim_box_info.vol - vol_new) + 
+    boltz_fact = exp(in.press*(sim_box_info.vol - vol_new) + 
 		     (part_info.NN + 1)*log(vol_ratio));
     r_acc = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
     

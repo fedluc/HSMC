@@ -24,8 +24,14 @@ def pressure_virial(data_dir=os.getcwd(),samples_block=1):
     rdf_contact = coeff[:,0] + coeff[:,1]
 
     # Average and standard deviation of the pressure
-    press = 1 + (2.*math.pi/3.) * n_part/vol * rdf_contact
-    print(len(coeff),np.average(press),np.var(press)/np.sqrt(len(coeff)))
+    dens = n_part/vol
+    n_samples = len(coeff)
+    press = 1 + (2.*math.pi/3.) * dens * rdf_contact
+    press_ave = np.average(press)
+    press_var = np.var(press)/np.sqrt(n_samples)
+    print("Pressure from virial calculations")
+    print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
+    print("%d %.8f %.8f %.8f %.8f", n_samples, press_ave, press_var, press_ave*dens, press_var*dens)
     
 
 # ------ Compute pressure from virial route ------
@@ -46,9 +52,15 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1):
     p_ex = coeff[:,1]/n_part
 
     # Average and standard deviation of the pressure
+    dens = n_part/vol
+    n_samples = len(coeff)
     press = 1 + p_ex
-    print(len(coeff),np.average(press),np.var(press)/np.sqrt(len(coeff)))
-
+    press_ave = np.average(press)
+    press_var = np.var(press)/np.sqrt(n_samples)
+    print("Pressure from virial calculations")
+    print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
+    print("%d %.8f %.8f %.8f %.8f", n_samples, press_ave, press_var, press_ave*dens, press_var*dens)
+    
 
 # ------ Read  HSMC output -----
 def read_output(file_names,samples_block,lines_header,press_flag):

@@ -111,7 +111,7 @@ int main (int argc, char **argv){
     // Read input
     read_input_file(arguments.input_file);
 
-    if (in.npt_press > 0){
+    if (in.press > 0){
       // NpT simulation
       hs_npt();
     }

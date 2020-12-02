@@ -27,14 +27,21 @@ void print_example(){
     "# 1: simple cubic, 1 particle per cell\n"
     "# 2: face-centered cubic, 4 particles per cell\n"
     "type 2\n\n"
-    "# Parameters for npt calculations (pressure, maximum volume deformation)\n"
-    "npt 2.5 1.0\n\n"
-    "# Pressure via virial (resolution, saving interval)\n"
+    "# Maximum displacement for particles moves\n"
+    "dr_max 0.05\n\n"
+    "# Parameters for NpT calculations (pressure, maximum volume deformation\n"
+    "# the default is npt 0, which corresponds to an NVT simulations)\n"
+    "npt 2.5 0.001\n\n"
+    "# Optmization\n"
+    "# (activation flag (0 or 1), sweeps used during optimization\n"
+    "# samples collected (<= sweeps), target acceptance ratio for particles moves\n"
+    "# target acceptance ratio for volume deformations, default: 1 1000 10 0.5 0.5)\n"
+    "opt 1 1000 10 0.5 0.5\n\n"
+    "# Pressure via virial (resolution, saving interval\n"
+    "# note: available only for NVT simulations)\n"
     "press_virial 0.002 10 \n\n"
     "# Pressure via thermodynamics (resolution, max relative compression, saving interval)\n"
     "press_thermo 0.0001 0.002 10 \n\n"
-    "# Maximum displacement for MC moves (use negative number to activate optimization)\n"
-    "dr_max 0.05\n\n"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
     "sweep_eq 10000\n\n"
     "# Number of sweeps for statistics\n"
@@ -73,8 +80,14 @@ void read_input_file(char *filename){
   in.presst_dxi = 0;
   in.presst_xi_max = 0;
   in.presst_sample_int = 0;
-  in.npt_press = 0;
-  in.npt_dv_max = 0;
+  in.press = 0;
+  in.dv_max = 0;
+  in.opt_flag = 1;
+  in.opt_sweeps = 1000;
+  in.opt_samples = 10;
+  in.opt_part_target = 0.5;
+  in.opt_vol_target = 0.5;
+
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -206,12 +219,40 @@ void read_input_file(char *filename){
       else if (strcmp(key,"npt") == 0 || strcmp(key,"npt\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.npt_press = atof(value);
+	  in.press = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
         value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.npt_dv_max = atof(value);
+	  in.dv_max = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"opt") == 0 || strcmp(key,"opt\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.opt_flag = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.opt_sweeps = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.opt_samples = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.opt_part_target = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.opt_vol_target = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
