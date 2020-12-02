@@ -46,7 +46,7 @@ void opt_nvt(){
     get_sample_nvt(&dr_2, &acc_ratio_2, sample_iter);
   }
 
-  printf("Optimal maximum displacement: %.8f\n.", in.dr_max);
+  printf("Optimal maximum displacement: %.8f\n", in.dr_max);
   printf("Acceptance ratio: %.8f \n", acc_ratio_2);
   printf("Maximum displacement optimization completed\n");
 

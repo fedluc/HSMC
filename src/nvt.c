@@ -57,8 +57,11 @@ void hs_nvt() {
   clock_t end = clock();
 
   // Print acceptance and rejection percentages 
-  printf("Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves));
-  printf("Rejection percentage: %f\n", (double)rej_part_moves/((double)part_moves));
+  printf("---------------------------------------------------\n");
+  printf("-- Particle moves: %.8e\n", (double)part_moves);
+  printf("   Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves));
+  printf("   Rejection percentage: %f\n", (double)rej_part_moves/((double)part_moves));
+
   
   // Stop timing
   printf("Elapsed time: %f seconds\n",

@@ -63,10 +63,10 @@ void hs_npt() {
 
   // Print acceptance and rejection percentages 
   printf("---------------------------------------------------\n");
-  printf("-- Particle moves: %d\n", part_moves);
+  printf("-- Particle moves: %.8e\n", (double)part_moves);
   printf("   Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves));
   printf("   Rejection percentage: %f\n", (double)rej_part_moves/((double)part_moves));
-  printf("-- Volume moves: %d\n", vol_moves);
+  printf("-- Volume moves: %.8e\n", (double)vol_moves);
   printf("   Acceptance percentage: %f\n", (double)acc_vol_moves/((double)vol_moves));
   printf("   Rejection percentage: %f\n", (double)rej_vol_moves/((double)vol_moves));
   
