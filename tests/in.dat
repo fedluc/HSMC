@@ -1,7 +1,7 @@
 # This is an input file for hsmc 
 
 # Density
-rho 0.2
+rho 0.4
 
 # Number of cells along the x, y and z directions
 # The cells are used a building block of the simulation box
@@ -18,10 +18,9 @@ type 2
 dr_max 0.5
 
 # NpT calculations
-npt 1.0072 0.01
+#npt 1.0072 0.01
 
 # Optimization of maximum displacements
-#opt 1 1000 10 0.5 0.5
 opt 1 1000 10 0.5 0.5
 
 # Pressure from virial calculation 
@@ -31,9 +30,9 @@ press_virial 0.002 5
 press_thermo 0.0001 0.002 5
 
 # Number of sweeps (for N particles, 1 sweep = N moves)
-sweep_eq 1000
-sweep_stat 2000
+sweep_eq 100000
+sweep_stat 200000
 
 
 # Output interval (how often output gets printed)
-out 100
+out 10000

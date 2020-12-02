@@ -31,7 +31,7 @@ def pressure_virial(data_dir=os.getcwd(),samples_block=1):
     press_var = np.var(press)/np.sqrt(n_samples)
     print("Pressure from virial calculations")
     print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
-    print("%d %.8f %.8f %.8f %.8f", n_samples, press_ave, press_var, press_ave*dens, press_var*dens)
+    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_var, press_ave*dens, press_var*dens))
     
 
 # ------ Compute pressure from virial route ------
@@ -57,9 +57,10 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1):
     press = 1 + p_ex
     press_ave = np.average(press)
     press_var = np.var(press)/np.sqrt(n_samples)
-    print("Pressure from virial calculations")
+    print("Pressure from thermodynamic calculations")
     print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
-    print("%d %.8f %.8f %.8f %.8f", n_samples, press_ave, press_var, press_ave*dens, press_var*dens)
+    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_var, press_ave*dens, press_var*dens))
+
     
 
 # ------ Read  HSMC output -----
