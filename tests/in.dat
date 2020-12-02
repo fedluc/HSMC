@@ -10,7 +10,7 @@ cells_y 5
 cells_z 5
 
 # Maximum displacement for MC moves
-dr_max -0.03
+dr_max 0.5
 
 # Type of cells 
 # 1: simple cubic, 1 particle per cell
@@ -24,8 +24,11 @@ press_virial 0.002 5
 press_thermo 0.0001 0.002 5
 
 # Number of sweeps (for N particles, 1 sweep = N moves)
-sweep_eq 100000
-sweep_stat 200000
+sweep_eq 1000
+sweep_stat 0
+
+# NpT calculations
+#npt 1.0072 0.002
 
 # Output interval (how often output gets printed)
-out 10000
+out 100

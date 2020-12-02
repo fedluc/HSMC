@@ -2,6 +2,7 @@
 #define READ_INPUT_H
 
 struct input {
+
   double rho;
   int nx, ny, nz, type;
   double dr_max;
@@ -9,6 +10,8 @@ struct input {
   int output_int;
   double pressv_dr, presst_xi_max, presst_dxi;
   int pressv_sample_int, presst_sample_int;
+  double npt_press, npt_dv_max;
+
 };
 
 extern struct input in;

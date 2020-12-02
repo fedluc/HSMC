@@ -1,12 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_math.h>
+//#include <gsl/gsl_math.h>
 #include "init.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_press.h"
-#include "hsmc.h"
+#include "moves.h"
 
 // Variables for the calculation of the pressure via the virial
 int pressv_hist_nn;

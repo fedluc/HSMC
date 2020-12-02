@@ -1,10 +1,10 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <argp.h>
 #include "read_input.h"
-#include "hsmc.h"
+#include "nvt.h"
+#include "npt.h"
 
 // ----------------------------------------
 // ------ Set-up command line parser ------
@@ -111,8 +111,14 @@ int main (int argc, char **argv){
     // Read input
     read_input_file(arguments.input_file);
 
-    // Monte-Carlo simulation of hard-spheres in the NVT ensemble
-    hs_nvt();
+    if (in.npt_press > 0){
+      // NpT simulation
+      hs_npt();
+    }
+    else {
+      // NVT simulation
+      hs_nvt();
+    }
 
     printf("Simulation complete!\n");
 
