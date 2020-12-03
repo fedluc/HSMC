@@ -112,8 +112,11 @@ void run_npt(bool prod_flag){
     }
 
     // Output on screen
+    if (ii == 0){
+      printf("Sweep number  Density\n");
+    }
     if (ii % in.output_int == 0) {
-      printf("Sweep number: %d, Density: %.8f\n", ii,in.rho);
+      printf("%d  %.8f\n", ii,in.rho);
       fflush(stdout);
     }
 

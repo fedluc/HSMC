@@ -114,10 +114,14 @@ void run_nvt(bool prod_flag){
     }
 
     // Output on screen
+    if (ii == 0){
+      printf("Sweep number\n");
+    }
     if (ii % in.output_int == 0) {
-      printf("Sweep number: %d\n", ii);
+      printf("%d\n", ii);
       fflush(stdout);
     }
+
 
 
   }  

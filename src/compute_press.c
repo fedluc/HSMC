@@ -28,27 +28,7 @@ void compute_pressv(bool init){
   pressv_compute_rdf();
   
   // Write output
-  FILE* fid;
-  if (init) fid = fopen("press_virial.dat", "w");
-  else fid = fopen("press_virial.dat", "a");
-  if (fid == NULL) {
-    perror("Error while creating the file for the virial pressure");
-    exit(EXIT_FAILURE);
-  }
-  fprintf(fid, "######################################\n");
-  fprintf(fid, "# Bins, volume, number of particles\n");
-  fprintf(fid, "######################################\n");
-  fprintf(fid, "%d %.8e %d\n", pressv_hist_nn, 
-	  sim_box_info.vol, part_info.NN);
-  fprintf(fid, "###############################\n");
-  fprintf(fid, "# rr, rdf\n");
-  fprintf(fid, "###############################\n");
-  for (int ii = 0; ii < pressv_hist_nn; ii++)
-    {
-      fprintf(fid, "%.8e %.8e\n", pressv_rr[ii], pressv_hist[ii]);
-    }
-  fclose(fid);
-
+  pressv_output(init);
 
   // Free memory
   free(pressv_rr);
@@ -136,27 +116,7 @@ void compute_presst(bool init){
   presst_compute_hist();
   
   // Write output
-  FILE* fid;
-  if (init) fid = fopen("press_thermo.dat", "w");
-  else fid = fopen("press_thermo.dat", "a");
-  if (fid == NULL) {
-    perror("Error while creating the file for the thermo pressure");
-    exit(EXIT_FAILURE);
-  }
-  fprintf(fid, "######################################\n");
-  fprintf(fid, "# Bins, volume, number of particles\n");
-  fprintf(fid, "######################################\n");
-  fprintf(fid, "%d %.8e %d\n", presst_hist_nn, 
-	  sim_box_info.vol, part_info.NN);
-  fprintf(fid, "######################################\n");
-  fprintf(fid, "# abs(xi), exp(-beta*U)\n");
-  fprintf(fid, "######################################\n");
-  for (int ii = 0; ii < presst_hist_nn; ii++)
-    {
-      fprintf(fid, "%.8e %.8e\n", presst_xi[ii], presst_hist[ii]);
-    }
-  fclose(fid);
-
+  presst_output(init);
 
   // Free memory
   free(presst_xi);
@@ -212,6 +172,74 @@ void presst_compute_hist(){
   }
     
 }
+
+void pressv_output(bool init){
+
+  // Print to file the sample needed to compute the pressure
+  FILE* fid;
+  if (init) fid = fopen("press_virial.dat", "w");
+  else fid = fopen("press_virial.dat", "a");
+  if (fid == NULL) {
+    perror("Error while creating the file for the virial pressure\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(fid, "######################################\n");
+  fprintf(fid, "# Bins, volume, number of particles\n");
+  fprintf(fid, "######################################\n");
+  fprintf(fid, "%d %.8e %d\n", pressv_hist_nn, 
+	  sim_box_info.vol, part_info.NN);
+  fprintf(fid, "###############################\n");
+  fprintf(fid, "# rr, rdf\n");
+  fprintf(fid, "###############################\n");
+  for (int ii = 0; ii < pressv_hist_nn; ii++)
+    {
+      fprintf(fid, "%.8e %.8e\n", pressv_rr[ii], pressv_hist[ii]);
+    }
+  fclose(fid);
+
+}
+
+void presst_output(bool init){
+
+  // Print to file the sample needed to compute the pressure
+  FILE* fid;
+  if (init) fid = fopen("press_thermo.dat", "w");
+  else fid = fopen("press_thermo.dat", "a");
+  if (fid == NULL) {
+    perror("Error while creating the file for the thermo pressure\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(fid, "######################################\n");
+  fprintf(fid, "# Bins, volume, number of particles\n");
+  fprintf(fid, "######################################\n");
+  fprintf(fid, "%d %.8e %d\n", presst_hist_nn, 
+	  sim_box_info.vol, part_info.NN);
+  fprintf(fid, "######################################\n");
+  fprintf(fid, "# abs(xi), exp(-beta*U)\n");
+  fprintf(fid, "######################################\n");
+  for (int ii = 0; ii < presst_hist_nn; ii++)
+    {
+      fprintf(fid, "%.8e %.8e\n", presst_xi[ii], presst_hist[ii]);
+    }
+  fclose(fid);
+
+  // For NpT calculations print to file also the density 
+  if (init) fid = fopen("density.dat", "w");
+  else fid = fopen("density.dat", "a");
+  if (fid == NULL) {
+    perror("Error while creating the file for the density\n");
+    exit(EXIT_FAILURE);
+  }
+  if (init){
+    fprintf(fid, "######################################\n");
+    fprintf(fid, "# Density (each line is one sample)\n");
+    fprintf(fid, "######################################\n");
+  }
+  fprintf(fid, "%.8e\n", in.rho);
+  fclose(fid);
+
+}
+
 
 /* void average_hist(double *hist, int nn){ */
   
