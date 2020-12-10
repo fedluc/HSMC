@@ -13,6 +13,7 @@ struct input {
   double press, dv_max;
   int opt_flag, opt_samples, opt_sweeps;
   double opt_part_target, opt_vol_target;
+  unsigned long int seed;
 
 };
 

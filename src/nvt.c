@@ -3,6 +3,7 @@
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_press.h"
+#include "compute_order_parameter.h"
 #include "moves.h"
 #include "optimizer.h"
 #include "nvt.h"
@@ -79,7 +80,7 @@ void hs_nvt() {
 void run_nvt(bool prod_flag){
 
   // Variable declaration
-  bool pressv_init = true, presst_init = true;
+  bool pressv_init = true, presst_init = true, ql_ave_init = true;
   int n_sweeps;
 
   // Number of sweeps
@@ -96,20 +97,28 @@ void run_nvt(bool prod_flag){
 
       // Compute pressure via virial route
       if (in.pressv_sample_int > 0){
-	if (ii % in.pressv_sample_int == 0) {
-	  compute_pressv(pressv_init);
-	  if (pressv_init) pressv_init = false;
-	}
+      	if (ii % in.pressv_sample_int == 0) {
+      	  compute_pressv(pressv_init);
+      	  if (pressv_init) pressv_init = false;
+      	}
       }
 
 
       // Compute pressure via thermodynamic route
       if (in.presst_sample_int > 0){
-	if (ii % in.presst_sample_int == 0) {
-	  compute_presst(presst_init);
-	  if (presst_init) presst_init = false;
-	}
+      	if (ii % in.presst_sample_int == 0) {
+      	  compute_presst(presst_init);
+      	  if (presst_init) presst_init = false;
+      	}
       }
+
+      /* // Compute order parameter */
+      /* if (in.pressv_sample_int > 0){ */
+      /* 	if (ii % in.pressv_sample_int == 0) { */
+      /* 	  compute_ql_ave(ql_ave_init); */
+      /* 	  if (ql_ave_init) ql_ave_init = false; */
+      /* 	} */
+      /* } */
 
     }
 

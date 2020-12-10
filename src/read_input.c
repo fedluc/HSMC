@@ -42,6 +42,8 @@ void print_example(){
     "press_virial 0.002 10 \n\n"
     "# Pressure via thermodynamics (resolution, max relative compression, saving interval)\n"
     "press_thermo 0.0001 0.002 10 \n\n"
+    "# Seed for random number generator\n"
+    "seed 124787"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
     "sweep_eq 10000\n\n"
     "# Number of sweeps for statistics\n"
@@ -87,7 +89,7 @@ void read_input_file(char *filename){
   in.opt_samples = 10;
   in.opt_part_target = 0.5;
   in.opt_vol_target = 0.5;
-
+  in.seed = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -257,6 +259,15 @@ void read_input_file(char *filename){
 	else read_input_file_err(1,line_buf);
       }
 
+      else if (strcmp(key,"seed") == 0 || strcmp(key,"seed\n") == 0){
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  in.seed = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+
       else read_input_file_err(2,line_buf);
 
     }
@@ -272,20 +283,20 @@ void read_input_file(char *filename){
   fclose(in_file);
 
   // Print content of input structure
-  printf("Density: %.8f\n", in.rho);
-  printf("Number of cells along x: %d\n", in.nx);
-  printf("Number of cells along y: %d\n", in.ny);
-  printf("Number of cells along z: %d\n", in.nz);
-  printf("Cell type: %d\n", in.type);
-  printf("Maximum MC displacement: %.8f\n", in.dr_max);
-  printf("Number of sweeps (equilibration): %d\n", in.sweep_eq);
-  printf("Number of sweeps (statistics): %d\n", in.sweep_stat);
-  printf("Output interval (sweeps): %d\n", in.output_int);
-  printf("Pressure - virial (resolution): %.8f\n", in.pressv_dr);
-  printf("Pressure - virial (sweeps/sample): %d\n", in.pressv_sample_int);
-  printf("Pressure - thermo (resolution): %.8f\n", in.presst_dxi);
-  printf("Pressure - thermo (max compression): %.8f\n", in.presst_xi_max);
-  printf("Pressure - thermo (sweeps/sample): %d\n", in.presst_sample_int);
+  /* printf("Density: %.8f\n", in.rho); */
+  /* printf("Number of cells along x: %d\n", in.nx); */
+  /* printf("Number of cells along y: %d\n", in.ny); */
+  /* printf("Number of cells along z: %d\n", in.nz); */
+  /* printf("Cell type: %d\n", in.type); */
+  /* printf("Maximum MC displacement: %.8f\n", in.dr_max); */
+  /* printf("Number of sweeps (equilibration): %d\n", in.sweep_eq); */
+  /* printf("Number of sweeps (statistics): %d\n", in.sweep_stat); */
+  /* printf("Output interval (sweeps): %d\n", in.output_int); */
+  /* printf("Pressure - virial (resolution): %.8f\n", in.pressv_dr); */
+  /* printf("Pressure - virial (sweeps/sample): %d\n", in.pressv_sample_int); */
+  /* printf("Pressure - thermo (resolution): %.8f\n", in.presst_dxi); */
+  /* printf("Pressure - thermo (max compression): %.8f\n", in.presst_xi_max); */
+  /* printf("Pressure - thermo (sweeps/sample): %d\n", in.presst_sample_int); */
   fflush(stdout);
 
 }

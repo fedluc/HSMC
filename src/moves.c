@@ -18,7 +18,7 @@ void rng_init(){
 
   // Set-up random number generator (Marsenne-Twister)
   rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
-  gsl_rng_set(rng_mt,0);
+  gsl_rng_set(rng_mt,in.seed);
   r_num_max = gsl_rng_max(rng_mt);
 
 }

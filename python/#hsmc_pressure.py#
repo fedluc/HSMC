@@ -17,7 +17,7 @@ def pressure_virial(data_dir=os.getcwd(),samples_block=1):
         sys.exit('hsmc_pressure.pressv: No pressure file was found')
     
     # Samples for the radial distribution function at contact
-    [coeff, vol, n_part] = read_pressure_output(file_names,samples_block,"virial")
+    [coeff, vol, n_part] = read_pressure_output(file_names,samples_block,lines_header,"virial")
     rdf_contact = coeff[:,0] + coeff[:,1]
 
     # Average and standard deviation of the pressure
@@ -34,6 +34,9 @@ def pressure_virial(data_dir=os.getcwd(),samples_block=1):
 # ------ Compute pressure from virial route ------
 def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
 
+    # Lines for the header of each sample (assumed fixed)
+    lines_header = 7
+
     # Get names of files in data directory
     file_names = glob.glob(os.path.join(data_dir,'press_thermo.dat'))
     out_dir = data_dir
@@ -42,44 +45,28 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
         sys.exit('hsmc_pressure.pressv: No pressure file was found')
     
     # Samples for the excess pressure
-    [coeff, vol, n_part] = read_pressure_output(file_names,samples_block,"thermo")
+    [coeff, vol, n_part] = read_pressure_output(file_names,samples_block,lines_header,"thermo")
     p_ex = coeff[:,1]/n_part
 
     # Samples for the density
     if npt:
         file_names = glob.glob(os.path.join(data_dir,'density.dat'))
-        dens = read_density_output(file_names,samples_block,lines_header)
-    else:
-        dens = n_part/vol
+        read_density_output(file_names,samples_block,lines_header)
 
     # Average and standard deviation of the pressure
-    if npt:
-        n_press_samples = len(coeff)
-        n_dens_samples = len(dens)
-        press = dens * (1 + p_ex)
-        press_ave = np.average(press)
-        press_var = np.var(press)/np.sqrt(n_press_samples)
-        dens_ave = np.average(dens)
-        dens_var = np.var(dens)/np.sqrt(n_dens_samples)
-        print("Pressure from thermodynamic calculations")
-        print("Samples, average (HS units), variance (HS units))")
-        print("%d %.8f %.8f" % (n_press_samples, press_ave, press_var))
-        print("Density from thermodynamic calculations")
-        print("Samples, average (HS units), variance (HS units))")
-        print("%d %.8f %.8f" % (n_dens_samples, dens_ave, dens_var))
-    else:
-        n_samples = len(coeff)
-        press = 1 + p_ex
-        press_ave = np.average(press)
-        press_var = np.var(press)/np.sqrt(n_samples)
-        print("Pressure from thermodynamic calculations")
-        print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
-        print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_var, press_ave*dens, press_var*dens))
+    dens = n_part/vol
+    n_samples = len(coeff)
+    press = 1 + p_ex
+    press_ave = np.average(press)
+    press_var = np.var(press)/np.sqrt(n_samples)
+    print("Pressure from thermodynamic calculations")
+    print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
+    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_var, press_ave*dens, press_var*dens))
 
     
 
 # ------ Read  HSMC output for the pressure -----
-def read_pressure_output(file_names,samples_block,press_flag):
+def read_pressure_output(file_names,samples_block,lines_header,press_flag):
 
     # Global variables declaration
     global lines
@@ -222,7 +209,7 @@ def read_density_output(file_names,samples_block,lines_header):
         lines_sample = 1
         lines_block = samples_block*lines_sample
         n_samples_file = (lines_file-1)//lines_block
-        dens = np.zeros((n_samples_file,1))
+        dens = np.zeros((n_samples_file,2))
 
         
         # Read file
@@ -235,7 +222,8 @@ def read_density_output(file_names,samples_block,lines_header):
             while n_samples < samples_block:
             
                 # Update running average
-                dens[n_blocks] += float(lines[lines_read+lines_header])/samples_block
+                # densTmp += np.array([float(kk) for kk in lines[lines_read+lines_header].split()])/samples_block
+                densTmp += (float(lines[lines_read+lines_header]))
 
                 # Update number of samples
                 n_samples += 1
@@ -243,15 +231,23 @@ def read_density_output(file_names,samples_block,lines_header):
                 # Update the number of read lines
                 lines_read += lines_sample
 
+
+            # # Fit data
+            # coeff[n_blocks,:] = data_fit(hist)
+
             # Update number of blocks 
             n_blocks+=1
-                       
+                     
+            # # Reset histogram
+            # hist = np.zeros((n_bins,2))
+            # initFlag = True
+
             # Reset number of samples
             n_samples = 0
 
 
         # Output
-        return dens
+        #return [coeff, vol, n_part]
 
 
 def read_density_sample(line_start, n_bins):

@@ -13,12 +13,12 @@ void hs_npt() {
   // Initialize simulation box
   sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
 
+  // Pressure 
+  printf("Pressure: %.8f\n", in.press);
+
   // Particles
   part_alloc();
   printf("Number of particles: %d\n", part_info.NN);
-
-  // Pressure 
-  printf("Pressure: %.8f\n", in.press);
   
   // Initialize particle's positions
   part_init();
