@@ -112,13 +112,13 @@ void run_nvt(bool prod_flag){
       	}
       }
 
-      /* // Compute order parameter */
-      /* if (in.pressv_sample_int > 0){ */
-      /* 	if (ii % in.pressv_sample_int == 0) { */
-      /* 	  compute_ql_ave(ql_ave_init); */
-      /* 	  if (ql_ave_init) ql_ave_init = false; */
-      /* 	} */
-      /* } */
+      // Compute order parameter
+      if (in.pressv_sample_int > 0){
+      	if (ii % in.pressv_sample_int == 0) {
+      	  compute_ql_ave(ql_ave_init);
+      	  if (ql_ave_init) ql_ave_init = false;
+      	}
+      }
 
     }
 
