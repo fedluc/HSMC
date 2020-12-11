@@ -40,8 +40,7 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
     # Get names of files in data directory
     file_names = glob.glob(os.path.join(data_dir,'press_thermo.dat'))
     out_dir = data_dir
-    n_files = len(file_names)
-    if n_files == 0:
+    if len(file_names) == 0:
         sys.exit('hsmc_pressure.pressv: No pressure file was found')
     
     # Samples for the excess pressure
@@ -51,6 +50,8 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
     # Samples for the density
     if npt:
         file_names = glob.glob(os.path.join(data_dir,'density.dat'))
+        if len(file_names) == 0:
+            sys.exit('hsmc_pressure.pressv: No density file was found')
         dens = read_density_output(file_names,samples_block,lines_header)
     else:
         dens = n_part/vol
