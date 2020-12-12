@@ -3,6 +3,7 @@
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_press.h"
+#include "compute_order_parameter.h"
 #include "moves.h"
 #include "optimizer.h"
 #include "npt.h"
@@ -87,7 +88,7 @@ void hs_npt() {
 void run_npt(bool prod_flag){
 
   // Variable declaration
-  bool presst_init = true;
+  bool presst_init = true, ql_ave_init = true;
   int n_sweeps;
 
   if (prod_flag) n_sweeps = in.sweep_stat;
@@ -108,6 +109,15 @@ void run_npt(bool prod_flag){
 	  if (presst_init) presst_init = false;
 	}
       }
+
+      // Compute order parameter
+      if (in.ql_sample_int > 0){
+        if (ii % in.ql_sample_int == 0) {
+          compute_op(ql_ave_init);
+          if (ql_ave_init) ql_ave_init = false;
+        }
+      }
+
 
     }
 

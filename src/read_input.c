@@ -42,6 +42,8 @@ void print_example(){
     "press_virial 0.002 10 \n\n"
     "# Pressure via thermodynamics (resolution, max relative compression, saving interval)\n"
     "press_thermo 0.0001 0.002 10 \n\n"
+    "# Order parameter (order, cutoff distance, saving interval)\n"
+    "ql 6 1.5 1 \n\n"
     "# Seed for random number generator\n"
     "seed 124787"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
@@ -90,6 +92,9 @@ void read_input_file(char *filename){
   in.opt_part_target = 0.5;
   in.opt_vol_target = 0.5;
   in.seed = 0;
+  in.ql_order = -1;
+  in.ql_rmax = 0;
+  in.ql_sample_int = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -267,6 +272,23 @@ void read_input_file(char *filename){
 	else read_input_file_err(1,line_buf);
       }
 
+      else if (strcmp(key,"ql") == 0 || strcmp(key,"ql\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.ql_order = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.ql_rmax = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.ql_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
 
       else read_input_file_err(2,line_buf);
 
