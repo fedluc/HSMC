@@ -1,5 +1,5 @@
-#ifndef ORDER_PARAMETER_H
-#define ORDER_PARAMETER_H
+#ifndef COMPUTE_ORDER_PARAMETER_H
+#define COMPUTE_ORDER_PARAMETER_H
 
 #include <stdbool.h>
 

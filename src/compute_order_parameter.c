@@ -7,9 +7,9 @@
 #include "cell_list.h"
 #include "compute_order_parameter.h"
 
-double ql_ave = 0.0;
-double *ql, *qlm2;
-double lx_2, ly_2, lz_2;
+static double ql_ave;
+static double *ql, *qlm2;
+static double lx_2, ly_2, lz_2;
 
 void compute_op(bool init){
   
@@ -30,6 +30,7 @@ void global_ql_compute(){
   ql_compute();
 
   // Average in order to obtain the global order parameter
+  ql_ave = 0.0;
   for (int ii=0; ii<part_info.NN; ii++){
     ql_ave += ql[ii]/part_info.NN;
   }

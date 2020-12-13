@@ -6,14 +6,14 @@
 #include "moves.h"
 
 // Variables for the calculation of the pressure via the virial
-int pressv_hist_nn;
-double pressv_rmax = 1.05;
-double *pressv_rr, *pressv_hist;
+static int pressv_hist_nn;
+static double pressv_rmax = 1.05;
+static double *pressv_rr, *pressv_hist;
 
 // Variables for the calculation of the pressure via virtual
 // volume perturbations
-int presst_hist_nn;
-double *presst_xi, *presst_hist;
+static int presst_hist_nn;
+static double *presst_xi, *presst_hist;
 
 
 void compute_pressv(bool init){

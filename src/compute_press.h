@@ -1,5 +1,5 @@
-#ifndef PRESS_H
-#define PRESS_H
+#ifndef COMPUTE_PRESS_H
+#define COMPUTE_PRESS_H
 
 #include <stdbool.h>
 
