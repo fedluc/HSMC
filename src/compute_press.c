@@ -224,19 +224,22 @@ void presst_output(bool init){
   fclose(fid);
 
   // For NpT calculations print to file also the density 
-  if (init) fid = fopen("density.dat", "w");
-  else fid = fopen("density.dat", "a");
-  if (fid == NULL) {
-    perror("Error while creating the file for the density\n");
-    exit(EXIT_FAILURE);
+  if (in.press > 0) {
+    
+    if (init) fid = fopen("density.dat", "w");
+    else fid = fopen("density.dat", "a");
+    if (fid == NULL) {
+      perror("Error while creating the file for the density\n");
+      exit(EXIT_FAILURE);
+    }
+    if (init){
+      fprintf(fid, "######################################\n");
+      fprintf(fid, "# Density (each line is one sample)\n");
+      fprintf(fid, "######################################\n");
+    }
+    fprintf(fid, "%.8e\n", in.rho);
+    fclose(fid);
   }
-  if (init){
-    fprintf(fid, "######################################\n");
-    fprintf(fid, "# Density (each line is one sample)\n");
-    fprintf(fid, "######################################\n");
-  }
-  fprintf(fid, "%.8e\n", in.rho);
-  fclose(fid);
 
 }
 
