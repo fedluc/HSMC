@@ -8,7 +8,7 @@ def acf_ave(data_dir,file_id,mode='fft',samples_block=-1,file_comments='#'):
     file_names = glob.glob(os.path.join(data_dir,file_id))
     out_dir = data_dir
     if len(file_names) == 0:
-        sys.exit('hsmc_acf.pressv: No data file was found')
+        sys.exit('hsmc_acf.acf_ave: No data file was found')
 
     # Read data
     data = read_hsmc_output(file_names, file_comments, samples_block)
@@ -22,7 +22,7 @@ def acf_ave(data_dir,file_id,mode='fft',samples_block=-1,file_comments='#'):
         elif mode == 'dsum':
             corr += acf(data[ii,:])/n_blocks
         else:
-            sys.exit('Unkown mode option')
+            sys.exit('hsmc_acf.acf_ave: Unkown mode option')
             
     # Output
     return corr
