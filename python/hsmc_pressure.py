@@ -9,6 +9,9 @@ import gzip as gz
 # ------ Compute pressure from virial route ------
 def pressure_virial(data_dir=os.getcwd(),samples_block=1):
 
+    # Lines for the header of each sample (assumed fixed)
+    lines_header = 7
+
     # Get names of files in data directory
     file_names = glob.glob(os.path.join(data_dir,'press_virial.dat'))
     out_dir = data_dir
@@ -49,6 +52,7 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
 
     # Samples for the density
     if npt:
+        lines_header = 3
         file_names = glob.glob(os.path.join(data_dir,'density.dat'))
         if len(file_names) == 0:
             sys.exit('hsmc_pressure.pressv: No density file was found')
@@ -86,22 +90,21 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
 def read_pressure_output(file_names,samples_block,lines_header,press_flag):
 
     # Global variables declaration
-    global lines
+    global lines_press
 
-    # Lines for the header of each sample (assumed fixed)
-    lines_header = 7
-
-    initFlag = True
+    # Read files listed in file_names
+    init_hist_flag = True
+    init_file_flag = True
     for name in file_names:
             
         # Open file, read all lines and close
         ff = open(name)
-        lines = ff.readlines()
+        lines_press = ff.readlines()
         ff.close()
-        lines_file = len(lines)
+        lines_file = len(lines_press)
                 
         # Extract number of bins, volume and number of particles
-        [n_bins, vol, n_part]  = [float(kk) for kk in lines[3].split()]
+        [n_bins, vol, n_part]  = [float(kk) for kk in lines_press[3].split()]
         n_bins = int(n_bins)
 
         # Initialize histograms and pressure
@@ -113,7 +116,7 @@ def read_pressure_output(file_names,samples_block,lines_header,press_flag):
 
         # Number of usable samples in file
         n_samples_file = lines_file//lines_block
-        coeff = np.zeros((n_samples_file,2))
+        coeff_file = np.zeros((n_samples_file,2))
         
         # Read file
         n_samples = 0
@@ -128,9 +131,10 @@ def read_pressure_output(file_names,samples_block,lines_header,press_flag):
                 histTmp = read_pressure_sample(lines_read+lines_header, n_bins)
 
                 # Create vector with abscissa for fit 
-                if initFlag:
+                if init_hist_flag:
                     hist[:,0] = histTmp[:,0]
-                    initFlag = False
+                    init_hist_flag = False
+
                 # Update running average
                 hist[:,1] += histTmp[:,1]/samples_block
 
@@ -152,25 +156,30 @@ def read_pressure_output(file_names,samples_block,lines_header,press_flag):
                 hist[:,1] = -np.log(hist[:,1])
 
             # Fit data
-            coeff[n_blocks,:] = data_fit(hist)
+            coeff_file[n_blocks,:] = data_fit(hist)
 
             # Update number of blocks 
             n_blocks+=1
                      
             # Reset histogram
             hist = np.zeros((n_bins,2))
-            initFlag = True
+            init_hist_flag = True
 
             # Reset number of samples
             n_samples = 0
 
-            
-        # Remove nan values 
-        del_idx = np.argwhere(np.isnan(coeff))
-        coeff = np.delete(coeff,del_idx,axis=0)
+            # Remove nan values 
+            del_idx = np.argwhere(np.isnan(coeff_file))
+            coeff_file = np.delete(coeff_file,del_idx,axis=0)
+        
+        if init_file_flag:
+            coeff = coeff_file
+            init_file_flag = False;
+        else:
+            coeff = np.append(coeff,coeff_tmp,axis=0)
 
-        # Output
-        return [coeff, vol, n_part]
+    # Output
+    return [coeff, vol, n_part]
 
 
 
@@ -179,7 +188,7 @@ def read_pressure_sample(line_start, n_bins):
     hist = np.zeros((n_bins,2))
 
     for jj in range(n_bins):
-        histTmp = np.array([float(kk) for kk in lines[jj+line_start].split()])
+        histTmp = np.array([float(kk) for kk in lines_press[jj+line_start].split()])
         hist[jj,0] = histTmp[0]
         hist[jj,1] = histTmp[1] 
     
@@ -207,27 +216,21 @@ def data_fit(hist):
 
 def read_density_output(file_names,samples_block,lines_header):
 
-    # Global variables declaration
-    global lines
-
-    # Lines for the header
-    lines_header = 3
-
-    initFlag = True
+    # Read files listed in file_names
+    init_file_flag = True
     for name in file_names:
             
         # Open file, read all lines and close
         ff = open(name)
-        lines = ff.readlines()
+        lines_dens = ff.readlines()
         ff.close()
-        lines_file = len(lines)
+        lines_file = len(lines_dens)
                 
         # Number of usable samples in file
         lines_sample = 1
         lines_block = samples_block*lines_sample
         n_samples_file = (lines_file-1)//lines_block
-        dens = np.zeros((n_samples_file,1))
-
+        dens_file = np.zeros((n_samples_file,1))
         
         # Read file
         n_samples = 0
@@ -239,7 +242,7 @@ def read_density_output(file_names,samples_block,lines_header):
             while n_samples < samples_block:
             
                 # Update running average
-                dens[n_blocks] += float(lines[lines_read+lines_header])/samples_block
+                dens_file[n_blocks] += float(lines_dens[lines_read+lines_header])/samples_block
 
                 # Update number of samples
                 n_samples += 1
@@ -252,19 +255,14 @@ def read_density_output(file_names,samples_block,lines_header):
                        
             # Reset number of samples
             n_samples = 0
+        
+        if init_file_flag:
+            dens = dens_file
+            init_file_flag = False
+        else:
+            dens = np.append(dens,dens_file,axis=0)
 
 
-        # Output
-        return dens
+    # Output
+    return dens
 
-
-def read_density_sample(line_start, n_bins):
-
-    hist = np.zeros((n_bins,2))
-
-    for jj in range(n_bins):
-        histTmp = np.array([float(kk) for kk in lines[jj+line_start].split()])
-        hist[jj,0] = histTmp[0]
-        hist[jj,1] = histTmp[1] 
-    
-    return hist
