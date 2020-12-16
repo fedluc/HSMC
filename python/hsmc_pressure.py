@@ -4,10 +4,9 @@ import math
 from scipy import optimize as opt
 from scipy import special as spec
 import glob
-import gzip as gz
 
 # ------ Compute pressure from virial route ------
-def pressure_virial(data_dir=os.getcwd(),samples_block=1):
+def pressure_virial(data_dir,samples_block=1):
 
     # Lines for the header of each sample (assumed fixed)
     lines_header = 7
