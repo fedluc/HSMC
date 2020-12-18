@@ -9,7 +9,7 @@ void global_ql_compute();
 
 void ql_compute();
 
-void qlm_compute(int ref_idx);
+void qlm2_compute(int ref_idx);
 
 void global_ql_output(bool init);
 

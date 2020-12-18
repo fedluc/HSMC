@@ -66,7 +66,7 @@ def average(data_dir,file_id='order_param.dat',file_comments='#',
     # Output
     return dens_ave
 
-def var_blocking(data_dir,file_id='density.dat',file_comments='#',
+def var_blocking(data_dir,file_id='order_param.dat',file_comments='#',
                 plot = True, output=True):
 
     # Get names of files in data directory

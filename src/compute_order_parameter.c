@@ -65,7 +65,7 @@ void ql_compute(){
   for (int ii=0; ii<part_info.NN; ii++){
 
     // Obtain all the m-components of ql
-    qlm_compute(ii);
+    qlm2_compute(ii);
 
     ql[ii] = 0.0;
     for (int jj=0; jj<tlp1; jj++){
@@ -82,12 +82,12 @@ void ql_compute(){
 }
 
 
-void qlm_compute(int ref_idx){
+void qlm2_compute(int ref_idx){
   
   int cell_idx, neigh_idx, part_idx;
   int num_bonds = 0;
-  double qlm_real_tmp;
-  double qlm_imag_tmp;
+  double qlm_real_tmp, qlmm_real_tmp;
+  double qlm_imag_tmp, qlmm_imag_tmp;
   double plm;
   double dr, dx, dy, dz;
   double phi;
@@ -96,11 +96,13 @@ void qlm_compute(int ref_idx){
   cell_idx = cell_part_idx(ref_idx);
     
   // Loop over all possible values of m
-  for (int mm=-in.ql_order; mm<in.ql_order+1; mm++){
+  for (int mm=0; mm<in.ql_order+1; mm++){
 
     num_bonds = 0;
-    qlm_real_tmp = 0;
-    qlm_imag_tmp = 0;
+    qlm_real_tmp = 0.;
+    qlm_imag_tmp = 0.;
+    qlmm_real_tmp = 0.;
+    qlmm_imag_tmp = 0.;
     
     // Loop over the neighbors
     for (int jj=0; jj<cl_neigh_num; jj++){
@@ -136,10 +138,12 @@ void qlm_compute(int ref_idx){
 	  num_bonds++;
 	  // Legendre polynomial
 	  plm =  gsl_sf_legendre_sphPlm(in.ql_order, abs(mm), dz/dr);
-	  if (mm < 0 && mm % 2 != 0) plm *= -1.0;
 	  // Spherical harmonics
 	  qlm_real_tmp += plm * cos(mm*phi);
 	  qlm_imag_tmp += plm * sin(mm*phi);
+	  if (mm % 2 != 0) plm *= -1.0;
+	  qlmm_real_tmp += plm * cos(-mm*phi);
+	  qlmm_imag_tmp += plm * sin(-mm*phi);
 	}
 	
 	part_idx = cl_link[part_idx];
@@ -150,8 +154,12 @@ void qlm_compute(int ref_idx){
     
     qlm_real_tmp /= num_bonds;
     qlm_imag_tmp /= num_bonds;
-    qlm2[mm+in.ql_order] = qlm_real_tmp*qlm_real_tmp + 
+    qlmm_real_tmp /= num_bonds;
+    qlmm_imag_tmp /= num_bonds;
+    qlm2[in.ql_order+mm] = qlm_real_tmp*qlm_real_tmp + 
                            qlm_imag_tmp*qlm_imag_tmp;
+    qlm2[in.ql_order-mm] = qlmm_real_tmp*qlmm_real_tmp + 
+                           qlmm_imag_tmp*qlmm_imag_tmp;
     
   }
   
