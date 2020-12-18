@@ -137,7 +137,7 @@ void qlm2_compute(int ref_idx){
 	  // Update number of bonds
 	  num_bonds++;
 	  // Legendre polynomial
-	  plm =  gsl_sf_legendre_sphPlm(in.ql_order, abs(mm), dz/dr);
+	  plm =  gsl_sf_legendre_sphPlm(in.ql_order, mm, dz/dr);
 	  // Spherical harmonics
 	  qlm_real_tmp += plm * cos(mm*phi);
 	  qlm_imag_tmp += plm * sin(mm*phi);
@@ -152,10 +152,12 @@ void qlm2_compute(int ref_idx){
       
     }
     
-    qlm_real_tmp /= num_bonds;
-    qlm_imag_tmp /= num_bonds;
-    qlmm_real_tmp /= num_bonds;
-    qlmm_imag_tmp /= num_bonds;
+    if (num_bonds != 0) {
+      qlm_real_tmp /= num_bonds;
+      qlm_imag_tmp /= num_bonds;
+      qlmm_real_tmp /= num_bonds;
+      qlmm_imag_tmp /= num_bonds;
+    }
     qlm2[in.ql_order+mm] = qlm_real_tmp*qlm_real_tmp + 
                            qlm_imag_tmp*qlm_imag_tmp;
     qlm2[in.ql_order-mm] = qlmm_real_tmp*qlmm_real_tmp + 

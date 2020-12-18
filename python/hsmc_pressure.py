@@ -4,8 +4,10 @@ import math
 from scipy import optimize as opt
 from scipy import special as spec
 import glob
+import hsmc_stat
 
 # ------ Compute pressure from virial route ------
+
 def pressure_virial(data_dir,samples_block=1):
 
     # Lines for the header of each sample (assumed fixed)
@@ -22,18 +24,25 @@ def pressure_virial(data_dir,samples_block=1):
     [coeff, vol, n_part] = read_pressure_output(file_names,samples_block,lines_header,"virial")
     rdf_contact = coeff[:,0] + coeff[:,1]
 
-    # Average and standard deviation of the pressure
+    # Pressure
     dens = n_part/vol
     n_samples = len(coeff)
     press = 1 + (2.*math.pi/3.) * dens * rdf_contact
+
+    # Average
     press_ave = np.average(press)
-    press_var = np.var(press)/np.sqrt(n_samples)
+
+    # Standard deviation (via jackknife)
+    press_std = hsmc_stat.jackknife(press)
+
+    # Output
     print("Pressure from virial calculations")
     print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
-    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_var, press_ave*dens, press_var*dens))
+    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_std, press_ave*dens, press_std*dens))
     
 
 # ------ Compute pressure from virial route ------
+
 def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
 
     # Lines for the header of each sample (assumed fixed)
@@ -59,33 +68,40 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
     else:
         dens = n_part/vol
 
-    # Average and standard deviation of the pressure
-    if npt:
-        n_press_samples = len(coeff)
-        n_dens_samples = len(dens)
-        press = dens * (1 + p_ex)
-        press_ave = np.average(press)
-        press_var = np.var(press)/np.sqrt(n_press_samples)
-        dens_ave = np.average(dens)
-        dens_var = np.var(dens)/np.sqrt(n_dens_samples)
-        print("Pressure from thermodynamic calculations")
-        print("Samples, average (HS units), variance (HS units))")
-        print("%d %.8f %.8f" % (n_press_samples, press_ave, press_var))
-        print("Density from thermodynamic calculations")
-        print("Samples, average (HS units), variance (HS units))")
-        print("%d %.8f %.8f" % (n_dens_samples, dens_ave, dens_var))
-    else:
-        n_samples = len(coeff)
-        press = 1 + p_ex
-        press_ave = np.average(press)
-        press_var = np.var(press)/np.sqrt(n_samples)
-        print("Pressure from thermodynamic calculations")
-        print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
-        print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_var, press_ave*dens, press_var*dens))
-
+    # Total pressure (in HS units) 
+    press = dens * (1 + p_ex)
     
+    if npt: # For NpT calcutions
+        
+        # Average
+        press_ave = np.average(press)
+        dens_ave = np.average(dens)
+        
+        # Standard deviation
+        press_std = hsmc_stat.jackknife(press)
+        dens_std = hsmc_stat.jackknife(dens)
+
+    else: # For NVT calculations
+
+        # Average 
+        press_ave = np.average(press)
+        dens_ave = dens
+        
+        # Standard deviation
+        press_std = hsmc_stat.jackknife(press)
+        dens_std = 0.0
+
+    # Output
+    print("Pressure from thermodynamic calculations")
+    print("Samples, average (HS units), std. dev. (HS units), average (ISO units), std. dev. (ISO units))")
+    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_std, press_ave/dens_ave, press_std/dens_ave))
+    if npt:
+        print("Density from thermodynamic calculations")
+        print("Samples, average (HS units), std. dev. (HS units), average (ISO units), std. dev. (ISO units)")
+        print("%d %.8f %.8f" % (n_dens_samples, dens_ave, dens_std, 1.0, dens_std/dens_ave))
 
 # ------ Read  HSMC output for the pressure -----
+
 def read_pressure_output(file_names,samples_block,lines_header,press_flag):
 
     # Global variables declaration

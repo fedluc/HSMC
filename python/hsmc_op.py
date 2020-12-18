@@ -5,53 +5,53 @@ import glob
 import hsmc_stat
 
 # ---------------------------------------------------------
-# Note: these functions are only applicable to the density
-# output produced when hsmc runs in the NpT ensemble
+# Note: these functions analyze the order parameter
+# output produced when hsmc is run with the ql option
 # ---------------------------------------------------------
 
-# ------ Average density -------
+# ------ Average order parameter ------
 
-def ave(data_dir,file_id='density.dat',file_comments='#',
+def ave(data_dir,file_id='order_param.dat',file_comments='#',
         output=True, plot=True):
 
     # Get names of files in data directory
     file_names = glob.glob(os.path.join(data_dir,file_id))
     out_dir = data_dir
     if len(file_names) == 0:
-        sys.exit('hsmc_density.ave: No data file was found')
+        sys.exit('hsmc_op.ave: No data file was found')
 
     # Read data
     data = read_hsmc_output(file_names, file_comments,squeeze=True)
 
-    # Average density
-    dens_ave = np.average(data)
-    
+    # Average order parameter
+    op_ave = np.average(data)
+
     # Print result on screen
     if output:
-        print("Average density: %.8f" % dens_ave)
+        print("Average order parameter: %.8f" % op_ave)
 
     # Plot 
     if plot:
-        dens_ave_plot = np.full(len(data), dens_ave)    
+        op_ave_plot = np.full(len(data), op_ave)    
         plt.plot(data,'b')
-        plt.plot(dens_ave_plot,'r--')
-        plt.ylabel('Density [1/sigma^3]')
+        plt.plot(op_ave_plot,'r--')
+        plt.ylabel('Order parameter')
         plt.xlabel('Sweep number')
         plt.show()
         
     # Output
-    return dens_ave
+    return op_ave
 
-# ------ Standard deviation of the density (via blocking)  -------
+# ------ Standard deviation of the order parameter (via blocking) ------
 
-def std(data_dir,file_id='density.dat',file_comments='#',
+def std(data_dir,file_id='order_param.dat',file_comments='#',
         output=True, plot=True, jackknife=False):
 
     # Get names of files in data directory
     file_names = glob.glob(os.path.join(data_dir,file_id))
     out_dir = data_dir
     if len(file_names) == 0:
-        sys.exit('hsmc_density.std: No data file was found')
+        sys.exit('hsmc_op.std: No data file was found')
 
     # Read data
     data = read_hsmc_output(file_names, file_comments, squeeze=True)
@@ -60,16 +60,16 @@ def std(data_dir,file_id='density.dat',file_comments='#',
     sigma = hsmc_stat.blocking_std(data,plt_flag=plot,
                                    print_flag=output,jk_flag=jackknife)
 
-# ------ Density autocorrelation function  -------
+# ------ Density autocorrelation function ------
 
-def acf(data_dir,file_id='density.dat',mode='fft',
+def acf(data_dir,file_id='order_param.dat',mode='fft',
         samples_block=-1,file_comments='#',plot=True):
 
     # Get names of files in data directory
     file_names = glob.glob(os.path.join(data_dir,file_id))
     out_dir = data_dir
     if len(file_names) == 0:
-        sys.exit('hsmc_density.acf: No data file was found')
+        sys.exit('hsmc_op.acf: No data file was found')
 
     # Read data
     data = read_hsmc_output(file_names, file_comments, samples_block)
@@ -83,7 +83,7 @@ def acf(data_dir,file_id='density.dat',mode='fft',
         elif mode == 'dsum':
             corr += hsmc_stat.acf(data[ii,:])/n_blocks
         else:
-            sys.exit('hsmc_density.acf: Unkown mode option')
+            sys.exit('hsmc_op.acf: Unkown mode option')
 
     # Plot 
     if plot:
@@ -96,7 +96,7 @@ def acf(data_dir,file_id='density.dat',mode='fft',
     return corr
 
 
-# ------ Read density output of hsmc ------
+# ------ Read order parameter output of hsmc ------
 
 def read_hsmc_output(file_names,file_comments,samples_block=-1,squeeze=False):
 
