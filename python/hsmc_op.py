@@ -14,14 +14,8 @@ import hsmc_stat
 def ave(data_dir,file_id='order_param.dat',file_comments='#',
         output=True, plot=True):
 
-    # Get names of files in data directory
-    file_names = glob.glob(os.path.join(data_dir,file_id))
-    out_dir = data_dir
-    if len(file_names) == 0:
-        sys.exit('hsmc_op.ave: No data file was found')
-
     # Read data
-    data = read_hsmc_output(file_names, file_comments,squeeze=True)
+    data = read_hsmc_output(data_dir,file_id, file_comments,squeeze=True)
 
     # Average order parameter
     op_ave = np.average(data)
@@ -42,19 +36,34 @@ def ave(data_dir,file_id='order_param.dat',file_comments='#',
     # Output
     return op_ave
 
+# ------ Histograms ------
+
+def hist(data_dir,file_id='order_param.dat',file_comments='#',
+        hist_bins=100,output=True, plot=True):
+
+    # Read data
+    data = read_hsmc_output(data_dir, file_id, file_comments,squeeze=True)
+
+    # Density histograms
+    op_hist = np.histogram(data, bins=hist_bins)
+
+    # Plot
+    plt.hist(data, bins=hist_bins)
+    plt.xlabel('Order parameter')
+    plt.show()
+
+    # Output
+    return op_hist
+
+
+
 # ------ Standard deviation of the order parameter (via blocking) ------
 
 def std(data_dir,file_id='order_param.dat',file_comments='#',
         output=True, plot=True, jackknife=False):
 
-    # Get names of files in data directory
-    file_names = glob.glob(os.path.join(data_dir,file_id))
-    out_dir = data_dir
-    if len(file_names) == 0:
-        sys.exit('hsmc_op.std: No data file was found')
-
     # Read data
-    data = read_hsmc_output(file_names, file_comments, squeeze=True)
+    data = read_hsmc_output(data_dir, file_id, file_comments, squeeze=True)
 
     # Blocking to estimate the variance
     sigma = hsmc_stat.blocking_std(data,plt_flag=plot,
@@ -65,14 +74,8 @@ def std(data_dir,file_id='order_param.dat',file_comments='#',
 def acf(data_dir,file_id='order_param.dat',mode='fft',
         samples_block=-1,file_comments='#',plot=True):
 
-    # Get names of files in data directory
-    file_names = glob.glob(os.path.join(data_dir,file_id))
-    out_dir = data_dir
-    if len(file_names) == 0:
-        sys.exit('hsmc_op.acf: No data file was found')
-
     # Read data
-    data = read_hsmc_output(file_names, file_comments, samples_block)
+    data = read_hsmc_output(data_dir, file_id, file_comments, samples_block)
     n_blocks = data.shape[0]
 
     # Compute average autocorrelation function
@@ -98,7 +101,13 @@ def acf(data_dir,file_id='order_param.dat',mode='fft',
 
 # ------ Read order parameter output of hsmc ------
 
-def read_hsmc_output(file_names,file_comments,samples_block=-1,squeeze=False):
+def read_hsmc_output(data_dir,file_id,file_comments,samples_block=-1,squeeze=False):
+
+    # Get names of files in data directory
+    file_names = glob.glob(os.path.join(data_dir,file_id))
+    out_dir = data_dir
+    if len(file_names) == 0:
+        sys.exit('hsmc_op.ave: No data file was found')
 
     # Read files listed in file_names
     init_file_flag = True

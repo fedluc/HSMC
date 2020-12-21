@@ -18,7 +18,7 @@ def pressure_virial(data_dir,samples_block=1):
     out_dir = data_dir
     n_files = len(file_names)
     if n_files == 0:
-        sys.exit('hsmc_pressure.pressv: No pressure file was found')
+        sys.exit('hsmc_pressure.pressure_virial: No pressure file was found')
     
     # Samples for the radial distribution function at contact
     [coeff, vol, n_part] = read_pressure_output(file_names,samples_block,lines_header,"virial")
@@ -33,12 +33,12 @@ def pressure_virial(data_dir,samples_block=1):
     press_ave = np.average(press)
 
     # Standard deviation (via jackknife)
-    press_std = hsmc_stat.jackknife(press)
+    press_std = hsmc_stat.jackknife(press)[1]
 
     # Output
     print("Pressure from virial calculations")
-    print("Samples, average (reduced units), variance (reduced units), average (HS units), variance (HS units))")
-    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_std, press_ave*dens, press_std*dens))
+    print("Samples, average (HS units), variance (HS units), average (ISO units), variance (HS units)")
+    print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave*dens, press_std*dens, press_ave, press_std))
     
 
 # ------ Compute pressure from virial route ------
@@ -57,14 +57,16 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
     # Samples for the excess pressure
     [coeff, vol, n_part] = read_pressure_output(file_names,samples_block,lines_header,"thermo")
     p_ex = coeff[:,1]/n_part
+    n_samples = len(coeff)
 
     # Samples for the density
     if npt:
         lines_header = 3
         file_names = glob.glob(os.path.join(data_dir,'density.dat'))
         if len(file_names) == 0:
-            sys.exit('hsmc_pressure.pressv: No density file was found')
+            sys.exit('hsmc_pressure.pressure_thermo: No density file was found')
         dens = read_density_output(file_names,samples_block,lines_header)
+        n_dens_samples = len(dens)
     else:
         dens = n_part/vol
 
@@ -78,8 +80,8 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
         dens_ave = np.average(dens)
         
         # Standard deviation
-        press_std = hsmc_stat.jackknife(press)
-        dens_std = hsmc_stat.jackknife(dens)
+        press_std = hsmc_stat.jackknife(press)[1]
+        dens_std = hsmc_stat.jackknife(dens)[1]
 
     else: # For NVT calculations
 
@@ -88,12 +90,12 @@ def pressure_thermo(data_dir=os.getcwd(),samples_block=1,npt=False):
         dens_ave = dens
         
         # Standard deviation
-        press_std = hsmc_stat.jackknife(press)
+        press_std = hsmc_stat.jackknife(press)[1]
         dens_std = 0.0
 
     # Output
     print("Pressure from thermodynamic calculations")
-    print("Samples, average (HS units), std. dev. (HS units), average (ISO units), std. dev. (ISO units))")
+    print("Samples, average (HS units), std. dev. (HS units), average (ISO units), std. dev. (ISO units)")
     print("%d %.8f %.8f %.8f %.8f" % (n_samples, press_ave, press_std, press_ave/dens_ave, press_std/dens_ave))
     if npt:
         print("Density from thermodynamic calculations")
