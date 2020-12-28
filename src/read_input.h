@@ -36,6 +36,9 @@ struct input {
   int ql_order, ql_sample_int;
   double ql_rmax;
 
+  // Compute: chemical potential
+  int mu_insertions, mu_sample_int;
+
 };
 
 extern struct input in;
