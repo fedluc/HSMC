@@ -88,7 +88,7 @@ def read_hsmc_output(data_dir,file_id,file_comments):
     file_names = glob.glob(os.path.join(data_dir,file_id))
     out_dir = data_dir
     if len(file_names) == 0:
-        sys.exit('hsmc_density.read_hsmc_output: No data file was found')
+        sys.exit('hsmc_chem_pot.read_hsmc_output: No data file was found')
 
     # Read files listed in file_names
     init_file_flag = True

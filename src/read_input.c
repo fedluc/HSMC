@@ -46,6 +46,9 @@ void print_example(){
     "ql 6 1.5 1 \n\n"
     "# Chemical potential via Widom insertions (insertions, saving interval)\n"
     "widom 100 5 \n\n"
+    "# Cavity simulations (probability of moving a cavity, maximum and minimum distance,\n"
+    "# saving interval)\n"
+    "cavity 0.1 1.2 0.0 4\n\n"
     "# Seed for random number generator\n"
     "seed 124787"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
@@ -99,6 +102,10 @@ void read_input_file(char *filename){
   in.ql_sample_int = 0;
   in.mu_sample_int = 0;
   in.mu_insertions = 0;
+  in.cavity_pcav = 0;
+  in.cavity_maxdr = 0;
+  in.cavity_mindr = 0;
+  in.cavity_sample_int = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -303,6 +310,29 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
 	  in.mu_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"cavity") == 0 || strcmp(key,"cavity\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.cavity_pcav = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.cavity_maxdr = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.cavity_mindr = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.cavity_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }

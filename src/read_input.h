@@ -27,7 +27,7 @@ struct input {
 
   // Seed for random number generator
   unsigned long int seed;
-
+  
   // Compute: pressure (virial and thermodynamic)
   double pressv_dr, presst_xi_max, presst_dxi;
   int pressv_sample_int, presst_sample_int;
@@ -38,6 +38,10 @@ struct input {
 
   // Compute: chemical potential
   int mu_insertions, mu_sample_int;
+
+  // Cavity simulations
+  double cavity_pcav, cavity_maxdr, cavity_mindr;
+  int cavity_sample_int;
 
 };
 

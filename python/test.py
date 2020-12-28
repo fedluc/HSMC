@@ -4,6 +4,8 @@ import hsmc_density as density
 import hsmc_op as op
 import hsmc_pressure as press
 import hsmc_chem_pot as mu
+import hsmc_cavity as cavity
+
 # NVT simulations
 # data_dir = '../../HSMC_tests'
 # op.ave(data_dir)
@@ -26,6 +28,10 @@ import hsmc_chem_pot as mu
 # press.pressure_thermo(data_dir,samples_block=128)
 
 # NVT simulations with Widom insertion
+# data_dir = '../../HSMC_tests'
+# mu.ave(data_dir,plot=False)
+# mu.hist(data_dir)
+
+# cavity NVT simulations
 data_dir = '../../HSMC_tests'
-mu.ave(data_dir,plot=False)
-#mu.hist(data_dir)
+cavity.hist(data_dir)

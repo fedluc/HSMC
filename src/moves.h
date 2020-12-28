@@ -22,4 +22,13 @@ double compute_dist(int idx1, int idx2,
 bool check_overlap(int idx_ref,
                    double sf_x, double sf_y, double sf_z);
 
+void cavity_rng_init();
+
+void cavity_part_move();
+
+bool cavity_check_move(int idx_ref, int move_type, double en_old);
+
+double cavity_interaction(double dr);
+
+
 #endif
