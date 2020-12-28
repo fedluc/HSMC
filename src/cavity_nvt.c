@@ -8,6 +8,7 @@
 #include "moves.h"
 #include "optimizer.h"
 #include "cavity_nvt.h"
+#include "analytic.h"
 
 // Cavity simulation for hard-spheres in the NVT ensemble
 void cavity_hs_nvt() {
@@ -23,6 +24,15 @@ void cavity_hs_nvt() {
 
   // Initialize particle's positions
   part_init();
+
+  // Set cavities to a distance within the allowed interval
+  double cavity_avedr = (in.cavity_maxdr + in.cavity_mindr)/ 2.0;
+  part[1][1] = part[0][1];
+  part[1][2] = part[0][2];
+  part[1][3] = part[0][3] + cavity_avedr;
+  if (part[1][3] > sim_box_info.lz) part[1][3] -= sim_box_info.lz;
+  else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
+  
 
   // Initialize cell lists
   cell_list_init();
@@ -82,6 +92,8 @@ void cavity_run_nvt(bool prod_flag){
   // Variable declaration
   bool cavity_init = true;
   int n_sweeps;
+
+  rdf_vw(1.1,0.4,1.0);
 
   // Number of sweeps
   if (prod_flag) n_sweeps = in.sweep_stat;

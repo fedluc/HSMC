@@ -1,4 +1,5 @@
 #include <math.h>
+#include <complex.h>
 #include "init.h"
 #include "read_input.h"
 #include "cell_list.h"
@@ -68,7 +69,7 @@ void part_move(){
     // Accept move
     acc_part_moves+=1;
     // Update cell list
-    cell_list_update();      
+    cell_list_update();
   }
 
 }
@@ -191,7 +192,7 @@ void cavity_part_move(){
 
   int r_type, r_idx;
   double r_x, r_y, r_z;
-  double x_old, y_old, z_old, dr_old, en_old;
+  double x_old, y_old, z_old, dr_old, en_old=0.0;
   int move_type;
 
   // Select particle to move (cavities are moved with probability in.cavity_pcav)
@@ -260,7 +261,7 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old){
 
   // Variable declaration
   int cell_idx, neigh_idx, part_idx;
-  double dr,dr_cavity;
+  double dr,dr_cavity=0.0;
   double boltz_fact, r_acc;
 
   // Cell that contains the particle
@@ -313,12 +314,6 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old){
 
 }
 
-
-// ------ Interaction potential between cavities ------
-double cavity_interaction(double dr){
-  return 0;
-}
-
 // ------ Compute distance between two particles ------
 double compute_dist(int idx1, int idx2, 
 		    double sf_x, double sf_y, double sf_z){
@@ -351,4 +346,9 @@ double compute_dist(int idx1, int idx2,
 
 }
 
+// ------ Interaction potential between cavities ------
 
+double cavity_interaction(double xx){
+  
+  return 0.0;
+}
