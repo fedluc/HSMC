@@ -3,7 +3,7 @@
 
 void hs_nvt();
 
-void run_nvt(bool prod_flag);
+void run_nvt(bool prod_flag, int sweep_offset);
 
 void sweep_nvt();
 

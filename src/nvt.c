@@ -1,4 +1,5 @@
 #include <time.h>
+#include <math.h>
 #include "init.h"
 #include "read_input.h"
 #include "cell_list.h"
@@ -6,6 +7,7 @@
 #include "compute_order_parameter.h"
 #include "compute_widom_chem_pot.h"
 #include "moves.h"
+#include "io_config.h"
 #include "optimizer.h"
 #include "nvt.h"
 
@@ -48,13 +50,13 @@ void hs_nvt() {
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
-  run_nvt(false);
+  run_nvt(false,0);
   printf("Equilibration completed.\n");
 
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  run_nvt(true);
+  run_nvt(true,in.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -78,22 +80,34 @@ void hs_nvt() {
 
 }
 
-void run_nvt(bool prod_flag){
+void run_nvt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
   bool pressv_init = true, presst_init = true;
   bool ql_ave_init = true, mu_ave_init = true;
   int n_sweeps;
 
+  // Names for restart files
+  int max_out_length = ceil(log10(in.sweep_stat+in.sweep_eq));
+  char restart_name_p1[20], restart_name_p2[max_out_length+20];
+  sprintf(restart_name_p1, "restart_%%0%dd.bin", max_out_length);
+
   // Number of sweeps
   if (prod_flag) n_sweeps = in.sweep_stat;
   else n_sweeps = in.sweep_eq;
   
   // Run MC simulation
-  for (int ii=0; ii<n_sweeps; ii++){
+  for (int ii=sweep_offset; ii<n_sweeps+sweep_offset; ii++){
 
     // Sweep
     sweep_nvt();
+
+    // Write restart file
+    if (ii % 1024 == 0){
+      sprintf(restart_name_p2, restart_name_p1, ii);
+      write_restart(restart_name_p2);
+      read_restart(restart_name_p2);
+    }
 
     if (prod_flag){
 
