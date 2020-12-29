@@ -6,20 +6,65 @@
 #include "read_input.h"
 #include "analytic.h"
 
-static bool init_coeff_vw = true, init_coeff_py = true;
+// Coefficients for the Grundke-Henderson parametrization of the cavity function
+static double ay0, ay1, ay2, ay3;
+// Coefficients for the Verlet-Weiss parametrization of the rdf
 static double AA, mu, etaW, dW;
+// Coefficients for the Percus-Yevick solution of the rdf
 static double complex t0, t1, t2;
 static double complex a00, a01, a02;
 
+// ------ Grundke-Henderson parametrization of the cavity function ------
+
+double lny_gh(double xx, double eta, double sigma, bool init_coeff){
+
+  // Initialize coefficients if necessary
+  if (init_coeff) coeff_gh(eta);
+
+  // Compute cavity function
+  double lny;
+  double xx_hs = xx/sigma;
+  if (xx_hs < 1.0){
+    lny = ay0 + ay1*xx_hs + ay2*xx_hs*xx_hs + ay3*xx_hs*xx_hs*xx_hs;
+  }
+  else {
+    lny =  log(rdf_vw(xx, eta, sigma, false));
+  }
+
+  // Output
+  return lny;
+
+}
+
+
+// ------ Coefficients for Grundke-Henderson parametrization of the cavity function ------
+
+void coeff_gh(double eta){
+
+  // Compute coefficients for the Verlet-Weiss paremetrization of the rdf  
+  coeff_vw(eta);
+
+  // Packing fraction and related quantities
+  double eta2 = eta*eta, eta3 = eta2*eta;
+  double ometa = 1. - eta, ometa3 = ometa*ometa*ometa;
+  double ometaW = 1. - etaW, ometaW3 = ometaW*ometaW*ometaW;
+
+  // Coefficients
+  double g1 = rdf_py(1.0, etaW, dW, false) + AA;
+  double dg1 = -(9./2.) * etaW * (1+etaW)/ometaW3 - AA*(1+mu);
+  ay0 = (8.*eta -9.*eta2 + 3.*eta3)/ometa3;
+  ay1 = -3. *eta * (2.-eta)/ ometa3;
+  ay2 = -(dg1/g1) - 3.*ay0 - 2.*ay1 + 3.*log(g1);
+  ay3 = 1./3.*( (dg1/g1) - ay1 - 2.*ay2);
+
+}
+
 // ------ Verlet-Weiss parametrization of the rdf ------
 
-double rdf_vw(double xx, double eta, double sigma){
+double rdf_vw(double xx, double eta, double sigma, bool init_coeff){
   
   // Initialize coefficients if necessary
-  if (init_coeff_vw){
-    coeff_vw(eta);
-    init_coeff_vw = false;
-  }
+  if (init_coeff) coeff_vw(eta);
 
   // Compute rdf
   double delta_g1, rdf;
@@ -29,10 +74,8 @@ double rdf_vw(double xx, double eta, double sigma){
   }
   else {
     delta_g1 = (AA/xx_hs) * exp(-mu*(xx_hs-1)) * cos(mu*(xx_hs-1));
-    rdf = rdf_py(xx_hs, etaW, dW) + delta_g1;
+    rdf = rdf_py(xx_hs, etaW, dW, false) + delta_g1;
   }
-
-  printf("%.8e %.8e %.8e\n", rdf_py(xx_hs, etaW, dW), etaW, dW);
 
   // Output 
   return rdf;
@@ -70,10 +113,9 @@ void coeff_vw(double eta){
 
   // Compute coefficients for Percus-Yevick solution for the rdf
   coeff_py(etaW);
-  init_coeff_py = false;
 
   // Verlet-Weis parametrization for the radial distribution function
-  AA = (zz_cs-1.0)/(4.0*eta) - rdf_py(1.0, etaW, dW);
+  AA = (zz_cs-1.0)/(4.0*eta) - rdf_py(1.0, etaW, dW, false);
   mu = 12 * AA * eta / (mu_cs - mu_py +
 			       (etaW * (27.0*etaW*(1+etaW) - 8.0*dW*op2etaW2
 					+ dW4*(8.0+ 5.0*etaW + 5.0*etaW*etaW)))
@@ -83,13 +125,10 @@ void coeff_vw(double eta){
 
 // ------ Percus-Yevick solution of the rdf ------
 
-double rdf_py(double xx, double eta, double sigma){
+double rdf_py(double xx, double eta, double sigma, bool init_coeff){
   
   // Initialize coefficients if necessary
-  if (init_coeff_py){
-    coeff_py(eta);
-    init_coeff_py = false;
-  }
+  if (init_coeff) coeff_py(eta);
 
   // Compute rdf
   double complex g1;
@@ -147,3 +186,4 @@ void coeff_py(double eta){
   a02 = t2 * L2 / S12;
 
 }
+

@@ -41,6 +41,7 @@ struct input {
 
   // Cavity simulations
   double cavity_pcav, cavity_maxdr, cavity_mindr;
+  double cavity_out_dr;
   int cavity_sample_int;
 
 };

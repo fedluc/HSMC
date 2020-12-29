@@ -47,8 +47,8 @@ void print_example(){
     "# Chemical potential via Widom insertions (insertions, saving interval)\n"
     "widom 100 5 \n\n"
     "# Cavity simulations (probability of moving a cavity, maximum and minimum distance,\n"
-    "# saving interval)\n"
-    "cavity 0.1 1.2 0.0 4\n\n"
+    "# saving interval, potential resolution)\n"
+    "cavity 0.1 1.2 0.0 4 0.01\n\n"
     "# Seed for random number generator\n"
     "seed 124787"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
@@ -333,6 +333,11 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
 	  in.cavity_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.cavity_out_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }

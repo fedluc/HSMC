@@ -34,4 +34,6 @@ import hsmc_cavity as cavity
 
 # cavity NVT simulations
 data_dir = '../../HSMC_tests'
-cavity.hist(data_dir)
+cavity.rdf(data_dir,normalize=True)
+cavity.lny(data_dir)
+cavity.psi(data_dir)

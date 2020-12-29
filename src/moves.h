@@ -28,7 +28,7 @@ void cavity_part_move();
 
 bool cavity_check_move(int idx_ref, int move_type, double en_old);
 
-double cavity_interaction(double xx);
+double cavity_interaction(double xx, bool cavity_init);
 
 double hspy(double xx, double eta);
 

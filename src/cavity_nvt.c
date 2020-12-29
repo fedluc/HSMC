@@ -32,7 +32,12 @@ void cavity_hs_nvt() {
   part[1][3] = part[0][3] + cavity_avedr;
   if (part[1][3] > sim_box_info.lz) part[1][3] -= sim_box_info.lz;
   else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
-  
+
+  // Initialize cavity interaction potential (0.5 is just a dummy distance)
+  cavity_interaction(0.5, true);
+
+  // Write cavity interaction potential to file 
+  cavity_psi_output();
 
   // Initialize cell lists
   cell_list_init();
@@ -93,8 +98,6 @@ void cavity_run_nvt(bool prod_flag){
   bool cavity_init = true;
   int n_sweeps;
 
-  rdf_vw(1.1,0.4,1.0);
-
   // Number of sweeps
   if (prod_flag) n_sweeps = in.sweep_stat;
   else n_sweeps = in.sweep_eq;
@@ -140,14 +143,35 @@ void cavity_sweep_nvt(){
 }
 
 
+void cavity_psi_output(){
+
+  FILE* fid;
+  fid = fopen("cavity_psi.dat", "w");
+  if (fid == NULL) {
+    perror("Error while creating the file for the cavity potential\n");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(fid, "#########################################################\n");
+  fprintf(fid, "# Interaction potential  between the cavities \n");
+  fprintf(fid, "# Distance, potential\n");
+  fprintf(fid, "#########################################################\n");
+  double xx = in.cavity_mindr;
+  int n_points = (int)((in.cavity_maxdr - in.cavity_mindr)/in.cavity_out_dr);
+  for (int ii=0; ii < n_points; ii++){
+    fprintf(fid, "%.8e %.8e\n", xx, cavity_interaction(xx, false));
+    xx += in.cavity_out_dr;
+  }
+  fclose(fid);
+
+}
+
 void cavity_dist_output(bool init){
 
-  // Print to file the sample needed to compute the pressure
   FILE* fid;
   if (init) fid = fopen("cavity_distance.dat", "w");
   else fid = fopen("cavity_distance.dat", "a");
   if (fid == NULL) {
-    perror("Error while creating the file for the cavity\n");
+    perror("Error while creating the file for the cavity distance\n");
     exit(EXIT_FAILURE);
   }
   if (init){
@@ -159,3 +183,6 @@ void cavity_dist_output(bool init){
   fclose(fid);
 
 }
+
+
+
