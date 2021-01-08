@@ -106,6 +106,8 @@ void read_input_file(char *filename){
   in.cavity_maxdr = 0;
   in.cavity_mindr = 0;
   in.cavity_sample_int = 0;
+  in.restart_read = 0;
+  in.restart_write = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -342,6 +344,30 @@ void read_input_file(char *filename){
 	else read_input_file_err(1,line_buf);
       }
 
+      else if (strcmp(key,"restart_read") == 0 || strcmp(key,"restart_read\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.restart_read = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  int len = strlen(value);
+	  if (value[len-1] == '\n') value[len-1] = '\0';
+	  if (len < 100) strcpy(in.restart_name,value);
+	  else read_input_file_err(3,line_buf);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"restart_write") == 0 || strcmp(key,"restart_write\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.restart_write = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
 
       else read_input_file_err(2,line_buf);
 
@@ -388,6 +414,11 @@ void read_input_file_err(int err_id, char *last_string){
     case 2:
       printf("Unknown key\n");
       break;
+
+    case 3:
+      printf("Name of restart file is too long, maximum 100 characters\n");
+      break;
+
     }
 
   printf("Last read line in the input file:\n%s\n", last_string);

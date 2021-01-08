@@ -14,30 +14,37 @@
 // Hard-sphere simulation in the NVT ensemble
 void hs_nvt() {
 
-  // Simulation box
-  sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
-  printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
+  if (in.restart_read == 0){ // Read from input file  
+
+    // Simulation box
+    sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+    printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
 	 sim_box_info.ly, sim_box_info.lz);
 
-  // Particles
-  part_alloc();
-  printf("Number of particles: %d\n", part_info.NN);
+    // Particles
+    part_alloc();
+    printf("Number of particles: %d\n", part_info.NN);
 
-  // Initialize particle's positions
-  part_init();
+    // Initialize particle's positions
+    part_init();
+
+    
+    // Set-up random number generator (Marsenne-Twister)
+    rng_init();
+
+  }
+  else { // Read from restart file
+    read_restart(in.restart_name);
+  }
 
   // Initialize cell lists
   cell_list_init();
-
-  // Set-up random number generator (Marsenne-Twister)
-  rng_init();
 
   // Optmize maximum displacement
   if (in.opt_flag == 1){
     opt_nvt();
     part_init();
   }
-
 
   // Start timing
   clock_t start = clock();
@@ -87,11 +94,6 @@ void run_nvt(bool prod_flag, int sweep_offset){
   bool ql_ave_init = true, mu_ave_init = true;
   int n_sweeps;
 
-  // Names for restart files
-  int max_out_length = ceil(log10(in.sweep_stat+in.sweep_eq));
-  char restart_name_p1[20], restart_name_p2[max_out_length+20];
-  sprintf(restart_name_p1, "restart_%%0%dd.bin", max_out_length);
-
   // Number of sweeps
   if (prod_flag) n_sweeps = in.sweep_stat;
   else n_sweeps = in.sweep_eq;
@@ -103,12 +105,13 @@ void run_nvt(bool prod_flag, int sweep_offset){
     sweep_nvt();
 
     // Write restart file
-    if (ii % 1024 == 0){
-      sprintf(restart_name_p2, restart_name_p1, ii);
-      write_restart(restart_name_p2);
-      read_restart(restart_name_p2);
+    if (in.restart_write > 0){
+      if (ii % in.restart_write == 0) {
+	write_restart(ii);
+      }
     }
 
+    // Save samples for production runs
     if (prod_flag){
 
       // Compute pressure via virial route
@@ -118,7 +121,6 @@ void run_nvt(bool prod_flag, int sweep_offset){
       	  if (pressv_init) pressv_init = false;
       	}
       }
-
 
       // Compute pressure via thermodynamic route
       if (in.presst_sample_int > 0){

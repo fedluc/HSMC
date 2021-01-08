@@ -2,10 +2,7 @@
 #define MOVES_H
 
 #include <stdbool.h>
-#include <gsl/gsl_rng.h>
 
-extern gsl_rng *rng_mt;
-extern long unsigned int r_num_max;
 extern int part_moves, vol_moves;
 extern int acc_part_moves, rej_part_moves;
 extern int acc_vol_moves, rej_vol_moves;

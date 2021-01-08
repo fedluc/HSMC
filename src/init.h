@@ -1,6 +1,8 @@
 #ifndef INIT_H
 #define INIT_H
 
+#include <gsl/gsl_rng.h>
+
 struct p_info {int NN, Ncell; };
 
 struct box_info {
@@ -12,6 +14,8 @@ struct box_info {
   int cell_type;
 };
 
+extern gsl_rng *rng_mt;
+extern long unsigned int r_num_max;
 extern struct box_info sim_box_info;
 extern struct p_info part_info;
 extern double (*part)[4];

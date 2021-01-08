@@ -6,24 +6,10 @@
 #include "moves.h"
 #include "analytic.h"
 
-// Global variables for random number generator
-gsl_rng *rng_mt;
-long unsigned int r_num_max;
-
-// Global variables for particles moves
+// Global variables
 int part_moves, vol_moves;
 int acc_part_moves, rej_part_moves;
 int acc_vol_moves, rej_vol_moves;
-
-// ------ Initialize random number generator ------
-void rng_init(){
-
-  // Set-up random number generator (Marsenne-Twister)
-  rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
-  gsl_rng_set(rng_mt,in.seed);
-  r_num_max = gsl_rng_max(rng_mt);
-
-}
 
 // ------ Move one particle ------
 void part_move(){

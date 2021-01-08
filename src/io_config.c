@@ -1,11 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <gsl/gsl_rng.h>
 #include "init.h"
 #include "read_input.h"
 #include "io_config.h"
 
-void write_restart(char *restart_file){
+void write_restart(int sweep){
   
+  // Name of restart file (defined by the sweep number)
+  int max_out_length = ceil(log10(in.sweep_stat+in.sweep_eq));
+  char restart_file_template[20], restart_file[max_out_length+20];
+  sprintf(restart_file_template, "restart_%%0%dd.bin", max_out_length);
+  sprintf(restart_file, restart_file_template, sweep);
+  
+  // Open binary file
   FILE *fid = NULL;
   fid = fopen(restart_file, "wb");
   if (fid == NULL) {
@@ -13,56 +22,60 @@ void write_restart(char *restart_file){
     exit(EXIT_FAILURE);
   }
 
-  fwrite(&in, sizeof(struct input), 1, fid);
+  // Write Simulation box information
   fwrite(&sim_box_info, sizeof(struct box_info), 1, fid);
+
+  // Write particles information
   fwrite(&part_info, sizeof(struct p_info), 1, fid);
+
+  // Write configuration
   fwrite(part, sizeof(double), part_info.NN*4, fid);
+
+  // Write random number generator status
+  gsl_rng_fwrite(fid, rng_mt);
+
+  // Close binary file
   fclose(fid);
 
 }
 
 
 void read_restart(char *restart_file){
+
+  // Declare the type of random number generator
+  rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
   
+  // Open binary file
   FILE *fid = NULL;
   fid = fopen(restart_file, "rb");
   if (fid == NULL) {
-    perror("Error while creating restart file\n");
+    perror("Error while reading restart file");
     exit(EXIT_FAILURE);
   }
 
-  struct input in_read;
-  struct box_info sim_box_info_read;
-  struct p_info part_info_read;
-  double (*part_read)[4]; 
-  part_read = malloc(part_info.NN * sizeof(*part_read));
-  if (part_read == NULL){
-    printf("ERROR: Failed particle allocation\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  fread(&in_read, sizeof(struct input), 1, fid);
-  fread(&sim_box_info_read, sizeof(struct box_info), 1, fid);
-  fread(&part_info_read, sizeof(struct p_info), 1, fid);
-  fread(part_read, sizeof(double), part_info.NN*4, fid);
+  // Read simulation box
+  fread(&sim_box_info, sizeof(struct box_info), 1, fid);
+
+  // Read particles information
+  fread(&part_info, sizeof(struct p_info), 1, fid);
+
+  // Allocate particles
+  part_alloc();
+ 
+  // Read configuration
+  fread(part, sizeof(double), part_info.NN*4, fid);
+
+  // Read random number generator status
+  gsl_rng_fread(fid, rng_mt);
+
+  // Close binary file
   fclose(fid);
-  
-  printf("-------------------------------------\n");
-  printf("%.8e %.8e\n",in.rho,in_read.rho);
-  printf("%d %d\n",in.nx,in_read.nx);
-  printf("%.8e %.8e\n",in.press,in_read.press);
-  printf("%lu %lu\n",in.seed,in_read.seed);
-  printf("%d %d\n",in.mu_insertions,in_read.mu_insertions);
-  printf("%.8e %.8e\n",in.cavity_pcav,in_read.cavity_pcav);
-  printf("%.8e %.8e\n",in.cavity_out_dr,in_read.cavity_out_dr);
-  printf("%d %d\n",in.cavity_sample_int,in_read.cavity_sample_int);
-  printf("-------------------------------------\n");
-  for (int ii=0; ii<part_info.NN; ii++){
-    //printf("%.8e %.8e\n",part_read[ii][1],part[ii][1]);
-    if(part_read[ii][0]!=part[ii][0] || part_read[ii][1]!=part[ii][1] || part_read[ii][2]!=part[ii][2] || part_read[ii][2]!=part[ii][2]){
-      printf("!!!\n");
-    }
-  }
-  
-  free(part_read);
+
+  // Compute the density
+  in.rho = part_info.NN/sim_box_info.vol;
+
+  // Initialize maximum number produced by random number generator
+  r_num_max = gsl_rng_max(rng_mt);
+
+
 }

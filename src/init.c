@@ -1,12 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "read_input.h"
 #include "init.h"
 
+// Global variable for random number generator
+gsl_rng *rng_mt;
+long unsigned int r_num_max;
+
+// Global variable for simulation box information
 struct box_info sim_box_info;
+
+// Global variables for particles information
 struct p_info part_info;
 double (*part)[4];
 
+
+// ------ Initialize simulation box ------
 void sim_box_init(int cell_type, int nx, int ny, int nz, double rho){
 
   // Variable declaration
@@ -49,6 +59,7 @@ void sim_box_init(int cell_type, int nx, int ny, int nz, double rho){
 }
 
 
+// ------ Allocate multidimensional array for particles positions  ------
 void part_alloc(){
 
   // Variable declaration
@@ -85,6 +96,7 @@ void part_alloc(){
 }
 
 
+// ------ Initialize particles positions  ------
 void part_init(){
 
   if (sim_box_info.cell_type == 1){
@@ -147,3 +159,14 @@ void part_init_err(){
   exit(EXIT_FAILURE);
 
 }
+
+// ------ Initialize random number generator ------
+void rng_init(){
+
+  // Set-up random number generator (Marsenne-Twister)
+  rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
+  gsl_rng_set(rng_mt,in.seed);
+  r_num_max = gsl_rng_max(rng_mt);
+
+}
+
