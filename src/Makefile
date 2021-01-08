@@ -6,7 +6,7 @@ CFLAGS = -Wall -O2 -std=gnu99
 INCLUDE += -I/home/x_fedlu/gsl/include
 
 # Libraries
-LIB = -static -L/home/x_fedlu/gsl/lib
+#LIB = -static -L/home/x_fedlu/gsl/lib
 
 # Files
 SRC = $(wildcard *.c)
@@ -23,5 +23,5 @@ all: $(EXECUTABLE)
 
 # Link
 $(EXECUTABLE): $(OBJS)
-	$(CC) $(LIB) $^ -o $@ -lgsl -lgslcblas -lm
+	$(CC) $^ -o $@ -lz -lgsl -lgslcblas -lm
 	rm *.o

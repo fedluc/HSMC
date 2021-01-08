@@ -52,7 +52,7 @@ void hs_nvt() {
   // Initialize move counters
   part_moves = 0;
   acc_part_moves = 0;
-  rej_part_moves = 0;  
+  rej_part_moves = 0;
 
   // Run equilibration
   printf("---------------------------------------------------\n");
@@ -67,7 +67,7 @@ void hs_nvt() {
   printf("Production completed.\n");
   clock_t end = clock();
 
-  // Print acceptance and rejection percentages 
+  // Print acceptance and rejection percentages
   printf("---------------------------------------------------\n");
   printf("-- Particle moves: %.8e\n", (double)part_moves);
   printf("   Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves));
@@ -76,7 +76,7 @@ void hs_nvt() {
   
   // Stop timing
   printf("Elapsed time: %f seconds\n",
-	 (double)(end - start) / CLOCKS_PER_SEC);
+  	 (double)(end - start) / CLOCKS_PER_SEC);
   
   // Free memory
   free(part);
@@ -113,6 +113,11 @@ void run_nvt(bool prod_flag, int sweep_offset){
 
     // Save samples for production runs
     if (prod_flag){
+
+      // Write configuration
+      if (ii % 1024 == 0){
+	write_config(ii);
+      }
 
       // Compute pressure via virial route
       if (in.pressv_sample_int > 0){
