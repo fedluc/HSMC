@@ -3,7 +3,7 @@
 
 void cavity_hs_nvt();
 
-void cavity_run_nvt(bool prod_flag);
+void cavity_run_nvt(bool prod_flag, int sweep_offset);
 
 void cavity_sweep_nvt();
 

@@ -26,6 +26,9 @@ void write_restart(int sweep){
   // Write maximum step information (could be affected by optimization)  
   fwrite(&in.dr_max, sizeof(double), 1, fid); 
 
+  // Write maximum volume step information (could be affected by optimization)  
+  fwrite(&in.dv_max, sizeof(double), 1, fid); 
+
   // Write Simulation box information
   fwrite(&sim_box_info, sizeof(struct box_info), 1, fid);
 
@@ -48,8 +51,9 @@ void read_restart(char *restart_file){
 
   // Declare the type of random number generator
   rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
-  
+
   // Open binary file
+  printf("Reading data from restart file %s...\n", restart_file);
   FILE *fid = NULL;
   fid = fopen(restart_file, "rb");
   if (fid == NULL) {
@@ -59,6 +63,9 @@ void read_restart(char *restart_file){
 
   // Read maximum displacement 
   fread(&in.dr_max, sizeof(double), 1, fid);
+
+  // Read maximum volume displacement 
+  fread(&in.dv_max, sizeof(double), 1, fid);
   
   // Read simulation box
   fread(&sim_box_info, sizeof(struct box_info), 1, fid);
@@ -74,7 +81,7 @@ void read_restart(char *restart_file){
 
   // Read random number generator status
   gsl_rng_fread(fid, rng_mt);
-
+  
   // Close binary file
   fclose(fid);
 
@@ -84,6 +91,16 @@ void read_restart(char *restart_file){
   // Initialize maximum number produced by random number generator
   r_num_max = gsl_rng_max(rng_mt);
 
+  // Print message on screen
+  printf("The following data was initialized via the restart file:\n"
+	 "- Maximum displacement (override with optimization)\n"
+	 "- Maximum volume displacement (only for NpT, override with optimization)\n"
+	 "- Dimensions of the simulation box\n"
+	 "- Cell list information\n"
+	 "- Number of particles\n"
+	 "- Particle's positions\n"
+	 "- Density\n"
+	 "- Status of the random number generator\n");
 
 }
 
@@ -101,8 +118,6 @@ void write_config(int sweep){
     perror("Error while creating configuration file\n");
     exit(EXIT_FAILURE);
   }
-
-  gzprintf(fid, "%.8e %.8e %.8e\n", part[1][1], part[1][2], part[1][3]);
 
   // Close binary file
   gzclose(fid);

@@ -44,13 +44,15 @@ struct input {
   double cavity_out_dr;
   int cavity_sample_int;
 
-  // Restart (read)
+  // Read restart
   int restart_read;
   char restart_name[100];
 
-  // Restart write 
+  // Write restart
   int restart_write;
 
+  // Write configuration
+  int config_write, config_sample_file;
 };
 
 extern struct input in;

@@ -6,6 +6,7 @@
 #include "compute_order_parameter.h"
 #include "compute_widom_chem_pot.h"
 #include "moves.h"
+#include "io_config.h"
 #include "optimizer.h"
 #include "cavity_nvt.h"
 #include "analytic.h"
@@ -13,25 +14,37 @@
 // Cavity simulation for hard-spheres in the NVT ensemble
 void cavity_hs_nvt() {
 
-  // Simulation box
-  sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+  if (in.restart_read == 0){ // Read from input file
+
+    // Simulation box
+    sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+
+    // Particles
+    part_alloc();
+
+    // Initialize particle's positions
+    part_init();
+
+    // Set cavities to a distance within the allowed interval
+    double cavity_avedr = (in.cavity_maxdr + in.cavity_mindr)/ 2.0;
+    part[1][1] = part[0][1];
+    part[1][2] = part[0][2];
+    part[1][3] = part[0][3] + cavity_avedr;
+    if (part[1][3] > sim_box_info.lz) part[1][3] -= sim_box_info.lz;
+    else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
+
+    // Set-up random number generator (Marsenne-Twister)
+    rng_init();
+
+  }
+  else { // Read from restart file
+    read_restart(in.restart_name);
+  }
+
+  // Print simulation info on screen
   printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
-	 sim_box_info.ly, sim_box_info.lz);
-
-  // Particles
-  part_alloc();
+         sim_box_info.ly, sim_box_info.lz);
   printf("Number of particles: %d\n", part_info.NN);
-
-  // Initialize particle's positions
-  part_init();
-
-  // Set cavities to a distance within the allowed interval
-  double cavity_avedr = (in.cavity_maxdr + in.cavity_mindr)/ 2.0;
-  part[1][1] = part[0][1];
-  part[1][2] = part[0][2];
-  part[1][3] = part[0][3] + cavity_avedr;
-  if (part[1][3] > sim_box_info.lz) part[1][3] -= sim_box_info.lz;
-  else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
 
   // Initialize cavity interaction potential (0.5 is just a dummy distance)
   cavity_interaction(0.5, true);
@@ -41,9 +54,6 @@ void cavity_hs_nvt() {
 
   // Initialize cell lists
   cell_list_init();
-
-  // Set-up random number generator (Marsenne-Twister)
-  rng_init();
 
   // Optmize maximum displacement
   if (in.opt_flag == 1){
@@ -62,13 +72,13 @@ void cavity_hs_nvt() {
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
-  cavity_run_nvt(false);
+  cavity_run_nvt(false,0);
   printf("Equilibration completed.\n");
 
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  cavity_run_nvt(true);
+  cavity_run_nvt(true,in.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -92,7 +102,7 @@ void cavity_hs_nvt() {
 
 }
 
-void cavity_run_nvt(bool prod_flag){
+void cavity_run_nvt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
   bool cavity_init = true;
@@ -103,20 +113,7 @@ void cavity_run_nvt(bool prod_flag){
   else n_sweeps = in.sweep_eq;
   
   // Run MC simulation
-  for (int ii=0; ii<n_sweeps; ii++){
-
-    // Sweep
-    cavity_sweep_nvt();
-
-    if (prod_flag){
-      // Output distance between the cavities
-      if (in.cavity_sample_int > 0){
-        if (ii % in.cavity_sample_int == 0) {
-          cavity_dist_output(cavity_init);
-          if (cavity_init) cavity_init = false;
-        }
-      }
-    }
+  for (int ii=sweep_offset; ii<n_sweeps+sweep_offset; ii++){
 
     // Output on screen
     if (ii == 0){
@@ -127,6 +124,26 @@ void cavity_run_nvt(bool prod_flag){
       fflush(stdout);
     }
 
+    // Write restart file
+    if (in.restart_write > 0){
+      if (ii % in.restart_write == 0) {
+        write_restart(ii);
+      }
+    }
+
+    // Save samples for production runs
+    if (prod_flag){
+      // Output distance between the cavities
+      if (in.cavity_sample_int > 0){
+        if (ii % in.cavity_sample_int == 0) {
+          cavity_dist_output(cavity_init);
+          if (cavity_init) cavity_init = false;
+        }
+      }
+    }
+    
+    // Generate new configuration
+    cavity_sweep_nvt();
 
   }  
 

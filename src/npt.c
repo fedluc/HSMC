@@ -5,30 +5,40 @@
 #include "compute_press.h"
 #include "compute_order_parameter.h"
 #include "moves.h"
+#include "io_config.h"
 #include "optimizer.h"
 #include "npt.h"
 
 // Hard-sphere simulation in the NpT ensemble
 void hs_npt() {
 
-  // Initialize simulation box
-  sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+  if (in.restart_read == 0){ // Read from input file
 
-  // Pressure 
-  printf("Pressure: %.8f\n", in.press);
-
-  // Particles
-  part_alloc();
-  printf("Number of particles: %d\n", part_info.NN);
+    // Initialize simulation box
+    sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
   
-  // Initialize particle's positions
-  part_init();
+    // Particles
+    part_alloc();
+
+    // Initialize particle's positions
+    part_init();
+
+    // Set-up random number generator (Marsenne-Twister)
+    rng_init();
+
+  }
+  else { // Read from restart file
+    read_restart(in.restart_name);
+  }
+
+  // Print simulation info on screen
+  printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
+         sim_box_info.ly, sim_box_info.lz);
+  printf("Number of particles: %d\n", part_info.NN);
+  printf("Pressure: %.8f\n", in.press);
 
   // Initialize cell lists
   cell_list_init();
-
-  // Set-up random number generator (Marsenne-Twister)
-  rng_init();
 
   // Optmize maximum displacement
   if (in.opt_flag == 1){
@@ -52,13 +62,13 @@ void hs_npt() {
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
-  run_npt(false);
+  run_npt(false,0);
   printf("Equilibration completed.\n");
 
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  run_npt(true);
+  run_npt(true,in.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -85,7 +95,7 @@ void hs_npt() {
 }
 
 
-void run_npt(bool prod_flag){
+void run_npt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
   bool presst_init = true, ql_ave_init = true;
@@ -95,12 +105,34 @@ void run_npt(bool prod_flag){
   else n_sweeps = in.sweep_eq;
 
   // Run MC simulation
-  for (int ii=0; ii<n_sweeps; ii++){
+  for (int ii=sweep_offset; ii<n_sweeps+sweep_offset; ii++){
 
-    // Sweep
-    sweep_npt();
+    // Output on screen
+    if (ii == 0){
+      printf("Sweep number  Density\n");
+    }
+    if (ii % in.output_int == 0) {
+      printf("%d  %.8f\n", ii,in.rho);
+      fflush(stdout);
+    }
 
+    // Write restart file
+    if (in.restart_write > 0){
+      if (ii % in.restart_write == 0) {
+        write_restart(ii);
+      }
+    }
+
+    
+    // Save samples for production runs
     if (prod_flag){      
+
+      // Write configuration
+      if (in.config_write > 0){
+	if (ii % in.config_write == 0) {
+	  write_config(ii);
+	}
+      }
 
       // Compute pressure via thermodynamic route
       if (in.presst_sample_int > 0){
@@ -121,15 +153,8 @@ void run_npt(bool prod_flag){
 
     }
 
-    // Output on screen
-    if (ii == 0){
-      printf("Sweep number  Density\n");
-    }
-    if (ii % in.output_int == 0) {
-      printf("%d  %.8f\n", ii,in.rho);
-      fflush(stdout);
-    }
-
+    // Generate a new configuration
+    sweep_npt();
 
   }  
 

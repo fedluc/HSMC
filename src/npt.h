@@ -3,7 +3,7 @@
 
 void hs_npt();
 
-void run_npt(bool prod_flag);
+void run_npt(bool prod_flag, int sweep_offset);
 
 void sweep_npt();
 

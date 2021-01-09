@@ -18,12 +18,9 @@ void hs_nvt() {
 
     // Simulation box
     sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
-    printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
-	 sim_box_info.ly, sim_box_info.lz);
 
     // Particles
     part_alloc();
-    printf("Number of particles: %d\n", part_info.NN);
 
     // Initialize particle's positions
     part_init();
@@ -36,6 +33,12 @@ void hs_nvt() {
   else { // Read from restart file
     read_restart(in.restart_name);
   }
+
+  // Print simulation info on screen
+  printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
+	 sim_box_info.ly, sim_box_info.lz);
+  printf("Number of particles: %d\n", part_info.NN);
+
 
   // Initialize cell lists
   cell_list_init();
@@ -101,22 +104,30 @@ void run_nvt(bool prod_flag, int sweep_offset){
   // Run MC simulation
   for (int ii=sweep_offset; ii<n_sweeps+sweep_offset; ii++){
 
-    // Sweep
-    sweep_nvt();
+    // Output on screen
+    if (ii == sweep_offset){
+      printf("Sweep number\n");
+    }
+    if (ii % in.output_int == 0) {
+      printf("%d\n", ii);
+      fflush(stdout);
+    }
 
     // Write restart file
     if (in.restart_write > 0){
       if (ii % in.restart_write == 0) {
 	write_restart(ii);
       }
-    }
+    }  
 
     // Save samples for production runs
     if (prod_flag){
 
       // Write configuration
-      if (ii % 1024 == 0){
-	write_config(ii);
+      if (in.config_write > 0){
+        if (ii % in.config_write == 0) {
+          write_config(ii);
+        }
       }
 
       // Compute pressure via virial route
@@ -153,16 +164,8 @@ void run_nvt(bool prod_flag, int sweep_offset){
 
     }
 
-    // Output on screen
-    if (ii == 0){
-      printf("Sweep number\n");
-    }
-    if (ii % in.output_int == 0) {
-      printf("%d\n", ii);
-      fflush(stdout);
-    }
-
-
+    // Generate new configuration
+    sweep_nvt();
 
   }  
 
