@@ -14,7 +14,7 @@ int acc_vol_moves, rej_vol_moves;
 // ------ Move one particle ------
 void part_move(){
 
-  int r_idx;
+  int r_idx, cell_idx_old;
   double r_x, r_y, r_z;
   double x_old, y_old, z_old;
 
@@ -25,11 +25,12 @@ void part_move(){
   r_x = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
   r_y = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
   r_z = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-
+ 
   // Store old coordinates (if the move gets rejected)
   x_old = part[r_idx][1];
   y_old = part[r_idx][2];
   z_old = part[r_idx][3];
+  cell_idx_old = cell_part_idx(r_idx);
 
   // Proposed move
   part[r_idx][1] += (r_x - 0.5)*in.dr_max;
@@ -53,10 +54,12 @@ void part_move(){
     rej_part_moves+=1;
   }
   else {
+    // Update cell list if the particle left its original box
+    if (cell_part_idx(r_idx) != cell_idx_old) {
+      cell_list_update();
+    }
     // Accept move
     acc_part_moves+=1;
-    // Update cell list
-    cell_list_update();
   }
 
 }
@@ -122,7 +125,7 @@ void vol_move(){
 	else if (part[ii][3] < 0.0)        part[ii][3] += sim_box_info.lz;
       }
       // Update cell-list (not sure if necessary)
-      cell_list_update();
+      // cell_list_update();
     }
   }
   else{
@@ -136,7 +139,7 @@ void vol_move(){
 // ------ Check overlap between particles ------
 bool check_overlap(int idx_ref,
                    double sf_x, double sf_y, double sf_z){
-  
+
   // Variable declaration
   int cell_idx, neigh_idx, part_idx;
   double dr;
@@ -168,6 +171,7 @@ bool check_overlap(int idx_ref,
 
   }
 
+  // End timing
   return false;
 
 

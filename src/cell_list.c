@@ -75,6 +75,7 @@ void cell_list_update(){
   
 }
 
+
 int cell_part_idx(int id){
 
   return  (int)(part[id][1]/sim_box_info.cell_size)*sim_box_info.cell_x*sim_box_info.cell_x 

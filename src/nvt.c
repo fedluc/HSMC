@@ -80,7 +80,7 @@ void hs_nvt() {
   // Stop timing
   printf("Elapsed time: %f seconds\n",
   	 (double)(end - start) / CLOCKS_PER_SEC);
-  
+
   // Free memory
   free(part);
   gsl_rng_free(rng_mt);

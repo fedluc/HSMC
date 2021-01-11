@@ -7,6 +7,7 @@ extern int part_moves, vol_moves;
 extern int acc_part_moves, rej_part_moves;
 extern int acc_vol_moves, rej_vol_moves;
 
+
 void rng_init();
 
 void part_move();

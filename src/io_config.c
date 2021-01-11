@@ -119,6 +119,21 @@ void write_config(int sweep){
     exit(EXIT_FAILURE);
   }
 
+  // Write configuration
+  gzprintf(fid, "# Sweep number\n");
+  gzprintf(fid, "%d\n", sweep);
+  gzprintf(fid, "# Number of particles\n");
+  gzprintf(fid, "%d\n", part_info.NN);
+  gzprintf(fid, "# Simulation box size\n");
+  gzprintf(fid, "%.8f\n", part_info.NN);
+  gzprintf(fid, "%.8f\n", part_info.NN);
+  gzprintf(fid, "%.8f\n", part_info.NN);
+  gzprintf(fid, "# Configuration\n");
+  for (int ii=0; ii<part_info.NN; ii++){
+    gzprintf(fid, "%d %.8f %.8f %.8f\n", part[ii][0], part[ii][1],
+	    part[ii][2],part[ii][3]);
+  }
+
   // Close binary file
   gzclose(fid);
 
