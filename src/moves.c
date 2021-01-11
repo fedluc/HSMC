@@ -143,6 +143,7 @@ bool check_overlap(int idx_ref,
 
   // Variable declaration
   int cell_idx, neigh_idx, part_idx;
+  int n_part_cell;
   double dr;
 
   // Cell that contains the particle
@@ -154,23 +155,20 @@ bool check_overlap(int idx_ref,
     neigh_idx = cl_neigh[cell_idx][ii];
     
     // Loop over the particles in the neighboring cell
-    if (cl_part_cell[neigh_idx][0] > 0){
-      int jj = 1;
-      part_idx = cl_part_cell[neigh_idx][jj];
-      while (part_idx >= 0){	
+    n_part_cell = cl_part_cell[neigh_idx][0];
+    if (n_part_cell > 0){
+      for (int jj=1; jj<=n_part_cell; jj++){	
 	
+	// Particle index
+	part_idx = cl_part_cell[neigh_idx][jj];
+
 	//Compute inter-particle distance
 	dr = compute_dist(idx_ref, part_idx, sf_x, sf_y, sf_z);
 	
 	// Signal that there is overlap
-	if (dr < 1.0 && (part_idx-1) != idx_ref){
+	if (dr < 1.0 && part_idx != idx_ref){
 		return true;
 	}
-	
-	// Update index
-	jj++;
-	part_idx = cl_part_cell[neigh_idx][jj];
-
       }
     }
 

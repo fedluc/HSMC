@@ -22,8 +22,8 @@ void cell_list_init(){
 
   // Number of cells
   cell_num_x = (int)floor(sim_box_info.lx);
-  cell_num_y = (int)floor(sim_box_info.lx);
-  cell_num_z = (int)floor(sim_box_info.lx);
+  cell_num_y = (int)floor(sim_box_info.ly);
+  cell_num_z = (int)floor(sim_box_info.lz);
   cell_num_tot = cell_num_x * cell_num_y * cell_num_z;
 
   // Cell size
@@ -123,7 +123,6 @@ void cell_list_del(int cell_idx, int part_idx){
       idx_remove = ii;
       cl_part_cell[cell_idx][ii] = -1;
       shift_flag = true;
-      break;
     }
     if (shift_flag && ii > idx_remove) { 
       cl_part_cell[cell_idx][ii-1] = cl_part_cell[cell_idx][ii];
