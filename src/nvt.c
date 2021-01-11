@@ -111,22 +111,22 @@ void run_nvt(bool prod_flag, int sweep_offset){
       fflush(stdout);
     }
 
-    /* // Write restart file */
-    /* if (in.restart_write > 0){ */
-    /*   if (ii % in.restart_write == 0) { */
-    /* 	write_restart(ii); */
-    /*   } */
-    /* }   */
+    // Write restart file
+    if (in.restart_write > 0){
+      if (ii % in.restart_write == 0) {
+    	write_restart(ii);
+      }
+    }
 
-    /* // Save samples for production runs */
-    /* if (prod_flag){ */
+    // Save samples for production runs
+    if (prod_flag){
 
-    /*   // Write configuration */
-    /*   if (in.config_write > 0){ */
-    /*     if (ii % in.config_write == 0) { */
-    /*       write_config(ii); */
-    /*     } */
-    /*   } */
+      // Write configuration
+      if (100 > 0){
+        if (ii % 100 == 0) {
+          write_config(ii);
+        }
+      }
 
     /*   // Compute pressure via virial route */
     /*   if (in.pressv_sample_int > 0){ */
@@ -160,7 +160,7 @@ void run_nvt(bool prod_flag, int sweep_offset){
     /*   	} */
     /*   } */
 
-    /* } */
+    }
 
     // Generate new configuration
     sweep_nvt();
