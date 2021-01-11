@@ -124,8 +124,8 @@ void run_nvt(bool prod_flag, int sweep_offset){
     if (prod_flag){
 
       // Write configuration
-      if (in.config_write > 0){
-        if (ii % in.config_write == 0) {
+      if (100 > 0){
+        if (ii % 100 == 0) {
           write_config(ii);
         }
       }

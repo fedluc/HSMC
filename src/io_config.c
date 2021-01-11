@@ -125,13 +125,13 @@ void write_config(int sweep){
   gzprintf(fid, "# Number of particles\n");
   gzprintf(fid, "%d\n", part_info.NN);
   gzprintf(fid, "# Simulation box size\n");
-  gzprintf(fid, "%.8f\n", part_info.NN);
-  gzprintf(fid, "%.8f\n", part_info.NN);
-  gzprintf(fid, "%.8f\n", part_info.NN);
+  gzprintf(fid, "%.8f\n", sim_box_info.lx);
+  gzprintf(fid, "%.8f\n", sim_box_info.ly);
+  gzprintf(fid, "%.8f\n", sim_box_info.lz);
   gzprintf(fid, "# Configuration\n");
   for (int ii=0; ii<part_info.NN; ii++){
-    gzprintf(fid, "%d %.8f %.8f %.8f\n", part[ii][0], part[ii][1],
-	    part[ii][2],part[ii][3]);
+    gzprintf(fid, "%d %.8f %.8f %.8f\n", (int)part[ii][0], part[ii][1],
+	    part[ii][2], part[ii][3]);
   }
 
   // Close binary file
