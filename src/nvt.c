@@ -3,12 +3,12 @@
 #include "init.h"
 #include "read_input.h"
 #include "cell_list.h"
-#include "compute_press.h"
-#include "compute_order_parameter.h"
-#include "compute_widom_chem_pot.h"
+//#include "compute_press.h"
+//#include "compute_order_parameter.h"
+//#include "compute_widom_chem_pot.h"
 #include "moves.h"
 #include "io_config.h"
-#include "optimizer.h"
+//#include "optimizer.h"
 #include "nvt.h"
 
 // Hard-sphere simulation in the NVT ensemble
@@ -24,14 +24,13 @@ void hs_nvt() {
 
     // Initialize particle's positions
     part_init();
-
     
     // Set-up random number generator (Marsenne-Twister)
     rng_init();
 
   }
   else { // Read from restart file
-    read_restart(in.restart_name);
+    //read_restart(in.restart_name);
   }
 
   // Print simulation info on screen
@@ -44,10 +43,10 @@ void hs_nvt() {
   cell_list_init();
 
   // Optmize maximum displacement
-  if (in.opt_flag == 1){
-    opt_nvt();
-    part_init();
-  }
+  /* if (in.opt_flag == 1){ */
+  /*   opt_nvt(); */
+  /*   part_init(); */
+  /* } */
 
   // Start timing
   clock_t start = clock();
@@ -84,9 +83,8 @@ void hs_nvt() {
   // Free memory
   free(part);
   gsl_rng_free(rng_mt);
-  free(cl_neigh);
-  free(cl_head);
-  free(cl_link);
+  free(cl_neigh); 
+  free(cl_part_cell);
 
 }
 
@@ -113,56 +111,56 @@ void run_nvt(bool prod_flag, int sweep_offset){
       fflush(stdout);
     }
 
-    // Write restart file
-    if (in.restart_write > 0){
-      if (ii % in.restart_write == 0) {
-	write_restart(ii);
-      }
-    }  
+    /* // Write restart file */
+    /* if (in.restart_write > 0){ */
+    /*   if (ii % in.restart_write == 0) { */
+    /* 	write_restart(ii); */
+    /*   } */
+    /* }   */
 
-    // Save samples for production runs
-    if (prod_flag){
+    /* // Save samples for production runs */
+    /* if (prod_flag){ */
 
-      // Write configuration
-      if (in.config_write > 0){
-        if (ii % in.config_write == 0) {
-          write_config(ii);
-        }
-      }
+    /*   // Write configuration */
+    /*   if (in.config_write > 0){ */
+    /*     if (ii % in.config_write == 0) { */
+    /*       write_config(ii); */
+    /*     } */
+    /*   } */
 
-      // Compute pressure via virial route
-      if (in.pressv_sample_int > 0){
-      	if (ii % in.pressv_sample_int == 0) {
-      	  compute_pressv(pressv_init);
-      	  if (pressv_init) pressv_init = false;
-      	}
-      }
+    /*   // Compute pressure via virial route */
+    /*   if (in.pressv_sample_int > 0){ */
+    /*   	if (ii % in.pressv_sample_int == 0) { */
+    /*   	  compute_pressv(pressv_init); */
+    /*   	  if (pressv_init) pressv_init = false; */
+    /*   	} */
+    /*   } */
 
-      // Compute pressure via thermodynamic route
-      if (in.presst_sample_int > 0){
-      	if (ii % in.presst_sample_int == 0) {
-      	  compute_presst(presst_init);
-      	  if (presst_init) presst_init = false;
-      	}
-      }
+    /*   // Compute pressure via thermodynamic route */
+    /*   if (in.presst_sample_int > 0){ */
+    /*   	if (ii % in.presst_sample_int == 0) { */
+    /*   	  compute_presst(presst_init); */
+    /*   	  if (presst_init) presst_init = false; */
+    /*   	} */
+    /*   } */
 
-      // Compute order parameter
-      if (in.ql_sample_int > 0){
-      	if (ii % in.ql_sample_int == 0) {
-      	  compute_op(ql_ave_init);
-      	  if (ql_ave_init) ql_ave_init = false;
-      	}
-      }
+    /*   // Compute order parameter */
+    /*   if (in.ql_sample_int > 0){ */
+    /*   	if (ii % in.ql_sample_int == 0) { */
+    /*   	  compute_op(ql_ave_init); */
+    /*   	  if (ql_ave_init) ql_ave_init = false; */
+    /*   	} */
+    /*   } */
 
-      // Compute chemical potential via Widom insertions
-      if (in.mu_sample_int > 0){
-      	if (ii % in.mu_sample_int == 0) {
-      	  compute_mu(mu_ave_init);
-      	  if (mu_ave_init) mu_ave_init = false;
-      	}
-      }
+    /*   // Compute chemical potential via Widom insertions */
+    /*   if (in.mu_sample_int > 0){ */
+    /*   	if (ii % in.mu_sample_int == 0) { */
+    /*   	  compute_mu(mu_ave_init); */
+    /*   	  if (mu_ave_init) mu_ave_init = false; */
+    /*   	} */
+    /*   } */
 
-    }
+    /* } */
 
     // Generate new configuration
     sweep_nvt();
