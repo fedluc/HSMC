@@ -30,7 +30,7 @@ void hs_nvt() {
 
   }
   else { // Read from restart file
-    //read_restart(in.restart_name);
+    read_restart(in.restart_name);
   }
 
   // Print simulation info on screen
