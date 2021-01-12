@@ -15,5 +15,7 @@ void cell_list_check();
 int cell_part_idx(int id);
 void cell_neigh_init();
 void neigh_id(int ref_idx_x, int ref_idx_y, int ref_idx_z);
+void get_cell_list_info(int *num_x, int *num_y, int *num_z,
+                        double *size_x, double *size_y, double *size_z);
 
 #endif

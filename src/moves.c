@@ -66,75 +66,75 @@ void part_move(){
 }
 
 // ------ Change volume (only for NpT) ------
-/* void vol_move(){ */
+void vol_move(){
 
-/*   double r_dv, r_acc; */
-/*   double log_vol_new, vol_new, vol_ratio, sf; */
-/*   double boltz_fact; */
-/*   bool overlap = false; */
+  double r_dv, r_acc;
+  double log_vol_new, vol_new, vol_ratio, sf;
+  double boltz_fact;
+  bool overlap = false;
 
-/*   // Random number for volume perturbation */
-/*   r_dv = (double)gsl_rng_get(rng_mt)/(double)r_num_max; */
+  // Random number for volume perturbation
+  r_dv = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
 
-/*   // Proposed volume move */
-/*   log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*in.dv_max; */
-/*   vol_new = exp(log_vol_new); */
+  // Proposed volume move
+  log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*in.dv_max;
+  vol_new = exp(log_vol_new);
 
-/*   // Volume ratio */
-/*   vol_ratio = vol_new/sim_box_info.vol; */
+  // Volume ratio
+  vol_ratio = vol_new/sim_box_info.vol;
 
-/*   // Scaling factor for coordinates and simulation box */
-/*   sf = pow(vol_ratio, 1./3.); */
+  // Scaling factor for coordinates and simulation box
+  sf = pow(vol_ratio, 1./3.);
      
-/*   // Check if there is overlap with re-scaled coordinates */
-/*   for (int ii=0; ii<part_info.NN; ii++){ */
+  // Check if there is overlap with re-scaled coordinates
+  for (int ii=0; ii<part_info.NN; ii++){
 
-/*     overlap = check_overlap(ii, sf, sf, sf); */
+    overlap = check_overlap(ii, sf, sf, sf);
 
-/*     if (overlap) break; */
+    if (overlap) break;
 
-/*   } */
+  }
 
-/*   // If there is no overlap accept move according to npt acceptance rule */
-/*   if (!overlap){ */
+  // If there is no overlap accept move according to npt acceptance rule
+  if (!overlap){
 
-/*     boltz_fact = exp(in.press*(sim_box_info.vol - vol_new) +  */
-/* 		     (part_info.NN + 1)*log(vol_ratio)); */
-/*     r_acc = (double)gsl_rng_get(rng_mt)/(double)r_num_max; */
+    boltz_fact = exp(in.press*(sim_box_info.vol - vol_new) +
+		     (part_info.NN + 1)*log(vol_ratio));
+    r_acc = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
     
-/*     if (r_acc >= boltz_fact){ */
-/*       // Reject move */
-/*       rej_vol_moves+=1; */
-/*     } */
-/*     else{ */
-/*       // Accept move */
-/*       acc_vol_moves+=1; */
-/*       // Update density */
-/*       in.rho = part_info.NN / vol_new; */
-/*       // Update the simulation box */
-/*       sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho); */
-/*       // Re-scale particle's positions */
-/*       for (int ii=0; ii<part_info.NN; ii++){ */
-/* 	part[ii][1] *= sf; */
-/* 	part[ii][2] *= sf; */
-/* 	part[ii][3] *= sf; */
-/* 	if (part[ii][1] > sim_box_info.lx) part[ii][1] -= sim_box_info.lx; */
-/* 	else if (part[ii][1] < 0.0)        part[ii][1] += sim_box_info.lx; */
-/* 	if (part[ii][2] > sim_box_info.ly) part[ii][2] -= sim_box_info.ly; */
-/* 	else if (part[ii][2] < 0.0)        part[ii][2] += sim_box_info.ly; */
-/* 	if (part[ii][3] > sim_box_info.lz) part[ii][3] -= sim_box_info.lz; */
-/* 	else if (part[ii][3] < 0.0)        part[ii][3] += sim_box_info.lz; */
-/*       } */
-/*       // Update cell-list (not sure if necessary) */
-/*       // cell_list_update(); */
-/*     } */
-/*   } */
-/*   else{ */
-/*     // Reject move */
-/*     rej_vol_moves+=1; */
-/*   } */
+    if (r_acc >= boltz_fact){
+      // Reject move
+      rej_vol_moves+=1;
+    }
+    else{
+      // Accept move
+      acc_vol_moves+=1;
+      // Update density
+      in.rho = part_info.NN / vol_new;
+      // Update the simulation box
+      sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+      // Re-scale particle's positions
+      for (int ii=0; ii<part_info.NN; ii++){
+	part[ii][1] *= sf;
+	part[ii][2] *= sf;
+	part[ii][3] *= sf;
+	if (part[ii][1] > sim_box_info.lx) part[ii][1] -= sim_box_info.lx;
+	else if (part[ii][1] < 0.0)        part[ii][1] += sim_box_info.lx;
+	if (part[ii][2] > sim_box_info.ly) part[ii][2] -= sim_box_info.ly;
+	else if (part[ii][2] < 0.0)        part[ii][2] += sim_box_info.ly;
+	if (part[ii][3] > sim_box_info.lz) part[ii][3] -= sim_box_info.lz;
+	else if (part[ii][3] < 0.0)        part[ii][3] += sim_box_info.lz;
+      }
+      // Construct new  cell-list (the simulation box has changed)
+      cell_list_new();
+    }
+  }
+  else{
+    // Reject move
+    rej_vol_moves+=1;
+  }
 
-/* } */
+}
 
 
 // ------ Check overlap between particles ------
@@ -174,7 +174,6 @@ bool check_overlap(int idx_ref,
 
   }
 
-  // End timing
   return false;
 
 

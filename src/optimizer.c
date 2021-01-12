@@ -5,7 +5,7 @@
 #include "moves.h"
 #include "npt.h"
 #include "nvt.h"
-#include "cavity_nvt.h"
+//#include "cavity_nvt.h"
 #include "optimizer.h"
 
 
@@ -155,58 +155,58 @@ void get_sample_npt(double *dr, double *acc_ratio_part,
 }
 
 
-void opt_cavity_nvt(){
+/* void opt_cavity_nvt(){ */
 
-  int sample_iter = in.opt_sweeps/in.opt_samples;
-  double acc_ratio_1, acc_ratio_2, dr_1, dr_2;
+/*   int sample_iter = in.opt_sweeps/in.opt_samples; */
+/*   double acc_ratio_1, acc_ratio_2, dr_1, dr_2; */
 
-  printf("---------------------------------------------------\n");
-  printf("Maximum displacement optimization started ...\n");
-  printf("Sweeps for optimization: %d\n", in.opt_sweeps);
-  printf("Number of samples: %d\n", in.opt_samples);
+/*   printf("---------------------------------------------------\n"); */
+/*   printf("Maximum displacement optimization started ...\n"); */
+/*   printf("Sweeps for optimization: %d\n", in.opt_sweeps); */
+/*   printf("Number of samples: %d\n", in.opt_samples); */
 
-  // Collect two samples to get started
-  get_sample_cavity_nvt(&dr_1, &acc_ratio_1, sample_iter);
-  if (acc_ratio_1 > in.opt_part_target){
-    in.dr_max *= 2;
-  }
-  else {
-    in.dr_max /= 2;
-  }
-  get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter);
+/*   // Collect two samples to get started */
+/*   get_sample_cavity_nvt(&dr_1, &acc_ratio_1, sample_iter); */
+/*   if (acc_ratio_1 > in.opt_part_target){ */
+/*     in.dr_max *= 2; */
+/*   } */
+/*   else { */
+/*     in.dr_max /= 2; */
+/*   } */
+/*   get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter); */
 
 
-  // Secant-method to find optimum value
-  for (int ii=0; ii<in.opt_samples; ii++){
+/*   // Secant-method to find optimum value */
+/*   for (int ii=0; ii<in.opt_samples; ii++){ */
 
-    in.dr_max = dr_2 - (acc_ratio_2 - in.opt_part_target) * (dr_2 - dr_1)/(acc_ratio_2 - acc_ratio_1);
-    if (in.dr_max > 1.0) {
-      in.dr_max = 1.0;
-    }
-    else if (in.dr_max <= 0.0) {
-      printf("Error: maximum displacement is zero!\n");
-      exit(EXIT_FAILURE);
-    }
-    dr_1 = dr_2;
-    acc_ratio_1 = acc_ratio_2;
-    get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter);
-  }
+/*     in.dr_max = dr_2 - (acc_ratio_2 - in.opt_part_target) * (dr_2 - dr_1)/(acc_ratio_2 - acc_ratio_1); */
+/*     if (in.dr_max > 1.0) { */
+/*       in.dr_max = 1.0; */
+/*     } */
+/*     else if (in.dr_max <= 0.0) { */
+/*       printf("Error: maximum displacement is zero!\n"); */
+/*       exit(EXIT_FAILURE); */
+/*     } */
+/*     dr_1 = dr_2; */
+/*     acc_ratio_1 = acc_ratio_2; */
+/*     get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter); */
+/*   } */
 
-  printf("Optimal maximum displacement: %.8f\n", in.dr_max);
-  printf("Acceptance ratio: %.8f \n", acc_ratio_2);
-  printf("Maximum displacement optimization completed\n");
+/*   printf("Optimal maximum displacement: %.8f\n", in.dr_max); */
+/*   printf("Acceptance ratio: %.8f \n", acc_ratio_2); */
+/*   printf("Maximum displacement optimization completed\n"); */
 
-}
+/* } */
 
-void get_sample_cavity_nvt(double *dr, double *acc_ratio, int sample_iter){
+/* void get_sample_cavity_nvt(double *dr, double *acc_ratio, int sample_iter){ */
 
-  part_moves = 0;
-  acc_part_moves=0;
-  rej_part_moves=0;
-  for (int ii=0; ii<sample_iter; ii++){
-    cavity_sweep_nvt();
-  }
-  *dr = in.dr_max;
-  *acc_ratio = (double)acc_part_moves/((double)part_moves);
+/*   part_moves = 0; */
+/*   acc_part_moves=0; */
+/*   rej_part_moves=0; */
+/*   for (int ii=0; ii<sample_iter; ii++){ */
+/*     cavity_sweep_nvt(); */
+/*   } */
+/*   *dr = in.dr_max; */
+/*   *acc_ratio = (double)acc_part_moves/((double)part_moves); */
 
-}
+/* } */

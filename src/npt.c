@@ -89,8 +89,7 @@ void hs_npt() {
   free(part);
   gsl_rng_free(rng_mt);
   free(cl_neigh);
-  free(cl_head);
-  free(cl_link);
+  free(cl_part_cell);
 
 }
 
@@ -128,18 +127,18 @@ void run_npt(bool prod_flag, int sweep_offset){
     if (prod_flag){      
 
       // Write configuration
-      if (in.config_write > 0){
-	if (ii % in.config_write == 0) {
+      if (100 > 0){
+	if (ii % 100 == 0) {
 	  write_config(ii);
 	}
       }
 
       // Compute pressure via thermodynamic route
       if (in.presst_sample_int > 0){
-	if (ii % in.presst_sample_int == 0) {
-	  compute_presst(presst_init);
-	  if (presst_init) presst_init = false;
-	}
+      	if (ii % in.presst_sample_int == 0) {
+      	  compute_presst(presst_init);
+      	  if (presst_init) presst_init = false;
+      	}
       }
 
       // Compute order parameter

@@ -4,7 +4,7 @@
 #include <argp.h>
 #include "read_input.h"
 #include "nvt.h"
-//#include "npt.h"
+#include "npt.h"
 //#include "cavity_nvt.h"
 
 // ----------------------------------------
@@ -115,7 +115,7 @@ int main (int argc, char **argv){
     // Select which type of simulation to run
     if (in.press > 0){
       // NpT simulation
-      //hs_npt();
+      hs_npt();
     }
     else if (in.cavity_pcav > 0){
       // NVT cavity simulation

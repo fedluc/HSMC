@@ -14,9 +14,9 @@ static int cell_num_tot;
 static int cell_num_x;
 static int cell_num_y;
 static int cell_num_z;
-static double cl_size_x;
-static double cl_size_y;
-static double cl_size_z;
+static double cell_size_x;
+static double cell_size_y;
+static double cell_size_z;
 
 void cell_list_init(){
 
@@ -24,12 +24,10 @@ void cell_list_init(){
   cell_num_x = (int)floor(sim_box_info.lx);
   cell_num_y = (int)floor(sim_box_info.ly);
   cell_num_z = (int)floor(sim_box_info.lz);
+  /* cell_num_x =  sim_box_info.cell_x; */
+  /* cell_num_y =  sim_box_info.cell_y; */
+  /* cell_num_z =  sim_box_info.cell_z; */
   cell_num_tot = cell_num_x * cell_num_y * cell_num_z;
-
-  // Cell size
-  cl_size_x = sim_box_info.lx/cell_num_x;
-  cl_size_y = sim_box_info.ly/cell_num_y;
-  cl_size_z = sim_box_info.lz/cell_num_z;
 
   // Number of neighbor per cell
   cl_neigh_num = 27;
@@ -66,6 +64,16 @@ void cell_list_alloc(){
 }
 
 void cell_list_new(){
+
+  // Cell size
+  cell_size_x = sim_box_info.lx/cell_num_x;
+  cell_size_y = sim_box_info.ly/cell_num_y;
+  cell_size_z = sim_box_info.lz/cell_num_z;
+
+  if (cell_size_x < 1.0 || cell_size_y < 1.0 || cell_size_z < 1.0) {
+    printf("ERROR: size of cells in cell list is smaller than the size of the particles\n");
+    exit(EXIT_FAILURE);
+  }
 
   // Initialize the cell lists
   for (int ii=0; ii<cell_num_tot; ii++){
@@ -151,9 +159,9 @@ void cell_list_check(int cell_idx){
 
 int cell_part_idx(int id){
 
-  return  (int)(part[id][1]/cl_size_x)*cell_num_x*cell_num_x 
-          + (int)(part[id][2]/cl_size_y)*cell_num_y 
-          + (int)(part[id][3]/cl_size_z);
+  return  (int)(part[id][1]/cell_size_x)*cell_num_x*cell_num_x 
+          + (int)(part[id][2]/cell_size_y)*cell_num_y 
+          + (int)(part[id][3]/cell_size_z);
 
 }
 
@@ -204,4 +212,15 @@ void neigh_id(int ref_idx_x, int ref_idx_y, int ref_idx_z){
     }
   } 
     
+}
+
+void get_cell_list_info(int *num_x, int *num_y, int *num_z,
+			double *size_x, double *size_y, double *size_z){
+  *num_x = cell_num_x;
+  *num_y = cell_num_y;
+  *num_z = cell_num_z;
+  *size_x = cell_size_x;
+  *size_y = cell_size_y;
+  *size_z = cell_size_z;
+
 }

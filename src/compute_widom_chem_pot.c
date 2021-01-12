@@ -12,6 +12,14 @@ static double r_x, r_y, r_z;
 static double mu;
 static int wtest;
 
+// Variables to assign the virtual particles to the cell lists
+static int cell_num_x;
+static int cell_num_y;
+static int cell_num_z;
+static double cell_size_x;
+static double cell_size_y;
+static double cell_size_z;
+
 void compute_mu(bool init){
 
   // Compute the chemical potential via widom insertion method
@@ -26,6 +34,10 @@ void widom_insertion(){
 
   // Initialize insertion counter
   wtest = 0;
+
+  // Size of the cell list
+  get_cell_list_info(&cell_num_x, &cell_num_y, &cell_num_z,
+		     &cell_size_x, &cell_size_y, &cell_size_z);
 
   // Perform the insertions prescribed in input
   for (int ii=0; ii<in.mu_insertions; ii++){
@@ -65,34 +77,36 @@ bool widom_check_overlap(){
   
   // Variable declaration
   int cell_idx, neigh_idx, part_idx;
+  int n_part_cell;
   double dr;
 
   // Cell that contains the virtual particle
   cell_idx = widom_cell_part_idx();
-    
+
   // Loop over the neighboring cells
   for (int ii=0; ii<cl_neigh_num; ii++){
 
     neigh_idx = cl_neigh[cell_idx][ii];
-    part_idx = cl_head[neigh_idx];
 
-    // Loop over the particles in the neighboring cells
-    while (part_idx > 0){
-      
-      // Compute inter-particle distance
-      dr = widom_compute_dist(part_idx-1);
+    // Loop over the particles in the neighboring cell
+    n_part_cell = cl_part_cell[neigh_idx][0];
+    if (n_part_cell > 0){
+      for (int jj=1; jj<=n_part_cell; jj++){
 
-      // Signal that there is overlap
-      if (dr < 1.0){
-	return true;
+        // Particle index
+        part_idx = cl_part_cell[neigh_idx][jj];
+
+        //Compute inter-particle distance
+        dr = widom_compute_dist(part_idx);
+
+        // Signal that there is overlap
+        if (dr < 1.0){
+	  return true;
+        }
       }
-
-      // Update index
-      part_idx = cl_link[part_idx];
-
     }
-
   }
+
 
   return false;
 
@@ -101,9 +115,9 @@ bool widom_check_overlap(){
 
 int widom_cell_part_idx(){
 
-  return  (int)(r_x/sim_box_info.cell_size)*sim_box_info.cell_x*sim_box_info.cell_x
-    + (int)(r_y/sim_box_info.cell_size)*sim_box_info.cell_y
-    + (int)(r_z/sim_box_info.cell_size);
+  return  (int)(r_x/cell_size_x)*cell_num_x*cell_num_x
+    + (int)(r_y/cell_size_y)*cell_num_y
+    + (int)(r_z/cell_size_z);
 
 }
 
