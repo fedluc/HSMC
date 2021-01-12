@@ -27,6 +27,8 @@ void print_example(){
     "# 1: simple cubic, 1 particle per cell\n"
     "# 2: face-centered cubic, 4 particles per cell\n"
     "type 2\n\n"
+    "# Neighbor list (minumum size of cell list, default 1.0)\n"
+    "neigh_list 1.05\n\n"
     "# Maximum displacement for particles moves\n"
     "dr_max 0.05\n\n"
     "# Parameters for NpT calculations (pressure, maximum volume deformation\n"
@@ -83,7 +85,8 @@ void read_input_file(char *filename){
   in.ny = 0;
   in.nz = 0;
   in.type = 0;
-  in.nx = 0;
+  in.neigh_dr = 1.0;
+  in.neigh_max_part = 10;
   in.dr_max = 0;
   in.sweep_eq = 0;
   in.sweep_stat = 0;
@@ -173,6 +176,14 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
 	  in.type = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"neigh_list") == 0 || strcmp(key,"neigh_list\n") == 0){
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  in.neigh_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }

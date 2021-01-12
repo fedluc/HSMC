@@ -9,6 +9,9 @@ struct input {
   // Number of cells
   int nx, ny, nz, type;
 
+  // Parameters for neighbor list
+  double neigh_dr;
+
   // Maximum displacement
   double dr_max;
 
