@@ -52,11 +52,13 @@ void print_example(){
     "# saving interval, potential resolution)\n"
     "cavity 0.1 1.2 0.0 4 0.01\n\n"
     "# Seed for random number generator\n"
-    "seed 124787"
+    "seed 124787\n\n"
     "# Write restart data (saving interval)\n"
     "restart_write 1024\n\n"
     "# Read restart data (activation flag (0 or 1), name with restart file\n"
     "# restart_read 1 restart_04096.bin\n\n"
+    "# Write configuration to file (saving interval)\n"
+    "config_write 1024\n\n"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
     "sweep_eq 10000\n\n"
     "# Number of sweeps for statistics\n"
@@ -115,6 +117,7 @@ void read_input_file(char *filename){
   in.cavity_sample_int = 0;
   in.restart_read = 0;
   in.restart_write = 0;
+  in.config_write = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -379,6 +382,14 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
 	  in.restart_write = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"config_write") == 0 || strcmp(key,"config_write\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.config_write = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }

@@ -129,11 +129,12 @@ void run_npt(bool prod_flag, int sweep_offset){
     if (prod_flag){      
 
       // Write configuration
-      if (100 > 0){
-	if (ii % 100 == 0) {
-	  write_config(ii);
-	}
+      if (in.config_write > 0){
+        if (ii % in.config_write == 0) {
+          write_config(ii);
+        }
       }
+
 
       // Compute pressure via thermodynamic route
       if (in.presst_sample_int > 0){

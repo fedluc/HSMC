@@ -131,11 +131,12 @@ void cavity_run_nvt(bool prod_flag, int sweep_offset){
     if (prod_flag){
 
       // Write configuration
-      if (100 > 0){
-        if (ii % 100 == 0) {
+      if (in.config_write > 0){
+        if (ii % in.config_write == 0) {
           write_config(ii);
         }
       }
+
 
       // Output distance between the cavities
       if (in.cavity_sample_int > 0){

@@ -55,7 +55,7 @@ struct input {
   int restart_write;
 
   // Write configuration
-  int config_write, config_sample_file;
+  int config_write;
 };
 
 extern struct input in;
