@@ -35,5 +35,6 @@ void part_init_err();
 
 void add_particle(int id, double xx, double yy, double zz);
 
+void rng_init();
 
 #endif

@@ -11,6 +11,7 @@ struct input {
 
   // Parameters for neighbor list
   double neigh_dr;
+  int neigh_max_part;
 
   // Maximum displacement
   double dr_max;

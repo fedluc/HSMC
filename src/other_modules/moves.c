@@ -7,13 +7,12 @@
 //#include "analytic.h"
 
 // Global variables
-static int part_moves=0, vol_moves=0;
-static int acc_part_moves=0, rej_part_moves=0;
-static int acc_vol_moves=0, rej_vol_moves=0;
+int part_moves, vol_moves;
+int acc_part_moves, rej_part_moves;
+int acc_vol_moves, rej_vol_moves;
 
 // ------ Move one particle ------
-void part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-	       int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void part_move(){
 
   int r_idx, cell_idx_old, cell_idx_new;
   double r_x, r_y, r_z;
@@ -47,9 +46,7 @@ void part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_
   else if (part[r_idx][3] < 0.0)        part[r_idx][3] += sim_box_info.lz;
       
   // Accept or reject move according to metropolis algorithm
-  if (check_overlap(r_idx, 1.0, 1.0, 1.0,
-		    cl_num_tot, cl_max_part, cl_part_cell,
-		    cl_neigh_num, cl_neigh)){
+  if (check_overlap(r_idx, 1.0, 1.0, 1.0)){
     // Reject move
     part[r_idx][1] = x_old;
     part[r_idx][2] = y_old;
@@ -60,21 +57,16 @@ void part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_
     // Update cell list if the particle left its original box
     cell_idx_new = cell_part_idx(r_idx);
     if (cell_idx_new != cell_idx_old) {
-      cell_list_update(cell_idx_old, cell_idx_new, r_idx,
-		       cl_num_tot, cl_max_part, cl_part_cell);
+      cell_list_update(cell_idx_old, cell_idx_new, r_idx);
     }
     // Accept move
     acc_part_moves+=1;
   }
 
-  // Increment counter for particles moves
-  part_moves += 1;
-  
 }
 
 // ------ Change volume (only for NpT) ------
-void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-	      int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void vol_move(){
 
   double r_dv, r_acc;
   double log_vol_new, vol_new, vol_ratio, sf;
@@ -97,9 +89,7 @@ void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_m
   // Check if there is overlap with re-scaled coordinates
   for (int ii=0; ii<part_info.NN; ii++){
 
-    overlap = check_overlap(ii, sf, sf, sf,
-			    cl_num_tot, cl_max_part, cl_part_cell,
-			    cl_neigh_num, cl_neigh);
+    overlap = check_overlap(ii, sf, sf, sf);
 
     if (overlap) break;
 
@@ -136,7 +126,7 @@ void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_m
 	else if (part[ii][3] < 0.0)        part[ii][3] += sim_box_info.lz;
       }
       // Construct new  cell-list (the simulation box has changed)
-      cell_list_new(cl_num_tot, cl_max_part, cl_part_cell);
+      cell_list_new();
     }
   }
   else{
@@ -144,17 +134,12 @@ void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_m
     rej_vol_moves+=1;
   }
 
-  // Increment counter for volume moves
-  vol_moves += 1;
-
 }
 
 
 // ------ Check overlap between particles ------
 bool check_overlap(int idx_ref,
-                   double sf_x, double sf_y, double sf_z,
-		   int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		   int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+                   double sf_x, double sf_y, double sf_z){
 
   // Variable declaration
   int cell_idx, neigh_idx, part_idx;
@@ -194,28 +179,6 @@ bool check_overlap(int idx_ref,
 
 }
 
-
-void get_moves_counters(int *pm, int *apm, int *rpm, 
-			int* vm, int *avm, int *rvm){
-
-  if (pm != NULL) *pm = part_moves;
-  if (apm != NULL) *apm = acc_part_moves;
-  if (rpm != NULL) *rpm = rej_part_moves;
-  if (vm != NULL) *vm = vol_moves;
-  if (avm != NULL) *avm = acc_vol_moves;
-  if (rvm != NULL) *rvm = rej_vol_moves;
-
-}
-
-void reset_moves_counters(){
-
-  part_moves = 0;
-  acc_part_moves = 0;
-  rej_part_moves = 0;
-  vol_moves = 0;
-  acc_vol_moves = 0;
-  rej_vol_moves = 0;
-}
 
 // ------ Move particle in cavity simulations ------
 /* void cavity_part_move(){ */

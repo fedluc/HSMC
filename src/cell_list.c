@@ -6,11 +6,7 @@
 #include "read_input.h"
 #include "cell_list.h"
 
-int cl_neigh_num;
-int (*cl_neigh)[27];
-int (*cl_part_cell)[11];
-
-static int cell_num_tot;
+static int neigh_num;
 static int cell_num_x;
 static int cell_num_y;
 static int cell_num_z;
@@ -18,60 +14,33 @@ static double cell_size_x;
 static double cell_size_y;
 static double cell_size_z;
 
-void cell_list_init(){
+int *cell_list_alloc(int rows, int cols) {
+  int (*arr)[cols] = malloc(sizeof(*arr) * rows);
+  if (arr == NULL) {
+    printf("ERROR: Failed cell list allocation\n");
+    exit(EXIT_FAILURE);
+  }
+  return &arr[0][0];
+}
 
-  // Number of cells
-  cell_num_x = compute_cell_num(sim_box_info.lx, in.neigh_dr);
-  cell_num_y = compute_cell_num(sim_box_info.ly, in.neigh_dr);
-  cell_num_z = compute_cell_num(sim_box_info.lz, in.neigh_dr);
-  cell_num_tot = cell_num_x * cell_num_y * cell_num_z;
+void cell_list_init(int neigh_num, int (*neigh_mat)[neigh_num],
+		    int max_part_cell, int (*part_cell)[max_part_cell]){
 
-  // Number of neighbor per cell
-  cl_neigh_num = 27;
-  if (cell_num_tot < 27) cl_neigh_num = cell_num_tot;
+  // Total number of cells
+  int cell_num_tot = cell_num_tot = cell_num_x * cell_num_y * cell_num_z;
 
-  // Allocate linked list and neighbor matrix
-  cell_list_alloc();
-
-  // Initialize linked list
-  cell_list_new();
+  // Initialize cell list
+  cell_list_new(cell_num_tot, in.neigh_max_part, part_cell);
   
   // Initialize neighbor matrix
-  cell_neigh_init();
+  cell_neigh_init(cell_num_tot, neigh_num, neigh_mat);
 
 }
 
-int compute_cell_num(double sim_box_len, double dr){
-  
-  double rem = fmod(sim_box_len,dr); 
-  return (int)(sim_box_len - rem); 
+void cell_list_new(int cell_num_tot, int max_part, int part_cell[cell_num_tot][max_part]){
 
-}
-
-void cell_list_alloc(){
-
-  // Allocate matrix to store cell neighbors
-  cl_neigh = malloc(cell_num_tot * sizeof(*cl_neigh));
-  if (cl_neigh == NULL){
-    printf("ERROR: Failed cell list neighbor allocation\n");
-    exit(EXIT_FAILURE);
-  }
-
-  // Allocate matrix to store particles in each cell
-  cl_part_cell = malloc(cell_num_tot * sizeof(*cl_part_cell));
-  if (cl_part_cell == NULL){
-    printf("ERROR: Failed cell list particles allocation\n");
-    exit(EXIT_FAILURE);
-  }
-
-}
-
-void cell_list_new(){
-
-  // Cell size
-  cell_size_x = sim_box_info.lx/cell_num_x;
-  cell_size_y = sim_box_info.ly/cell_num_y;
-  cell_size_z = sim_box_info.lz/cell_num_z;
+  // Define number and size of the cells
+  compute_cell_list_info();
 
   // Check for consistency
   if (cell_size_x < 1.0 || cell_size_y < 1.0 || cell_size_z < 1.0) {
@@ -81,9 +50,9 @@ void cell_list_new(){
 
   // Initialize the cell lists
   for (int ii=0; ii<cell_num_tot; ii++){
-    cl_part_cell[ii][0] = 0;
+    part_cell[ii][0] = 0;
     for (int jj=1; jj<=10; jj++){
-      cl_part_cell[ii][jj] = -1;
+      part_cell[ii][jj] = -1;
     }
   }
 
@@ -97,52 +66,81 @@ void cell_list_new(){
     // Index of the cell that contains the particle
     idx_row = cell_part_idx(ii);
     // Update number of particles in cell
-    cl_part_cell[idx_row][0] += 1;
-    cell_list_check(idx_row);
+    part_cell[idx_row][0] += 1;
+    cell_list_check(idx_row, cell_num_tot, max_part, part_cell);
     // Update id of particles in cell
-    cl_part_cell[idx_row][idx_col[idx_row]] = ii;
+    part_cell[idx_row][idx_col[idx_row]] = ii;
     idx_col[idx_row] += 1;
   }
   free(idx_col);
   
 }
 
-void cell_list_update(int cell_idx_del, int cell_idx_add, int part_idx){
-  cell_list_del(cell_idx_del, part_idx);
-  cell_list_add(cell_idx_add, part_idx);
-}
+void compute_cell_list_info(){
 
-void cell_list_add(int cell_idx, int part_idx){
+  // Number of cells
+  cell_num_x = compute_cell_num(sim_box_info.lx, in.neigh_dr);
+  cell_num_y = compute_cell_num(sim_box_info.ly, in.neigh_dr);
+  cell_num_z = compute_cell_num(sim_box_info.lz, in.neigh_dr);
+  int cell_num_tot = cell_num_x * cell_num_y * cell_num_z;
 
-  int n_part_cell = cl_part_cell[cell_idx][0];
-  cl_part_cell[cell_idx][0] += 1;
-  cell_list_check(cell_idx);
-  cl_part_cell[cell_idx][n_part_cell+1] = part_idx;
+  // Number of neighbor per cell
+  neigh_num = 27;
+  if (cell_num_tot < 27) neigh_num = cell_num_tot;
+
+  // Cell size
+  cell_size_x = sim_box_info.lx/cell_num_x;
+  cell_size_y = sim_box_info.ly/cell_num_y;
+  cell_size_z = sim_box_info.lz/cell_num_z;
   
 }
 
-void cell_list_del(int cell_idx, int part_idx){
+int compute_cell_num(double sim_box_len, double dr){
+  
+  double rem = fmod(sim_box_len,dr);
+  return (int)(sim_box_len - rem);
 
-  int n_part_cell = cl_part_cell[cell_idx][0];
+}
+
+void cell_list_update(int cell_idx_del, int cell_idx_add, int part_idx,
+		      int cell_num_tot, int max_part, int part_cell[cell_num_tot][max_part]){
+  cell_list_del(cell_idx_del, part_idx, cell_num_tot, max_part, part_cell);
+  cell_list_add(cell_idx_add, part_idx, cell_num_tot, max_part, part_cell);
+}
+
+void cell_list_add(int cell_idx, int part_idx,
+		   int cell_num_tot, int max_part, int part_cell[cell_num_tot][max_part]){
+
+  int n_part_cell = part_cell[cell_idx][0];
+  part_cell[cell_idx][0] += 1;
+  cell_list_check(cell_idx, cell_num_tot, max_part, part_cell);
+  part_cell[cell_idx][n_part_cell+1] = part_idx;
+  
+}
+
+void cell_list_del(int cell_idx, int part_idx,
+		   int cell_num_tot, int max_part, int part_cell[cell_num_tot][max_part]){
+
+  int n_part_cell = part_cell[cell_idx][0];
   int idx_remove = n_part_cell;
   bool shift_flag = false;
 
 
-  cl_part_cell[cell_idx][0] -= 1;
-  cell_list_check(cell_idx);
+  part_cell[cell_idx][0] -= 1;
+  cell_list_check(cell_idx, cell_num_tot, max_part, part_cell);
   for (int ii=1; ii<=n_part_cell; ii++){
-    if (cl_part_cell[cell_idx][ii] == part_idx){ 
+    if (part_cell[cell_idx][ii] == part_idx){
       idx_remove = ii;
-      cl_part_cell[cell_idx][ii] = -1;
+      part_cell[cell_idx][ii] = -1;
       shift_flag = true;
     }
-    if (shift_flag && ii > idx_remove) { 
-      cl_part_cell[cell_idx][ii-1] = cl_part_cell[cell_idx][ii];
-      cl_part_cell[cell_idx][ii] = -1;
+    if (shift_flag && ii > idx_remove) {
+      part_cell[cell_idx][ii-1] = part_cell[cell_idx][ii];
+      part_cell[cell_idx][ii] = -1;
     }
   }
   if (!shift_flag){
-    printf("ERROR: Attempt to delete particle %d from cell %d, but particle is not in cell\n", 
+    printf("ERROR: Attempt to delete particle %d from cell %d, but particle is not in cell\n",
 	   part_idx, cell_idx);
     exit(EXIT_FAILURE);
   }
@@ -150,12 +148,13 @@ void cell_list_del(int cell_idx, int part_idx){
 }
 
 
-void cell_list_check(int cell_idx){
-  if (cl_part_cell[cell_idx][0] < 0){ 
+void cell_list_check(int cell_idx, 
+		     int cell_num_tot, int max_part, int part_cell[cell_num_tot][max_part]){
+  if (part_cell[cell_idx][0] < 0){
     printf("ERROR: Trying to remove one particle from an empty cell\n");
     exit(EXIT_FAILURE);
   }
-  if (cl_part_cell[cell_idx][0] > 10){ 
+  if (part_cell[cell_idx][0] > 10){
     printf("ERROR: More than %d particles in one cell", 10);
     exit(EXIT_FAILURE);
   }
@@ -163,30 +162,32 @@ void cell_list_check(int cell_idx){
 
 int cell_part_idx(int id){
 
-  return  (int)(part[id][1]/cell_size_x)*cell_num_x*cell_num_x 
-          + (int)(part[id][2]/cell_size_y)*cell_num_y 
+  return  (int)(part[id][1]/cell_size_x)*cell_num_x*cell_num_x
+          + (int)(part[id][2]/cell_size_y)*cell_num_y
           + (int)(part[id][3]/cell_size_z);
 
 }
 
-void cell_neigh_init(){
+void cell_neigh_init(int cell_num_tot, int neigh_num, int neigh_mat[cell_num_tot][neigh_num]){
 
   for (int ii=0; ii<cell_num_x; ii++){
     for (int jj=0; jj<cell_num_y; jj++){
       for (int kk=0; kk<cell_num_z; kk++){
-  	neigh_id(ii,jj,kk);
+  	neigh_id(ii,jj,kk,cell_num_tot,neigh_num,neigh_mat);
       }
     }
   }
 
 }
 
-void neigh_id(int ref_idx_x, int ref_idx_y, int ref_idx_z){
+
+void neigh_id(int ref_idx_x, int ref_idx_y, int ref_idx_z,
+	      int cell_num_tot, int neigh_num, int neigh_mat[cell_num_tot][neigh_num]){
 
   int idx_x, idx_y, idx_z;
   int counter=0;
-  int ref_idx = ref_idx_x*cell_num_x*cell_num_x + 
-                ref_idx_y*cell_num_y + 
+  int ref_idx = ref_idx_x*cell_num_x*cell_num_x +
+                ref_idx_y*cell_num_y +
                 ref_idx_z;
   
   // Loop over neighboring cells (including the reference cell)
@@ -206,25 +207,29 @@ void neigh_id(int ref_idx_x, int ref_idx_y, int ref_idx_z){
 	if (idx_z>cell_num_z-1) idx_z -= cell_num_z;
 	else if (idx_z<0) idx_z += cell_num_z;
 	// Update neighbor matrix
-	cl_neigh[ref_idx][counter] = 
-	  idx_x*cell_num_x*cell_num_x + 
-	  idx_y*cell_num_y + 
+	neigh_mat[ref_idx][counter] =
+	  idx_x*cell_num_x*cell_num_x +
+	  idx_y*cell_num_y +
 	  idx_z;
 	counter++;
 
       }
     }
-  } 
+  }
     
 }
 
-void get_cell_list_info(int *num_x, int *num_y, int *num_z,
+void get_cell_list_info(int *num_neigh_cell, int *num_tot,
+			int *num_x, int *num_y, int *num_z,
 			double *size_x, double *size_y, double *size_z){
-  *num_x = cell_num_x;
-  *num_y = cell_num_y;
-  *num_z = cell_num_z;
-  *size_x = cell_size_x;
-  *size_y = cell_size_y;
-  *size_z = cell_size_z;
+  
+  if (num_neigh_cell != NULL) *num_neigh_cell = neigh_num;
+  if (num_tot != NULL) *num_tot = cell_num_x * cell_num_y * cell_num_z;
+  if (num_x != NULL) *num_x = cell_num_x;
+  if (num_y != NULL) *num_y = cell_num_y;
+  if (num_z != NULL) *num_z = cell_num_z;
+  if (size_x != NULL) *size_x = cell_size_x;
+  if (size_y != NULL) *size_y = cell_size_y;
+  if (size_z != NULL) *size_z = cell_size_z;
 
 }

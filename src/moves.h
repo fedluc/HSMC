@@ -3,22 +3,21 @@
 
 #include <stdbool.h>
 
-extern int part_moves, vol_moves;
-extern int acc_part_moves, rej_part_moves;
-extern int acc_vol_moves, rej_vol_moves;
+
+void part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+               int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
 
 
-void rng_init();
+void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+              int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
 
-void part_move();
-
-void vol_move();
+bool check_overlap(int idx_ref,
+                   double sf_x, double sf_y, double sf_z,
+                   int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+                   int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
 
 double compute_dist(int idx1, int idx2,
                     double sf_x, double sf_y, double sf_z);
-
-bool check_overlap(int idx_ref,
-                   double sf_x, double sf_y, double sf_z);
 
 void cavity_rng_init();
 
@@ -28,6 +27,9 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old);
 
 double cavity_interaction(double xx, bool cavity_init);
 
-double hspy(double xx, double eta);
+void get_moves_counters(int *pm, int *apm, int *rpm,
+                        int* vm, int *avm, int *rvm);
+
+void reset_moves_counters();
 
 #endif
