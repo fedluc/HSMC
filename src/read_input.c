@@ -86,7 +86,7 @@ void read_input_file(char *filename){
   in.nz = 0;
   in.type = 0;
   in.neigh_dr = 1.0;
-  in.neigh_max_part = 10;
+  // in.neigh_max_part = 10;
   in.dr_max = 0;
   in.sweep_eq = 0;
   in.sweep_stat = 0;

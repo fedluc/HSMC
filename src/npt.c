@@ -46,6 +46,8 @@ void hs_npt() {
     opt_npt();
     sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start);
     part_init();
+    cell_list_init();
+
   }
 
   // Start timing

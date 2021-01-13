@@ -26,12 +26,7 @@ void cavity_hs_nvt() {
     part_init();
 
     // Set cavities to a distance within the allowed interval
-    double cavity_avedr = (in.cavity_maxdr + in.cavity_mindr)/ 2.0;
-    part[1][1] = part[0][1];
-    part[1][2] = part[0][2];
-    part[1][3] = part[0][3] + cavity_avedr;
-    if (part[1][3] > sim_box_info.lz) part[1][3] -= sim_box_info.lz;
-    else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
+    cavity_set_distance();
 
     // Set-up random number generator (Marsenne-Twister)
     rng_init();
@@ -59,6 +54,8 @@ void cavity_hs_nvt() {
   if (in.opt_flag == 1){
     opt_cavity_nvt();
     part_init();
+    cavity_set_distance();
+    cell_list_init();
   }
 
   // Start timing
@@ -97,8 +94,7 @@ void cavity_hs_nvt() {
   free(part);
   gsl_rng_free(rng_mt);
   free(cl_neigh);
-  free(cl_head);
-  free(cl_link);
+  free(cl_part_cell);
 
 }
 
@@ -159,6 +155,16 @@ void cavity_sweep_nvt(){
 
 }
 
+void cavity_set_distance(){
+  
+  double cavity_avedr = (in.cavity_maxdr + in.cavity_mindr)/ 2.0;
+  part[1][1] = part[0][1];
+  part[1][2] = part[0][2];
+  part[1][3] = part[0][3] + cavity_avedr;
+  if (part[1][3] > sim_box_info.lz) part[1][3] -= sim_box_info.lz;
+  else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
+
+}
 
 void cavity_psi_output(){
 

@@ -152,7 +152,7 @@ void cell_list_del(int cell_idx, int part_idx){
 
 void cell_list_check(int cell_idx){
   if (cl_part_cell[cell_idx][0] < 0){ 
-    printf("ERROR: Trying to remove one particle from an empty cell");
+    printf("ERROR: Trying to remove one particle from an empty cell\n");
     exit(EXIT_FAILURE);
   }
   if (cl_part_cell[cell_idx][0] > 10){ 
