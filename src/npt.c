@@ -46,6 +46,8 @@ void hs_npt() {
     opt_npt();
     sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start);
     part_init();
+    cell_list_init();
+
   }
 
   // Start timing
@@ -89,8 +91,7 @@ void hs_npt() {
   free(part);
   gsl_rng_free(rng_mt);
   free(cl_neigh);
-  free(cl_head);
-  free(cl_link);
+  free(cl_part_cell);
 
 }
 
@@ -129,17 +130,18 @@ void run_npt(bool prod_flag, int sweep_offset){
 
       // Write configuration
       if (in.config_write > 0){
-	if (ii % in.config_write == 0) {
-	  write_config(ii);
-	}
+        if (ii % in.config_write == 0) {
+          write_config(ii);
+        }
       }
+
 
       // Compute pressure via thermodynamic route
       if (in.presst_sample_int > 0){
-	if (ii % in.presst_sample_int == 0) {
-	  compute_presst(presst_init);
-	  if (presst_init) presst_init = false;
-	}
+      	if (ii % in.presst_sample_int == 0) {
+      	  compute_presst(presst_init);
+      	  if (presst_init) presst_init = false;
+      	}
       }
 
       // Compute order parameter

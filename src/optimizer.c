@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "init.h"
 #include "read_input.h"
-#include "cell_list.h"
 #include "compute_press.h"
 #include "moves.h"
 #include "npt.h"

@@ -56,7 +56,7 @@ void pressv_hist_init(){
 void pressv_compute_hist(){
   
   // Variable declaration
-  int cell_idx, neigh_idx, part_idx;
+  int cell_idx, neigh_idx, n_part_cell, part_idx;
   double dr;
   int bin;
 
@@ -68,22 +68,24 @@ void pressv_compute_hist(){
     for (int jj=0; jj<cl_neigh_num; jj++){
 
       neigh_idx = cl_neigh[cell_idx][jj];
-      part_idx = cl_head[neigh_idx];
+      n_part_cell = cl_part_cell[neigh_idx][0];
 
-      while (part_idx > 0){
-	
-	dr = compute_dist(ii, part_idx-1, 
-			  1.0, 1.0, 1.0);
+      if (n_part_cell > 0){
+	for (int kk=1; kk<=n_part_cell; kk++){
 
-	if (dr <= pressv_rmax && (part_idx-1) > ii) {
-	  bin = (int)((dr-1.0)/in.pressv_dr);
-	  pressv_hist[bin] += 2.0;
+	  part_idx = cl_part_cell[neigh_idx][kk];
+
+	  dr = compute_dist(ii, part_idx, 1.0, 1.0, 1.0);
+
+	  if (dr <= pressv_rmax && part_idx > ii) {
+	    bin = (int)((dr-1.0)/in.pressv_dr);
+	    pressv_hist[bin] += 2.0;
+	  }
+
 	}
 
-	part_idx = cl_link[part_idx];
-
       }
-      
+
     }
 
   }

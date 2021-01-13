@@ -9,6 +9,9 @@ struct input {
   // Number of cells
   int nx, ny, nz, type;
 
+  // Parameters for neighbor list
+  double neigh_dr;
+
   // Maximum displacement
   double dr_max;
 
@@ -52,7 +55,7 @@ struct input {
   int restart_write;
 
   // Write configuration
-  int config_write, config_sample_file;
+  int config_write;
 };
 
 extern struct input in;

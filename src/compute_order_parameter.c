@@ -12,7 +12,7 @@ static double *ql, *qlm2;
 static double lx_2, ly_2, lz_2;
 
 void compute_op(bool init){
-  
+
   // Compute the global order parameter
   global_ql_compute();
 
@@ -44,17 +44,12 @@ void ql_compute(){
 
    // Variable declaration
   int tlp1 = 2*in.ql_order + 1;
+  int cell_num_x, cell_num_y, cell_num_z;
+  double cell_size_x, cell_size_y, cell_size_z;
+  double cell_max_diag;
 
   // Allocate array to store the various m-components of ql
   qlm2 = (double*)malloc(sizeof(double) * tlp1);
-
-  // Check for consistency 
-  // (The cell lists limit the number of neighbor interactions 
-  // that can be compute)  
-  if (in.ql_rmax > 1.5*sim_box_info.cell_size) {
-    printf("WARNING: ql_rmax reduced to %f in order to be consistent with cell list", 1.5*sim_box_info.cell_size); 
-    in.ql_rmax = 1.5*sim_box_info.cell_size;
-  }
 
   // Half-box size
   lx_2 = sim_box_info.lx/2.0;
@@ -69,7 +64,7 @@ void ql_compute(){
 
     ql[ii] = 0.0;
     for (int jj=0; jj<tlp1; jj++){
-      ql[ii] += qlm2[jj]; 
+      ql[ii] += qlm2[jj];
     }
     ql[ii] *= 4 * M_PI / tlp1;
     ql[ii] = sqrt(ql[ii]);
@@ -84,7 +79,7 @@ void ql_compute(){
 
 void qlm2_compute(int ref_idx){
   
-  int cell_idx, neigh_idx, part_idx;
+  int cell_idx, neigh_idx, n_part_cell, part_idx;
   int num_bonds = 0;
   double qlm_real_tmp, qlmm_real_tmp;
   double qlm_imag_tmp, qlmm_imag_tmp;
@@ -108,64 +103,72 @@ void qlm2_compute(int ref_idx){
     for (int jj=0; jj<cl_neigh_num; jj++){
 
       neigh_idx = cl_neigh[cell_idx][jj];
-      part_idx = cl_head[neigh_idx];
+      n_part_cell = cl_part_cell[neigh_idx][0];
 
-      while (part_idx > 0){
-	
-	// Cartesian components of the distance 
-	dx = (part[ref_idx][1] - part[part_idx-1][1]);
-	dy = (part[ref_idx][2] - part[part_idx-1][2]);
-	dz = (part[ref_idx][3] - part[part_idx-1][3]);
-	
-	// Periodic boundary conditions
-	if (dx > lx_2)       dx -= sim_box_info.lx;
-	else if (dx < -lx_2) dx += sim_box_info.lx;
-	if (dy > ly_2)       dy -= sim_box_info.ly;
-	else if (dy < -ly_2) dy += sim_box_info.ly;
-	if (dz > lz_2)       dz -= sim_box_info.lz;
-	else if (dz < -lz_2) dz += sim_box_info.lz;
-	
-	// Radial distance
-	dr = sqrt(dx*dx + dy*dy + dz*dz);
-	
-	// Update count if the radial distance falls within the cutoff
-	if (part_idx-1 != ref_idx && dr <= in.ql_rmax){
-	  
-	  // Spherical coordinates
-	  phi = atan2(dy,dx);
-	  if(phi<0) phi += 2.*M_PI;
-	  // Update number of bonds
-	  num_bonds++;
-	  // Legendre polynomial
-	  plm =  gsl_sf_legendre_sphPlm(in.ql_order, mm, dz/dr);
-	  // Spherical harmonics
-	  qlm_real_tmp += plm * cos(mm*phi);
-	  qlm_imag_tmp += plm * sin(mm*phi);
-	  if (mm % 2 != 0) plm *= -1.0;
-	  qlmm_real_tmp += plm * cos(-mm*phi);
-	  qlmm_imag_tmp += plm * sin(-mm*phi);
-	}
-	
-	part_idx = cl_link[part_idx];
-	
+      if (n_part_cell > 0){
+    	for (int kk=1; kk<=n_part_cell; kk++){
+
+    	  // Particle index
+    	  part_idx = cl_part_cell[neigh_idx][kk];
+
+    	  // Cartesian components of the distance
+    	  dx = (part[ref_idx][1] - part[part_idx][1]);
+    	  dy = (part[ref_idx][2] - part[part_idx][2]);
+    	  dz = (part[ref_idx][3] - part[part_idx][3]);
+
+    	  // Periodic boundary conditions
+    	  if (dx > lx_2)       dx -= sim_box_info.lx;
+    	  else if (dx < -lx_2) dx += sim_box_info.lx;
+    	  if (dy > ly_2)       dy -= sim_box_info.ly;
+    	  else if (dy < -ly_2) dy += sim_box_info.ly;
+    	  if (dz > lz_2)       dz -= sim_box_info.lz;
+    	  else if (dz < -lz_2) dz += sim_box_info.lz;
+
+    	  // Radial distance
+    	  dr = sqrt(dx*dx + dy*dy + dz*dz);
+    	 
+    	  // Update count if the radial distance falls within the cutoff
+    	  if (part_idx != ref_idx && dr <= in.ql_rmax){
+
+    	    // Spherical coordinates
+    	    phi = atan2(dy,dx);
+    	    if(phi<0) phi += 2.*M_PI;
+    	    // Update number of bonds
+    	    num_bonds++;
+    	    // Legendre polynomial
+    	    plm =  gsl_sf_legendre_sphPlm(in.ql_order, mm, dz/dr);
+    	    // Spherical harmonics
+    	    qlm_real_tmp += plm * cos(mm*phi);
+    	    qlm_imag_tmp += plm * sin(mm*phi);
+    	    if (mm % 2 != 0) plm *= -1.0;
+    	    qlmm_real_tmp += plm * cos(-mm*phi);
+    	    qlmm_imag_tmp += plm * sin(-mm*phi);
+
+    	  }
+
+    	}
+
       }
-      
+
     }
     
+
     if (num_bonds != 0) {
       qlm_real_tmp /= num_bonds;
       qlm_imag_tmp /= num_bonds;
       qlmm_real_tmp /= num_bonds;
       qlmm_imag_tmp /= num_bonds;
     }
-    qlm2[in.ql_order+mm] = qlm_real_tmp*qlm_real_tmp + 
+    qlm2[in.ql_order+mm] = qlm_real_tmp*qlm_real_tmp +
                            qlm_imag_tmp*qlm_imag_tmp;
-    qlm2[in.ql_order-mm] = qlmm_real_tmp*qlmm_real_tmp + 
+    qlm2[in.ql_order-mm] = qlmm_real_tmp*qlmm_real_tmp +
                            qlmm_imag_tmp*qlmm_imag_tmp;
+    qlm2[in.ql_order+mm] = num_bonds; 
+    qlm2[in.ql_order-mm] = num_bonds;
+                           
     
   }
   
-
 }
  
 

@@ -131,7 +131,7 @@ void write_config(int sweep){
   gzprintf(fid, "# Configuration\n");
   for (int ii=0; ii<part_info.NN; ii++){
     gzprintf(fid, "%d %.8f %.8f %.8f\n", (int)part[ii][0], part[ii][1],
-	    part[ii][2], part[ii][3]);
+	     part[ii][2], part[ii][3]);
   }
 
   // Close binary file

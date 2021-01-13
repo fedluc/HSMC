@@ -24,7 +24,6 @@ void hs_nvt() {
 
     // Initialize particle's positions
     part_init();
-
     
     // Set-up random number generator (Marsenne-Twister)
     rng_init();
@@ -39,7 +38,6 @@ void hs_nvt() {
 	 sim_box_info.ly, sim_box_info.lz);
   printf("Number of particles: %d\n", part_info.NN);
 
-
   // Initialize cell lists
   cell_list_init();
 
@@ -47,6 +45,7 @@ void hs_nvt() {
   if (in.opt_flag == 1){
     opt_nvt();
     part_init();
+    cell_list_init();
   }
 
   // Start timing
@@ -84,9 +83,8 @@ void hs_nvt() {
   // Free memory
   free(part);
   gsl_rng_free(rng_mt);
-  free(cl_neigh);
-  free(cl_head);
-  free(cl_link);
+  free(cl_neigh); 
+  free(cl_part_cell);
 
 }
 
@@ -116,18 +114,18 @@ void run_nvt(bool prod_flag, int sweep_offset){
     // Write restart file
     if (in.restart_write > 0){
       if (ii % in.restart_write == 0) {
-	write_restart(ii);
+    	write_restart(ii);
       }
-    }  
+    }
 
     // Save samples for production runs
     if (prod_flag){
 
       // Write configuration
-      if (100 > 0){
-        if (ii % 100 == 0) {
-          write_config(ii);
-        }
+      if (in.config_write > 0){
+	if (ii % in.config_write == 0) {
+	  write_config(ii);
+	}
       }
 
       // Compute pressure via virial route

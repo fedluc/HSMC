@@ -5,6 +5,8 @@ void cavity_hs_nvt();
 
 void cavity_run_nvt(bool prod_flag, int sweep_offset);
 
+void cavity_set_distance();
+
 void cavity_sweep_nvt();
 
 void cavity_psi_output();

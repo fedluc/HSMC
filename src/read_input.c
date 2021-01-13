@@ -27,6 +27,8 @@ void print_example(){
     "# 1: simple cubic, 1 particle per cell\n"
     "# 2: face-centered cubic, 4 particles per cell\n"
     "type 2\n\n"
+    "# Neighbor list (minumum size of cell list, default 1.0)\n"
+    "neigh_list 1.05\n\n"
     "# Maximum displacement for particles moves\n"
     "dr_max 0.05\n\n"
     "# Parameters for NpT calculations (pressure, maximum volume deformation\n"
@@ -50,11 +52,13 @@ void print_example(){
     "# saving interval, potential resolution)\n"
     "cavity 0.1 1.2 0.0 4 0.01\n\n"
     "# Seed for random number generator\n"
-    "seed 124787"
+    "seed 124787\n\n"
     "# Write restart data (saving interval)\n"
     "restart_write 1024\n\n"
     "# Read restart data (activation flag (0 or 1), name with restart file\n"
     "# restart_read 1 restart_04096.bin\n\n"
+    "# Write configuration to file (saving interval)\n"
+    "config_write 1024\n\n"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
     "sweep_eq 10000\n\n"
     "# Number of sweeps for statistics\n"
@@ -83,7 +87,8 @@ void read_input_file(char *filename){
   in.ny = 0;
   in.nz = 0;
   in.type = 0;
-  in.nx = 0;
+  in.neigh_dr = 1.0;
+  // in.neigh_max_part = 10;
   in.dr_max = 0;
   in.sweep_eq = 0;
   in.sweep_stat = 0;
@@ -112,6 +117,7 @@ void read_input_file(char *filename){
   in.cavity_sample_int = 0;
   in.restart_read = 0;
   in.restart_write = 0;
+  in.config_write = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -173,6 +179,14 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
 	  in.type = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"neigh_list") == 0 || strcmp(key,"neigh_list\n") == 0){
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  in.neigh_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -368,6 +382,14 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
 	  in.restart_write = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"config_write") == 0 || strcmp(key,"config_write\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  in.config_write = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
