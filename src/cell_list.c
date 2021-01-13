@@ -51,7 +51,7 @@ void cell_list_new(int cell_num_tot, int max_part, int part_cell[cell_num_tot][m
   // Initialize the cell lists
   for (int ii=0; ii<cell_num_tot; ii++){
     part_cell[ii][0] = 0;
-    for (int jj=1; jj<=10; jj++){
+    for (int jj=1; jj<=max_part-1; jj++){
       part_cell[ii][jj] = -1;
     }
   }
@@ -154,8 +154,8 @@ void cell_list_check(int cell_idx,
     printf("ERROR: Trying to remove one particle from an empty cell\n");
     exit(EXIT_FAILURE);
   }
-  if (part_cell[cell_idx][0] > 10){
-    printf("ERROR: More than %d particles in one cell", 10);
+  if (part_cell[cell_idx][0] > max_part){
+    printf("ERROR: More than %d particles in one cell", max_part);
     exit(EXIT_FAILURE);
   }
 }

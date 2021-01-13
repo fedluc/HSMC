@@ -2,11 +2,11 @@
 #include "init.h"
 #include "read_input.h"
 #include "cell_list.h"
-#include "compute_press.h"
-#include "compute_order_parameter.h"
+//#include "compute_press.h"
+//#include "compute_order_parameter.h"
 #include "moves.h"
 #include "io_config.h"
-#include "optimizer.h"
+//#include "optimizer.h"
 #include "npt.h"
 
 // Hard-sphere simulation in the NpT ensemble
@@ -37,44 +37,51 @@ void hs_npt() {
   printf("Number of particles: %d\n", part_info.NN);
   printf("Pressure: %.8f\n", in.press);
 
-  // Initialize cell lists
-  cell_list_init();
+  // Set-up the neighbor list
+  int cl_neigh_num, cl_num_tot;
+  compute_cell_list_info();
+  get_cell_list_info(&cl_neigh_num, &cl_num_tot, NULL, NULL, NULL,
+                     NULL, NULL, NULL);
+  int (*cl_neigh)[cl_neigh_num] = (int (*)[cl_neigh_num])cell_list_alloc(cl_num_tot, cl_neigh_num);
+  int (*cl_part_cell)[in.neigh_max_part] = (int (*)[in.neigh_max_part])cell_list_alloc(cl_num_tot, in.neigh_max_part);
+  cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
 
   // Optmize maximum displacement
-  if (in.opt_flag == 1){
-    double rho_start = in.rho;
-    opt_npt();
-    sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start);
-    part_init();
-    cell_list_init();
+  /* if (in.opt_flag == 1){ */
+  /*   double rho_start = in.rho; */
+  /*   opt_npt(); */
+  /*   sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start); */
+  /*   part_init(); */
+  /*   cell_list_init(); */
 
-  }
+  /* } */
 
   // Start timing
   clock_t start = clock();
 
   // Initialize move counters
-  part_moves = 0;
-  acc_part_moves = 0;
-  rej_part_moves = 0;
-  vol_moves = 0;
-  acc_vol_moves = 0;
-  rej_vol_moves = 0;
+  reset_moves_counters();
 
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
-  run_npt(false,0);
+  run_npt(false,0, cl_num_tot, in.neigh_max_part, cl_part_cell,
+          cl_neigh_num, cl_neigh);
   printf("Equilibration completed.\n");
 
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  run_npt(true,in.sweep_eq);
+  run_npt(true,in.sweep_eq, cl_num_tot, in.neigh_max_part, cl_part_cell,
+          cl_neigh_num, cl_neigh);
   printf("Production completed.\n");
   clock_t end = clock();
 
-  // Print acceptance and rejection percentages 
+  // Print acceptance and rejection percentages
+  int part_moves, acc_part_moves, rej_part_moves;
+  int vol_moves, acc_vol_moves, rej_vol_moves;
+  get_moves_counters(&part_moves, &acc_part_moves, &rej_part_moves,
+                     &vol_moves, &acc_vol_moves, &rej_vol_moves);
   printf("---------------------------------------------------\n");
   printf("-- Particle moves: %.8e\n", (double)part_moves);
   printf("   Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves));
@@ -96,7 +103,9 @@ void hs_npt() {
 }
 
 
-void run_npt(bool prod_flag, int sweep_offset){
+void run_npt(bool prod_flag, int sweep_offset,
+	     int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+             int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   // Variable declaration
   bool presst_init = true, ql_ave_init = true;
@@ -136,33 +145,35 @@ void run_npt(bool prod_flag, int sweep_offset){
       }
 
 
-      // Compute pressure via thermodynamic route
-      if (in.presst_sample_int > 0){
-      	if (ii % in.presst_sample_int == 0) {
-      	  compute_presst(presst_init);
-      	  if (presst_init) presst_init = false;
-      	}
-      }
+      /* // Compute pressure via thermodynamic route */
+      /* if (in.presst_sample_int > 0){ */
+      /* 	if (ii % in.presst_sample_int == 0) { */
+      /* 	  compute_presst(presst_init); */
+      /* 	  if (presst_init) presst_init = false; */
+      /* 	} */
+      /* } */
 
-      // Compute order parameter
-      if (in.ql_sample_int > 0){
-        if (ii % in.ql_sample_int == 0) {
-          compute_op(ql_ave_init);
-          if (ql_ave_init) ql_ave_init = false;
-        }
-      }
+      /* // Compute order parameter */
+      /* if (in.ql_sample_int > 0){ */
+      /*   if (ii % in.ql_sample_int == 0) { */
+      /*     compute_op(ql_ave_init); */
+      /*     if (ql_ave_init) ql_ave_init = false; */
+      /*   } */
+      /* } */
 
 
     }
 
     // Generate a new configuration
-    sweep_npt();
+    sweep_npt(cl_num_tot, cl_max_part, cl_part_cell,
+              cl_neigh_num, cl_neigh);
 
   }  
 
 }
 
-void sweep_npt(){
+void sweep_npt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+               int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   int r_move_id;
 
@@ -173,12 +184,12 @@ void sweep_npt(){
     r_move_id = gsl_rng_uniform_int(rng_mt, part_info.NN+1);
 
     if (r_move_id < part_info.NN){
-      part_move(); // Move one particle
-      part_moves+=1;
+      part_move(cl_num_tot, cl_max_part, cl_part_cell,
+		cl_neigh_num, cl_neigh); // Move one particle
     }
     else{
-      vol_move(); // Change the volume
-      vol_moves+=1;
+      vol_move(cl_num_tot, cl_max_part, cl_part_cell,
+	       cl_neigh_num, cl_neigh); // Change the volume
     }
     
   }
