@@ -183,10 +183,10 @@ bool check_overlap(int idx_ref,
 // ------ Move particle in cavity simulations ------
 void cavity_part_move(){
 
-  int r_type, r_idx, cell_idx_old, cell_idx_new;
-  double r_x, r_y, r_z;
-  double x_old, y_old, z_old, dr_old, en_old=0.0;
+  int r_idx, cell_idx_old, cell_idx_new;
   int move_type;
+  double r_type, r_x, r_y, r_z;
+  double x_old, y_old, z_old, dr_old, en_old=0.0;
 
   // Select particle to move (cavities are moved with probability in.cavity_pcav)
   // Note: The cavities have indexes 0 and 1
@@ -304,10 +304,10 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old){
         dr = compute_dist(idx_ref, part_idx, 1.0, 1.0, 1.0);
 
 	// Reject move if an overlap between standard particles occurs
-	if (move_type == 0 && (part_idx-1) != idx_ref && dr < 1.0) return false;
+	if (move_type == 0 && part_idx != idx_ref && dr < 1.0) return false;
 
 	// Reject move if an overlap between a cavity and the standard particles occurs
-	if (move_type == 1 && (part_idx-1) >= 2 && dr < 1.0) return false;
+	if (move_type == 1 && part_idx >= 2 && dr < 1.0) return false;
 
       }
     }
