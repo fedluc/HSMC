@@ -18,22 +18,38 @@ static int presst_hist_nn;
 static double *presst_xi, *presst_hist;
 
 
-void compute_pressv(bool init,
-		    int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void compute_pressv(bool init){
 
   // Check if the neighbor list allows for a correct calculation of the pressure
+  if (init){
+
+    // Get info on the neighbor list
+    double cell_size_x, cell_size_y, cell_size_z, cell_size_min;
+    get_cell_list_info(NULL, NULL, NULL, NULL,
+                       NULL, NULL, NULL, &cell_size_x,
+                       &cell_size_y, &cell_size_z);
+    cell_size_min = cell_size_x;
+    if (cell_size_min < cell_size_y) cell_size_min = cell_size_y;
+    if (cell_size_min < cell_size_z) cell_size_min = cell_size_z;
+    if (cell_size_min < pressv_rmax){
+      printf("ERROR: The size of the cells in the neighbor list does not allow a correct calculation of the pressure, increase to %f\n", 
+	     pressv_rmax);
+      exit(EXIT_FAILURE);
+    }
+
+  }
+
+
+
   if (in.neigh_dr < pressv_rmax){
-    printf("ERROR: For a correct pressure calculation use a size for the neighbor list which is at least %f\n", pressv_rmax);
-    exit(EXIT_FAILURE);
+
   }
 
   // Initialize histogram
   pressv_hist_init();
 
   // Fill histogram
-  pressv_compute_hist(cl_num_tot, cl_max_part, cl_part_cell,
-		      cl_neigh_num, cl_neigh);
+  pressv_compute_hist();
 
   // compute Radial distribution function close to contact
   pressv_compute_rdf();
@@ -64,13 +80,18 @@ void pressv_hist_init(){
   
 }
 
-void pressv_compute_hist(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-			 int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void pressv_compute_hist(){
   
   // Variable declaration
+  int **cl_part_cell, **cl_neigh, cl_neigh_num;
   int cell_idx, neigh_idx, n_part_cell, part_idx;
   double dr;
   int bin;
+
+  // Neighbor list
+  get_cell_list_info(&cl_part_cell, &cl_neigh,
+                     &cl_neigh_num, NULL, NULL, NULL,
+                     NULL, NULL, NULL, NULL);
 
   // Fill histograms
   for (int ii=0; ii<part_info.NN; ii++){
@@ -121,16 +142,13 @@ void pressv_compute_rdf(){
 }
 
 
-void compute_presst(bool init,
-		    int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void compute_presst(bool init){
 
   //Initialize histogram
   presst_hist_init();
 
   // Fill histogram
-  presst_compute_hist(cl_num_tot, cl_max_part, cl_part_cell,
-		      cl_neigh_num, cl_neigh);
+  presst_compute_hist();
   
   // Write output
   presst_output(init);
@@ -159,8 +177,7 @@ void presst_hist_init(){
   
 }
 
-void presst_compute_hist(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-			 int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void presst_compute_hist(){
   
   // Variable declaration
   double vol_ratio, sf;
@@ -177,9 +194,7 @@ void presst_compute_hist(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_nu
     // Check if there is overlap
     for (int jj=0; jj<part_info.NN; jj++){
       
-      overlap = check_overlap(jj, sf, sf, sf,
-			      cl_num_tot, cl_max_part, cl_part_cell,
-			      cl_neigh_num, cl_neigh);
+      overlap = check_overlap(jj, sf, sf, sf);
 
       if (overlap) break;
 

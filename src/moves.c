@@ -7,7 +7,7 @@
 #include "read_input.h"
 #include "cell_list.h"
 #include "moves.h"
-//#include "analytic.h"
+#include "analytic.h"
 
 // Global variables
 static int part_moves=0, vol_moves=0;
@@ -189,7 +189,7 @@ bool check_overlap(int idx_ref,
 
   }
 
-  /* // Loop over the other particles (no cell lists are used) */
+  /* // Loop over the other particles (no neighbor list are used) */
   /* for (int ii=0; ii<part_info.NN; ii++){ */
 
   /*   //Compute inter-particle distance */
@@ -230,153 +230,155 @@ void reset_moves_counters(){
   rej_vol_moves = 0;
 }
 
-/* // ------ Move particle in cavity simulations ------ */
-/* void cavity_part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part], */
-/* 		      int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){ */
+// ------ Move particle in cavity simulations ------
+void cavity_part_move(){
 
-/*   int r_idx, cell_idx_old, cell_idx_new; */
-/*   int move_type; */
-/*   double r_type, r_x, r_y, r_z; */
-/*   double x_old, y_old, z_old, dr_old, en_old=0.0; */
+  int r_idx, cell_idx_old, cell_idx_new;
+  int move_type;
+  double r_type, r_x, r_y, r_z;
+  double x_old, y_old, z_old, dr_old, en_old=0.0;
 
-/*   // Select particle to move (cavities are moved with probability in.cavity_pcav) */
-/*   // Note: The cavities have indexes 0 and 1 */
-/*   r_type = rng_get_double(); */
-/*   if (r_type > in.cavity_pcav ) { */
-/*     // Move standard particles */
-/*     r_idx = rng_get_int(part_info.NN-2) + 2; */
-/*     move_type = 0; */
-/*   } */
-/*   else { */
-/*     // Move cavity */
-/*     r_idx = rng_get_int(2); */
-/*     move_type = 1; */
-/*   } */
+  // Select particle to move (cavities are moved with probability in.cavity_pcav)
+  // Note: The cavities have indexes 0 and 1
+  r_type = rng_get_double();
+  if (r_type > in.cavity_pcav ) {
+    // Move standard particles
+    r_idx = rng_get_int(part_info.NN-2) + 2;
+    move_type = 0;
+  }
+  else {
+    // Move cavity
+    r_idx = rng_get_int(2);
+    move_type = 1;
+  }
 
-/*   // Three random numbers in [0,1] for the displacement */
-/*   r_x = rng_get_double(); */
-/*   r_y = rng_get_double(); */
-/*   r_z = rng_get_double(); */
+  // Three random numbers in [0,1] for the displacement
+  r_x = rng_get_double();
+  r_y = rng_get_double();
+  r_z = rng_get_double();
 
-/*   // Store old coordinates (if the move gets rejected) */
-/*   x_old = part[r_idx][1]; */
-/*   y_old = part[r_idx][2]; */
-/*   z_old = part[r_idx][3]; */
-/*   cell_idx_old = cell_part_idx(r_idx); */
+  // Store old coordinates (if the move gets rejected)
+  x_old = part[r_idx][1];
+  y_old = part[r_idx][2];
+  z_old = part[r_idx][3];
+  cell_idx_old = cell_part_idx(r_idx);
 
-/*   // If a cavity has to be moved, compute old interaction energy */
-/*   if (move_type == 1){ */
-/*     dr_old = compute_dist(0,1,1.0,1.0,1.0); */
-/*     if (dr_old < in.cavity_mindr) { */
-/* 	printf("Error, cavities are too close!, Distance: %.8e\n", dr_old); */
-/* 	exit(EXIT_FAILURE); */
-/*     } */
-/*     if (dr_old > in.cavity_maxdr) { */
-/*       printf("Error, cavities are too far apart!, Distance: %.8e\n", dr_old); */
-/*       exit(EXIT_FAILURE); */
-/*     } */
-/*     en_old = cavity_interaction(dr_old,false); */
-/*   } */
+  // If a cavity has to be moved, compute old interaction energy
+  if (move_type == 1){
+    dr_old = compute_dist(0,1,1.0,1.0,1.0);
+    if (dr_old < in.cavity_mindr) {
+	printf("Error, cavities are too close!, Distance: %.8e\n", dr_old);
+	exit(EXIT_FAILURE);
+    }
+    if (dr_old > in.cavity_maxdr) {
+      printf("Error, cavities are too far apart!, Distance: %.8e\n", dr_old);
+      exit(EXIT_FAILURE);
+    }
+    en_old = cavity_interaction(dr_old,false);
+  }
 
-/*   // Proposed move */
-/*   part[r_idx][1] += (r_x - 0.5)*in.dr_max; */
-/*   part[r_idx][2] += (r_y - 0.5)*in.dr_max; */
-/*   part[r_idx][3] += (r_z - 0.5)*in.dr_max; */
+  // Proposed move
+  part[r_idx][1] += (r_x - 0.5)*in.dr_max;
+  part[r_idx][2] += (r_y - 0.5)*in.dr_max;
+  part[r_idx][3] += (r_z - 0.5)*in.dr_max;
 
-/*   // Periodic boundary conditions */
-/*   if (part[r_idx][1] > sim_box_info.lx) part[r_idx][1] -= sim_box_info.lx; */
-/*   else if (part[r_idx][1] < 0.0)        part[r_idx][1] += sim_box_info.lx; */
-/*   if (part[r_idx][2] > sim_box_info.ly) part[r_idx][2] -= sim_box_info.ly; */
-/*   else if (part[r_idx][2] < 0.0)        part[r_idx][2] += sim_box_info.ly; */
-/*   if (part[r_idx][3] > sim_box_info.lz) part[r_idx][3] -= sim_box_info.lz; */
-/*   else if (part[r_idx][3] < 0.0)        part[r_idx][3] += sim_box_info.lz; */
+  // Periodic boundary conditions
+  if (part[r_idx][1] > sim_box_info.lx) part[r_idx][1] -= sim_box_info.lx;
+  else if (part[r_idx][1] < 0.0)        part[r_idx][1] += sim_box_info.lx;
+  if (part[r_idx][2] > sim_box_info.ly) part[r_idx][2] -= sim_box_info.ly;
+  else if (part[r_idx][2] < 0.0)        part[r_idx][2] += sim_box_info.ly;
+  if (part[r_idx][3] > sim_box_info.lz) part[r_idx][3] -= sim_box_info.lz;
+  else if (part[r_idx][3] < 0.0)        part[r_idx][3] += sim_box_info.lz;
 
-/*   // Accept or reject move according to metropolis algorithm */
-/*   if (cavity_check_move(r_idx,move_type,en_old, */
-/* 			cl_num_tot, cl_max_part, cl_part_cell, */
-/* 			cl_neigh_num, cl_neigh)){ */
-/*     // Update cell list if the particle left its original box */
-/*     cell_idx_new = cell_part_idx(r_idx); */
-/*     if (cell_idx_new != cell_idx_old) { */
-/*       cell_list_update(cell_idx_old, cell_idx_new, r_idx, */
-/* 		       cl_num_tot, cl_max_part, cl_part_cell); */
-/*     } */
-/*     // Accept move */
-/*     acc_part_moves+=1; */
-/*   } */
-/*   else { */
-/*     // Reject move */
-/*     part[r_idx][1] = x_old; */
-/*     part[r_idx][2] = y_old; */
-/*     part[r_idx][3] = z_old; */
-/*     rej_part_moves+=1; */
-/*   } */
+  // Accept or reject move according to metropolis algorithm
+  if (cavity_check_move(r_idx,move_type,en_old)){
+    // Update cell list if the particle left its original box
+    cell_idx_new = cell_part_idx(r_idx);
+    if (cell_idx_new != cell_idx_old) {
+      cell_list_update(cell_idx_old, cell_idx_new, r_idx);
+    }
+    // Accept move
+    acc_part_moves+=1;
+  }
+  else {
+    // Reject move
+    part[r_idx][1] = x_old;
+    part[r_idx][2] = y_old;
+    part[r_idx][3] = z_old;
+    rej_part_moves+=1;
+  }
 
-/*   // Increment counter for particles moves */
-/*   part_moves += 1; */
+  // Increment counter for particles moves
+  part_moves += 1;
 
-/* } */
+}
 
 
-/* // ------ Accept or reject move in cavity simulations ------ */
-/* bool cavity_check_move(int idx_ref, int move_type, double en_old, */
-/* 		       int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part], */
-/* 		       int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){ */
+// ------ Accept or reject move in cavity simulations ------
+bool cavity_check_move(int idx_ref, int move_type, double en_old){
 
-/*   // Variable declaration */
-/*   int cell_idx, neigh_idx, part_idx; */
-/*   int n_part_cell; */
-/*   double dr, dr_cavity; */
-/*   double boltz_fact, r_acc; */
+  // Variable declaration
+  int **cl_part_cell, **cl_neigh, cl_neigh_num;
+  int cell_idx, neigh_idx, part_idx;
+  int n_part_cell;
+  double dr, dr_cavity;
+  double boltz_fact, r_acc;
 
-/*   // If a cavity is moved, check if the move should be rejected */
-/*   if (move_type == 1) { */
-/*     dr_cavity = compute_dist(0,1,1.0,1.0,1.0); */
-/*     // Reject if the cavities are too far or too close */
-/*     if (dr_cavity < in.cavity_mindr || dr_cavity > in.cavity_maxdr){ */
-/*       return false; */
-/*     } */
-/*     // Reject according to metropolis algorithm */
-/*     boltz_fact =  exp(-(cavity_interaction(dr_cavity,false) - en_old)); */
-/*     r_acc = rng_get_double(); */
-/*     if (r_acc > boltz_fact) return false; */
-/*   } */
+  // If a cavity is moved, check if the move should be rejected
+  if (move_type == 1) {
+    dr_cavity = compute_dist(0,1,1.0,1.0,1.0);
+    // Reject if the cavities are too far or too close
+    if (dr_cavity < in.cavity_mindr || dr_cavity > in.cavity_maxdr){
+      return false;
+    }
+    // Reject according to metropolis algorithm
+    boltz_fact =  exp(-(cavity_interaction(dr_cavity,false) - en_old));
+    r_acc = rng_get_double();
+    if (r_acc > boltz_fact) return false;
+  }
 
-/*   // Check for overlaps */
-/*   // Cell that contains the particle */
-/*   cell_idx = cell_part_idx(idx_ref); */
 
-/*   // Loop over the neighboring cells */
-/*   for (int ii=0; ii<cl_neigh_num; ii++){ */
+  // Check for overlaps
 
-/*     neigh_idx = cl_neigh[cell_idx][ii]; */
+  // Neighbor list
+  get_cell_list_info(&cl_part_cell, &cl_neigh,
+                     &cl_neigh_num, NULL, NULL, NULL,
+                     NULL, NULL, NULL, NULL);
 
-/*     // Loop over the particles in the neighboring cell */
-/*     n_part_cell = cl_part_cell[neigh_idx][0]; */
-/*     if (n_part_cell > 0){ */
-/*       for (int jj=1; jj<=n_part_cell; jj++){ */
+  // Cell that contains the particle
+  cell_idx = cell_part_idx(idx_ref);
 
-/*         // Particle index */
-/*         part_idx = cl_part_cell[neigh_idx][jj]; */
+  // Loop over the neighboring cells
+  for (int ii=0; ii<cl_neigh_num; ii++){
 
-/*         //Compute inter-particle distance */
-/*         dr = compute_dist(idx_ref, part_idx, 1.0, 1.0, 1.0); */
+    neigh_idx = cl_neigh[cell_idx][ii];
 
-/* 	// Reject move if an overlap between standard particles occurs */
-/* 	if (move_type == 0 && part_idx != idx_ref && dr < 1.0) return false; */
+    // Loop over the particles in the neighboring cell
+    n_part_cell = cl_part_cell[neigh_idx][0];
+    if (n_part_cell > 0){
+      for (int jj=1; jj<=n_part_cell; jj++){
 
-/* 	// Reject move if an overlap between a cavity and the standard particles occurs */
-/* 	if (move_type == 1 && part_idx >= 2 && dr < 1.0) return false; */
+        // Particle index
+        part_idx = cl_part_cell[neigh_idx][jj];
 
-/*       } */
-/*     } */
+        //Compute inter-particle distance
+        dr = compute_dist(idx_ref, part_idx, 1.0, 1.0, 1.0);
 
-/*   } */
+	// Reject move if an overlap between standard particles occurs
+	if (move_type == 0 && part_idx != idx_ref && dr < 1.0) return false;
 
-/*   // Accept move if it was not rejected */
-/*   return true; */
+	// Reject move if an overlap between a cavity and the standard particles occurs
+	if (move_type == 1 && part_idx >= 2 && dr < 1.0) return false;
 
-/* } */
+      }
+    }
+
+  }
+
+  // Accept move if it was not rejected
+  return true;
+
+}
 
 // ------ Compute distance between two particles ------
 double compute_dist(int idx1, int idx2,
@@ -410,10 +412,11 @@ double compute_dist(int idx1, int idx2,
 
 }
 
-/* // ------ Interaction potential between cavities ------ */
+// ------ Interaction potential between cavities ------
 
-/* double cavity_interaction(double xx, bool cavity_init){ */
+double cavity_interaction(double xx, bool cavity_init){
  
-/*   return lny_gh(xx, M_PI*in.rho/6.0, 1.0, cavity_init); */
-/*   //return 0.0; */
-/* } */
+  return lny_gh(xx, M_PI*in.rho/6.0, 1.0, cavity_init);
+  //return 0.0;
+
+}

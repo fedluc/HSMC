@@ -11,19 +11,17 @@ static double ql_ave;
 static double *ql, *qlm2;
 static double lx_2, ly_2, lz_2;
 
-void compute_op(bool init,
-	        int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void compute_op(bool init){
 
 
-  // Check if the neighbor list allows for a correct calculation of the pressure
+  // Check if the neighbor list allows for a correct calculation of the order parameter
   if (init){
     
-    // Get info on cell size
-    int cell_num_tot;
+    // Get info on the neighbor list
     double cell_size_x, cell_size_y, cell_size_z, cell_size_min;
-    get_cell_list_info(NULL, &cell_num_tot, NULL, NULL, NULL,
-    		       &cell_size_x, &cell_size_y, &cell_size_z);
+    get_cell_list_info(NULL, NULL, NULL, NULL, 
+		       NULL, NULL, NULL, &cell_size_x, 
+		       &cell_size_y, &cell_size_z);
     cell_size_min = cell_size_x;
     if (cell_size_min < cell_size_y) cell_size_min = cell_size_y;
     if (cell_size_min < cell_size_z) cell_size_min = cell_size_z;
@@ -34,26 +32,22 @@ void compute_op(bool init,
 
   }
 
-
   // Compute the global order parameter
-  global_ql_compute(cl_num_tot, cl_max_part, cl_part_cell,
-		    cl_neigh_num, cl_neigh);
+  global_ql_compute();
 
   // Export output
   global_ql_output(init);
 
 }
 
-void global_ql_compute(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		       int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void global_ql_compute(){
     
 
   // Allocate array for order parameter per particle
   ql = (double*)malloc(sizeof(double) * part_info.NN);
   
   // Compute the order parameter per particle
-  ql_compute(cl_num_tot, cl_max_part, cl_part_cell,
-		    cl_neigh_num, cl_neigh);
+  ql_compute();
 
   // Average in order to obtain the global order parameter
   ql_ave = 0.0;
@@ -66,8 +60,7 @@ void global_ql_compute(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_
 
 }
 
-void ql_compute(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void ql_compute(){
 
    // Variable declaration
   int tlp1 = 2*in.ql_order + 1;
@@ -84,9 +77,7 @@ void ql_compute(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl
   for (int ii=0; ii<part_info.NN; ii++){
 
     // Obtain all the m-components of ql
-    qlm2_compute(ii,
-		 cl_num_tot, cl_max_part, cl_part_cell,
-		 cl_neigh_num, cl_neigh);
+    qlm2_compute(ii);
 
     ql[ii] = 0.0;
     for (int jj=0; jj<tlp1; jj++){
@@ -103,17 +94,20 @@ void ql_compute(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl
 }
 
 
-void qlm2_compute(int ref_idx,
-		  int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		  int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void qlm2_compute(int ref_idx){
   
   int num_bonds = 0;
+  int **cl_part_cell, **cl_neigh, cl_neigh_num;
   int cell_idx, neigh_idx, part_idx, n_part_cell;
   double qlm_real_tmp, qlmm_real_tmp;
   double qlm_imag_tmp, qlmm_imag_tmp;
   double plm;
   double dr, dx, dy, dz;
   double phi;
+
+  // Neighbor list
+  get_cell_list_info(&cl_part_cell, &cl_neigh, &cl_neigh_num, NULL, 
+		     NULL, NULL, NULL, NULL, NULL, NULL);
       
   // Cell with the reference particle
   cell_idx = cell_part_idx(ref_idx);

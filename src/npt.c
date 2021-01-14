@@ -40,22 +40,16 @@ void hs_npt() {
   printf("Pressure: %.8f\n", in.press);
 
   // Set-up the neighbor list
-  int cl_neigh_num, cl_num_tot;
-  compute_cell_list_info();
-  get_cell_list_info(&cl_neigh_num, &cl_num_tot, NULL, NULL, NULL,
-                     NULL, NULL, NULL);
-  int (*cl_neigh)[cl_neigh_num] = (int (*)[cl_neigh_num])cell_list_alloc(cl_num_tot, cl_neigh_num);
-  int (*cl_part_cell)[in.neigh_max_part] = (int (*)[in.neigh_max_part])cell_list_alloc(cl_num_tot, in.neigh_max_part);
-  cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
+  cell_list_init();
+
 
   // Optmize maximum displacement
   if (in.opt_flag == 1){
     double rho_start = in.rho;
-    opt_npt(cl_num_tot, in.neigh_max_part, cl_part_cell,
-	    cl_neigh_num, cl_neigh);
+    opt_npt();
     sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start);
     part_init();
-    cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
+    cell_list_init();
   }
 
   // Start timing
@@ -67,15 +61,13 @@ void hs_npt() {
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
-  run_npt(false,0, cl_num_tot, in.neigh_max_part, cl_part_cell,
-          cl_neigh_num, cl_neigh);
+  run_npt(false,0);
   printf("Equilibration completed.\n");
 
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  run_npt(true,in.sweep_eq, cl_num_tot, in.neigh_max_part, cl_part_cell,
-          cl_neigh_num, cl_neigh);
+  run_npt(true,in.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -98,16 +90,13 @@ void hs_npt() {
   
   // Free memory
   free(part);
-  free(cl_neigh);
-  free(cl_part_cell);
+  cell_list_free();
   rng_free();
 
 }
 
 
-void run_npt(bool prod_flag, int sweep_offset,
-	     int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-             int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void run_npt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
   bool presst_init = true, ql_ave_init = true;
@@ -150,9 +139,7 @@ void run_npt(bool prod_flag, int sweep_offset,
       // Compute pressure via thermodynamic route
       if (in.presst_sample_int > 0){
       	if (ii % in.presst_sample_int == 0) {
-      	  compute_presst(presst_init,
-			 cl_num_tot, cl_max_part, cl_part_cell,
-			 cl_neigh_num, cl_neigh);
+      	  compute_presst(presst_init);
       	  if (presst_init) presst_init = false;
       	}
       }
@@ -160,9 +147,7 @@ void run_npt(bool prod_flag, int sweep_offset,
       // Compute order parameter
       if (in.ql_sample_int > 0){
         if (ii % in.ql_sample_int == 0) {
-          compute_op(ql_ave_init,
-		     cl_num_tot, cl_max_part, cl_part_cell,
-		     cl_neigh_num, cl_neigh);
+          compute_op(ql_ave_init);
           if (ql_ave_init) ql_ave_init = false;
         }
       }
@@ -171,15 +156,13 @@ void run_npt(bool prod_flag, int sweep_offset,
     }
 
     // Generate a new configuration
-    sweep_npt(cl_num_tot, cl_max_part, cl_part_cell,
-              cl_neigh_num, cl_neigh);
+    sweep_npt();
 
   }  
 
 }
 
-void sweep_npt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-               int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void sweep_npt(){
 
   int r_move_id;
 
@@ -190,12 +173,10 @@ void sweep_npt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_
     r_move_id = rng_get_int(part_info.NN+1);
 
     if (r_move_id < part_info.NN){
-      part_move(cl_num_tot, cl_max_part, cl_part_cell,
-		cl_neigh_num, cl_neigh); // Move one particle
+      part_move(); // Move one particle
     }
     else{
-      vol_move(cl_num_tot, cl_max_part, cl_part_cell,
-	       cl_neigh_num, cl_neigh); // Change the volume
+      vol_move(); // Change the volume
     }
     
   }

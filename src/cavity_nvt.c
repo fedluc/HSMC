@@ -47,22 +47,14 @@ void cavity_hs_nvt() {
   cavity_psi_output();
 
   // Set-up the neighbor list
-  int cl_neigh_num, cl_num_tot;
-  compute_cell_list_info();
-  get_cell_list_info(&cl_neigh_num, &cl_num_tot, NULL, NULL, NULL,
-                     NULL, NULL, NULL);
-  int (*cl_neigh)[cl_neigh_num] = (int (*)[cl_neigh_num])cell_list_alloc(cl_num_tot, cl_neigh_num);
-  int (*cl_part_cell)[in.neigh_max_part] = (int (*)[in.neigh_max_part])cell_list_alloc(cl_num_tot, in.neigh_max_part);
-  cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
-
+  cell_list_init();
 
   // Optmize maximum displacement
   if (in.opt_flag == 1){
-    opt_cavity_nvt(cl_num_tot, in.neigh_max_part, cl_part_cell,
-		   cl_neigh_num, cl_neigh);
+    opt_cavity_nvt();
     part_init();
     cavity_set_distance();
-    cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
+    cell_list_init();
   }
 
   // Start timing
@@ -74,15 +66,13 @@ void cavity_hs_nvt() {
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
-  cavity_run_nvt(false,0, cl_num_tot, in.neigh_max_part, cl_part_cell,
-		 cl_neigh_num, cl_neigh);
+  cavity_run_nvt(false,0);
   printf("Equilibration completed.\n");
 
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  cavity_run_nvt(true,in.sweep_eq, cl_num_tot, in.neigh_max_part, cl_part_cell,
-		 cl_neigh_num, cl_neigh);
+  cavity_run_nvt(true,in.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -103,14 +93,11 @@ void cavity_hs_nvt() {
   // Free memory
   free(part);
   rng_free();
-  free(cl_neigh);
-  free(cl_part_cell);
+  cell_list_free();
 
 }
 
-void cavity_run_nvt(bool prod_flag, int sweep_offset,
-		    int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void cavity_run_nvt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
   bool cavity_init = true;
@@ -161,20 +148,17 @@ void cavity_run_nvt(bool prod_flag, int sweep_offset,
     }
     
     // Generate new configuration
-    cavity_sweep_nvt(cl_num_tot, in.neigh_max_part, cl_part_cell,
-		     cl_neigh_num, cl_neigh);
+    cavity_sweep_nvt();
 
   }  
 
 }
 
-void cavity_sweep_nvt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-		      int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void cavity_sweep_nvt(){
 
   // Create N trial moves (N = number of particles)
   for (int ii=0; ii<part_info.NN; ii++){
-    cavity_part_move(cl_num_tot, in.neigh_max_part, cl_part_cell,
-		     cl_neigh_num, cl_neigh);
+    cavity_part_move();
   }
 
 }
