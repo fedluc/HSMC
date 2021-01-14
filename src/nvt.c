@@ -8,7 +8,7 @@
 #include "compute_widom_chem_pot.h"
 #include "moves.h"
 #include "io_config.h"
-//#include "optimizer.h"
+#include "optimizer.h"
 #include "nvt.h"
 
 // Hard-sphere simulation in the NVT ensemble
@@ -48,13 +48,12 @@ void hs_nvt() {
   cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
 
   // Optmize maximum displacement
-  /* if (in.opt_flag == 1){ */
-  /*   opt_nvt(); */
-  /*   part_init(); */
-  /*   cell_list_init(cl_neigh, in.neigh_max_part, cl_part_cell, false); */
-  /*   get_cell_list_info(&cl_neigh_num, &cl_num_tot, NULL, NULL, NULL, */
-  /*		     NULL, NULL, NULL); */
-  /* } */
+  if (in.opt_flag == 1){
+    opt_nvt(cl_num_tot, in.neigh_max_part, cl_part_cell,
+	    cl_neigh_num, cl_neigh);
+    part_init();
+    cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
+  }
 
   // Start timing
   clock_t start = clock();
@@ -164,9 +163,7 @@ void run_nvt(bool prod_flag, int sweep_offset,
       // Compute order parameter
       if (in.ql_sample_int > 0){
       	if (ii % in.ql_sample_int == 0) {
-      	  compute_op(ql_ave_init,
-		     cl_num_tot, cl_max_part, cl_part_cell,
-		     cl_neigh_num, cl_neigh);
+      	  compute_op(ql_ave_init);
       	  if (ql_ave_init) ql_ave_init = false;
       	}
       }

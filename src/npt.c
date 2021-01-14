@@ -6,7 +6,7 @@
 #include "compute_order_parameter.h"
 #include "moves.h"
 #include "io_config.h"
-//#include "optimizer.h"
+#include "optimizer.h"
 #include "npt.h"
 
 // Hard-sphere simulation in the NpT ensemble
@@ -47,14 +47,14 @@ void hs_npt() {
   cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
 
   // Optmize maximum displacement
-  /* if (in.opt_flag == 1){ */
-  /*   double rho_start = in.rho; */
-  /*   opt_npt(); */
-  /*   sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start); */
-  /*   part_init(); */
-  /*   cell_list_init(); */
-
-  /* } */
+  if (in.opt_flag == 1){
+    double rho_start = in.rho;
+    opt_npt(cl_num_tot, in.neigh_max_part, cl_part_cell,
+	    cl_neigh_num, cl_neigh);
+    sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start);
+    part_init();
+    cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
+  }
 
   // Start timing
   clock_t start = clock();
@@ -158,9 +158,7 @@ void run_npt(bool prod_flag, int sweep_offset,
       // Compute order parameter
       if (in.ql_sample_int > 0){
         if (ii % in.ql_sample_int == 0) {
-          compute_op(ql_ave_init,
-		     cl_num_tot, cl_max_part, cl_part_cell,
-		     cl_neigh_num, cl_neigh);
+          compute_op(ql_ave_init);
           if (ql_ave_init) ql_ave_init = false;
         }
       }

@@ -19,11 +19,12 @@ bool check_overlap(int idx_ref,
 double compute_dist(int idx1, int idx2,
                     double sf_x, double sf_y, double sf_z);
 
-void cavity_rng_init();
+void cavity_part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		      int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
 
-void cavity_part_move();
-
-bool cavity_check_move(int idx_ref, int move_type, double en_old);
+bool cavity_check_move(int idx_ref, int move_type, double en_old,
+		       int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		       int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
 
 double cavity_interaction(double xx, bool cavity_init);
 

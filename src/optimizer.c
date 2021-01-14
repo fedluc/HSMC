@@ -9,7 +9,8 @@
 #include "optimizer.h"
 
 
-void opt_nvt(){
+void opt_nvt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+	     int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   int sample_iter = in.opt_sweeps/in.opt_samples;
   double acc_ratio_1, acc_ratio_2, dr_1, dr_2;
@@ -20,14 +21,18 @@ void opt_nvt(){
   printf("Number of samples: %d\n", in.opt_samples);
 
   // Collect two samples to get started
-  get_sample_nvt(&dr_1, &acc_ratio_1, sample_iter);
+  get_sample_nvt(&dr_1, &acc_ratio_1, sample_iter,
+		 cl_num_tot, cl_max_part, cl_part_cell,
+		 cl_neigh_num, cl_neigh);
   if (acc_ratio_1 > in.opt_part_target){
     in.dr_max *= 2;
   }
   else {
     in.dr_max /= 2;
   }
-  get_sample_nvt(&dr_2, &acc_ratio_2, sample_iter);
+  get_sample_nvt(&dr_2, &acc_ratio_2, sample_iter,
+		 cl_num_tot, cl_max_part, cl_part_cell,
+		 cl_neigh_num, cl_neigh);
 
 
   // Secant-method to find optimum value
@@ -43,7 +48,9 @@ void opt_nvt(){
     }
     dr_1 = dr_2;
     acc_ratio_1 = acc_ratio_2;
-    get_sample_nvt(&dr_2, &acc_ratio_2, sample_iter);
+    get_sample_nvt(&dr_2, &acc_ratio_2, sample_iter,
+		   cl_num_tot, cl_max_part, cl_part_cell,
+		   cl_neigh_num, cl_neigh);
   }
 
   printf("Optimal maximum displacement: %.8f\n", in.dr_max);
@@ -52,21 +59,26 @@ void opt_nvt(){
 
 }
 
-void get_sample_nvt(double *dr, double *acc_ratio, int sample_iter){
+void get_sample_nvt(double *dr, double *acc_ratio, int sample_iter,
+		    int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
-  part_moves = 0;
-  acc_part_moves=0;
-  rej_part_moves=0;
+  reset_moves_counters();
   for (int ii=0; ii<sample_iter; ii++){
-    sweep_nvt();
+    sweep_nvt(cl_num_tot, cl_max_part, cl_part_cell,
+		 cl_neigh_num, cl_neigh);
   }
+  int part_moves, acc_part_moves;
+  get_moves_counters(&part_moves, &acc_part_moves, NULL,
+		     NULL, NULL, NULL);
   *dr = in.dr_max;
   *acc_ratio = (double)acc_part_moves/((double)part_moves);
 
 }
 
 
-void opt_npt(){
+void opt_npt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+	     int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   int sample_iter = in.opt_sweeps/in.opt_samples;
   double acc_ratio_part_1, acc_ratio_part_2, dr_1, dr_2;
@@ -79,8 +91,10 @@ void opt_npt(){
 
   // Collect two samples to get started
   get_sample_npt(&dr_1, &acc_ratio_part_1, 
-		  &dv_1, &acc_ratio_vol_1, 
-		  sample_iter);
+		 &dv_1, &acc_ratio_vol_1, 
+		 sample_iter,
+		 cl_num_tot, cl_max_part, cl_part_cell,
+		 cl_neigh_num, cl_neigh);
   if (acc_ratio_part_1 > in.opt_part_target){
     in.dr_max *= 2;
   }
@@ -94,8 +108,10 @@ void opt_npt(){
     in.dv_max /= 2;
   }
   get_sample_npt(&dr_2, &acc_ratio_part_2, 
-		  &dv_2, &acc_ratio_vol_2, 
-		  sample_iter);
+		 &dv_2, &acc_ratio_vol_2, 
+		 sample_iter,
+		 cl_num_tot, cl_max_part, cl_part_cell,
+		 cl_neigh_num, cl_neigh);
 
   // Secant-method to find optimum value
   for (int ii=0; ii<in.opt_samples; ii++){
@@ -110,8 +126,10 @@ void opt_npt(){
     acc_ratio_part_1 = acc_ratio_part_2;
     acc_ratio_vol_1 = acc_ratio_vol_2;
     get_sample_npt(&dr_2, &acc_ratio_part_2, 
-		  &dv_2, &acc_ratio_vol_2, 
-		  sample_iter);
+		   &dv_2, &acc_ratio_vol_2, 
+		   sample_iter,
+		   cl_num_tot, cl_max_part, cl_part_cell,
+		   cl_neigh_num, cl_neigh);
 
   }
 
@@ -136,17 +154,18 @@ void opt_npt(){
 
 void get_sample_npt(double *dr, double *acc_ratio_part, 
 		    double *dv, double *acc_ratio_vol,
-		    int sample_iter){
+		    int sample_iter,
+		    int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
-  part_moves = 0;
-  vol_moves = 0;
-  acc_part_moves= 0;
-  rej_part_moves= 0;
-  acc_vol_moves= 0;
-  rej_vol_moves= 0;
+  reset_moves_counters();
   for (int ii=0; ii<sample_iter; ii++){
-    sweep_npt();
+    sweep_npt(cl_num_tot, cl_max_part, cl_part_cell,
+	      cl_neigh_num, cl_neigh);
   }
+  int part_moves, acc_part_moves, vol_moves, acc_vol_moves;
+  get_moves_counters(&part_moves, &acc_part_moves, NULL,
+		     &vol_moves, &acc_vol_moves, NULL);
   *dr = in.dr_max;
   *dv = in.dv_max;
   *acc_ratio_part = (double)acc_part_moves/((double)part_moves);
@@ -155,7 +174,8 @@ void get_sample_npt(double *dr, double *acc_ratio_part,
 }
 
 
-void opt_cavity_nvt(){
+void opt_cavity_nvt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   int sample_iter = in.opt_sweeps/in.opt_samples;
   double acc_ratio_1, acc_ratio_2, dr_1, dr_2;
@@ -166,14 +186,18 @@ void opt_cavity_nvt(){
   printf("Number of samples: %d\n", in.opt_samples);
 
   // Collect two samples to get started
-  get_sample_cavity_nvt(&dr_1, &acc_ratio_1, sample_iter);
+  get_sample_cavity_nvt(&dr_1, &acc_ratio_1, sample_iter,
+			cl_num_tot, cl_max_part, cl_part_cell,
+			cl_neigh_num, cl_neigh);
   if (acc_ratio_1 > in.opt_part_target){
     in.dr_max *= 2;
   }
   else {
     in.dr_max /= 2;
   }
-  get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter);
+  get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter,
+			cl_num_tot, cl_max_part, cl_part_cell,
+			cl_neigh_num, cl_neigh);
 
 
   // Secant-method to find optimum value
@@ -189,7 +213,9 @@ void opt_cavity_nvt(){
     }
     dr_1 = dr_2;
     acc_ratio_1 = acc_ratio_2;
-    get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter);
+    get_sample_cavity_nvt(&dr_2, &acc_ratio_2, sample_iter,
+			  cl_num_tot, cl_max_part, cl_part_cell,
+			  cl_neigh_num, cl_neigh);
   }
 
   printf("Optimal maximum displacement: %.8f\n", in.dr_max);
@@ -198,14 +224,18 @@ void opt_cavity_nvt(){
 
 }
 
-void get_sample_cavity_nvt(double *dr, double *acc_ratio, int sample_iter){
+void get_sample_cavity_nvt(double *dr, double *acc_ratio, int sample_iter,
+			   int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+			   int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
-  part_moves = 0;
-  acc_part_moves=0;
-  rej_part_moves=0;
+  reset_moves_counters();
   for (int ii=0; ii<sample_iter; ii++){
-    cavity_sweep_nvt();
+    cavity_sweep_nvt(cl_num_tot, cl_max_part, cl_part_cell,
+		     cl_neigh_num, cl_neigh);
   }
+  int part_moves, acc_part_moves;
+  get_moves_counters(&part_moves, &acc_part_moves, NULL,
+                     NULL, NULL, NULL);
   *dr = in.dr_max;
   *acc_ratio = (double)acc_part_moves/((double)part_moves);
 
