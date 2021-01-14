@@ -175,22 +175,35 @@ bool check_overlap(int idx_ref,
     // Loop over the particles in the neighboring cell
     n_part_cell = cl_part_cell[neigh_idx][0];
     if (n_part_cell > 0){
-      for (int jj=1; jj<=n_part_cell; jj++){	
+      for (int jj=1; jj<=n_part_cell; jj++){
 	
-	// Particle index
-	part_idx = cl_part_cell[neigh_idx][jj];
+  	// Particle index
+  	part_idx = cl_part_cell[neigh_idx][jj];
 
-	//Compute inter-particle distance
-	dr = compute_dist(idx_ref, part_idx, sf_x, sf_y, sf_z);
+  	//Compute inter-particle distance
+  	dr = compute_dist(idx_ref, part_idx, sf_x, sf_y, sf_z);
 	
-	// Signal that there is overlap
-	if (dr < 1.0 && part_idx != idx_ref){
-		return true;
-	}
+  	// Signal that there is overlap
+  	if (dr < 1.0 && part_idx != idx_ref){
+  		return true;
+  	}
       }
     }
 
   }
+
+  /* // Loop over the other particles (no cell lists are used) */
+  /* for (int ii=0; ii<part_info.NN; ii++){ */
+
+  /*   //Compute inter-particle distance */
+  /*   dr = compute_dist(idx_ref, ii, sf_x, sf_y, sf_z); */
+	
+  /*   // Signal that there is overlap */
+  /*   if (dr < 1.0 && ii != idx_ref){ */
+  /* 		return true; */
+  /*   } */
+
+  /* } */
 
   return false;
 

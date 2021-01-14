@@ -41,7 +41,7 @@ void cell_list_new(int cell_num_tot, int max_part, int part_cell[cell_num_tot][m
 
   // Define number and size of the cells
   compute_cell_list_info();
-
+ 
   // Check for consistency
   if (cell_size_x < 1.0 || cell_size_y < 1.0 || cell_size_z < 1.0) {
     printf("ERROR: size of cells in cell list is smaller than the size of the particles\n");
@@ -51,7 +51,7 @@ void cell_list_new(int cell_num_tot, int max_part, int part_cell[cell_num_tot][m
   // Initialize the cell lists
   for (int ii=0; ii<cell_num_tot; ii++){
     part_cell[ii][0] = 0;
-    for (int jj=1; jj<=max_part-1; jj++){
+    for (int jj=1; jj<max_part; jj++){
       part_cell[ii][jj] = -1;
     }
   }
@@ -79,27 +79,28 @@ void cell_list_new(int cell_num_tot, int max_part, int part_cell[cell_num_tot][m
 void compute_cell_list_info(){
 
   // Number of cells
-  cell_num_x = compute_cell_num(sim_box_info.lx, in.neigh_dr);
-  cell_num_y = compute_cell_num(sim_box_info.ly, in.neigh_dr);
-  cell_num_z = compute_cell_num(sim_box_info.lz, in.neigh_dr);
+  cell_num_x = (int)floor(sim_box_info.lx/in.neigh_dr);
+  cell_num_y = (int)floor(sim_box_info.ly/in.neigh_dr);
+  cell_num_z = (int)floor(sim_box_info.lz/in.neigh_dr);
   int cell_num_tot = cell_num_x * cell_num_y * cell_num_z;
+  
+  // Do not allow less than 27 cells
+  if (cell_num_tot < 27){
+    printf("WARNING: The specified cell size has been reduced in order to accomodate 27 cells in the simulation box\n");
+    cell_num_x = 3;
+    cell_num_y = 3;
+    cell_num_z = 3;
+  }
 
   // Number of neighbor per cell
   neigh_num = 27;
-  if (cell_num_tot < 27) neigh_num = cell_num_tot;
 
   // Cell size
   cell_size_x = sim_box_info.lx/cell_num_x;
   cell_size_y = sim_box_info.ly/cell_num_y;
   cell_size_z = sim_box_info.lz/cell_num_z;
-  
-}
 
-int compute_cell_num(double sim_box_len, double dr){
   
-  double rem = fmod(sim_box_len,dr);
-  return (int)(sim_box_len - rem);
-
 }
 
 void cell_list_update(int cell_idx_del, int cell_idx_add, int part_idx,
@@ -155,7 +156,7 @@ void cell_list_check(int cell_idx,
     exit(EXIT_FAILURE);
   }
   if (part_cell[cell_idx][0] > max_part){
-    printf("ERROR: More than %d particles in one cell", max_part);
+    printf("ERROR: More than %d particles in one cell\n", max_part);
     exit(EXIT_FAILURE);
   }
 }

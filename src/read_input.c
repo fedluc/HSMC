@@ -189,6 +189,11 @@ void read_input_file(char *filename){
 	  in.neigh_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  in.neigh_max_part = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
       }
 
       else if (strcmp(key,"dr_max") == 0 || strcmp(key,"dr_max\n") == 0){

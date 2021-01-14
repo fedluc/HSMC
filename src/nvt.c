@@ -165,7 +165,9 @@ void run_nvt(bool prod_flag, int sweep_offset,
       // Compute order parameter
       if (in.ql_sample_int > 0){
       	if (ii % in.ql_sample_int == 0) {
-      	  compute_op(ql_ave_init);
+      	  compute_op(ql_ave_init,
+		     cl_num_tot, cl_max_part, cl_part_cell,
+		     cl_neigh_num, cl_neigh);
       	  if (ql_ave_init) ql_ave_init = false;
       	}
       }

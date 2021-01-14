@@ -12,8 +12,6 @@ void cell_list_new(int cell_num_tot, int max_part, int part_cell[cell_num_tot][m
 
 void compute_cell_list_info();
 
-int compute_cell_num(double sim_box_len, double dr);
-
 void cell_list_update(int cell_idx_del, int cell_idx_add, int part_idx,
 		      int cell_num_tot, int max_part, int part_cell[cell_num_tot][max_part]);
 
