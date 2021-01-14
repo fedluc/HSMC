@@ -11,23 +11,37 @@ static double ql_ave;
 static double *ql, *qlm2;
 static double lx_2, ly_2, lz_2;
 
-void compute_op(bool init){
+void compute_op(bool init,
+		int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+
+  // Check if the neighbor list allows for a correct calculation of the pressure
+  if (init){
+    if (in.neigh_dr < in.ql_rmax){
+      printf("WARNING: The cutoff for the order parameter was reduced to %f in order to be consistent with the neighbor list size\n", in.neigh_dr);
+      in.ql_rmax = in.neigh_dr;
+    }
+  }
 
   // Compute the global order parameter
-  global_ql_compute();
+  global_ql_compute(cl_num_tot, cl_max_part, cl_part_cell,
+		    cl_neigh_num, cl_neigh);
 
   // Export output
   global_ql_output(init);
 
 }
 
-void global_ql_compute(){
+void global_ql_compute(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		       int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+    
 
   // Allocate array for order parameter per particle
   ql = (double*)malloc(sizeof(double) * part_info.NN);
   
   // Compute the order parameter per particle
-  ql_compute();
+  ql_compute(cl_num_tot, cl_max_part, cl_part_cell,
+		    cl_neigh_num, cl_neigh);
 
   // Average in order to obtain the global order parameter
   ql_ave = 0.0;
@@ -40,13 +54,11 @@ void global_ql_compute(){
 
 }
 
-void ql_compute(){
+void ql_compute(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
    // Variable declaration
   int tlp1 = 2*in.ql_order + 1;
-  int cell_num_x, cell_num_y, cell_num_z;
-  double cell_size_x, cell_size_y, cell_size_z;
-  double cell_max_diag;
 
   // Allocate array to store the various m-components of ql
   qlm2 = (double*)malloc(sizeof(double) * tlp1);
@@ -60,7 +72,9 @@ void ql_compute(){
   for (int ii=0; ii<part_info.NN; ii++){
 
     // Obtain all the m-components of ql
-    qlm2_compute(ii);
+    qlm2_compute(ii,
+		 cl_num_tot, cl_max_part, cl_part_cell,
+		 cl_neigh_num, cl_neigh);
 
     ql[ii] = 0.0;
     for (int jj=0; jj<tlp1; jj++){
@@ -77,7 +91,9 @@ void ql_compute(){
 }
 
 
-void qlm2_compute(int ref_idx){
+void qlm2_compute(int ref_idx,
+		  int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		  int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
   
   int cell_idx, neigh_idx, n_part_cell, part_idx;
   int num_bonds = 0;

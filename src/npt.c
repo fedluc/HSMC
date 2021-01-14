@@ -2,8 +2,8 @@
 #include "init.h"
 #include "read_input.h"
 #include "cell_list.h"
-//#include "compute_press.h"
-//#include "compute_order_parameter.h"
+#include "compute_press.h"
+#include "compute_order_parameter.h"
 #include "moves.h"
 #include "io_config.h"
 //#include "optimizer.h"
@@ -145,21 +145,25 @@ void run_npt(bool prod_flag, int sweep_offset,
       }
 
 
-      /* // Compute pressure via thermodynamic route */
-      /* if (in.presst_sample_int > 0){ */
-      /* 	if (ii % in.presst_sample_int == 0) { */
-      /* 	  compute_presst(presst_init); */
-      /* 	  if (presst_init) presst_init = false; */
-      /* 	} */
-      /* } */
+      // Compute pressure via thermodynamic route
+      if (in.presst_sample_int > 0){
+      	if (ii % in.presst_sample_int == 0) {
+      	  compute_presst(presst_init,
+			 cl_num_tot, cl_max_part, cl_part_cell,
+			 cl_neigh_num, cl_neigh);
+      	  if (presst_init) presst_init = false;
+      	}
+      }
 
-      /* // Compute order parameter */
-      /* if (in.ql_sample_int > 0){ */
-      /*   if (ii % in.ql_sample_int == 0) { */
-      /*     compute_op(ql_ave_init); */
-      /*     if (ql_ave_init) ql_ave_init = false; */
-      /*   } */
-      /* } */
+      // Compute order parameter
+      if (in.ql_sample_int > 0){
+        if (ii % in.ql_sample_int == 0) {
+          compute_op(ql_ave_init,
+		     cl_num_tot, cl_max_part, cl_part_cell,
+		     cl_neigh_num, cl_neigh);
+          if (ql_ave_init) ql_ave_init = false;
+        }
+      }
 
 
     }

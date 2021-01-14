@@ -20,23 +20,27 @@ static double cell_size_x;
 static double cell_size_y;
 static double cell_size_z;
 
-void compute_mu(bool init){
+void compute_mu(bool init,
+		int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+                int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   // Compute the chemical potential via widom insertion method
-  widom_insertion();
+  widom_insertion(cl_num_tot, cl_max_part, cl_part_cell,
+		  cl_neigh_num, cl_neigh);
 
   // Export output
   mu_output(init);
  
 }
 
-void widom_insertion(){
+void widom_insertion(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		     int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   // Initialize insertion counter
   wtest = 0;
 
   // Size of the cell list
-  get_cell_list_info(&cell_num_x, &cell_num_y, &cell_num_z,
+  get_cell_list_info(NULL, NULL, &cell_num_x, &cell_num_y, &cell_num_z,
 		     &cell_size_x, &cell_size_y, &cell_size_z);
 
   // Perform the insertions prescribed in input
@@ -46,7 +50,8 @@ void widom_insertion(){
     widom_rand_pos();
 
     // Update average chemical potential if there is no overlap
-    if (!widom_check_overlap()) wtest++;
+    if (!widom_check_overlap(cl_num_tot, cl_max_part, cl_part_cell,
+			     cl_neigh_num, cl_neigh)) wtest++;
 
   }
 
@@ -73,7 +78,8 @@ void widom_rand_pos(){
 }
 
 
-bool widom_check_overlap(){
+bool widom_check_overlap(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+			 int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
   
   // Variable declaration
   int cell_idx, neigh_idx, part_idx;

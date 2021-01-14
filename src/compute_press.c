@@ -16,13 +16,22 @@ static int presst_hist_nn;
 static double *presst_xi, *presst_hist;
 
 
-void compute_pressv(bool init){
+void compute_pressv(bool init,
+		    int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+
+  // Check if the neighbor list allows for a correct calculation of the pressure
+  if (in.neigh_dr < pressv_rmax){
+    printf("ERROR: For a correct pressure calculation use a size for the neighbor list which is at least %f\n", pressv_rmax);
+    exit(EXIT_FAILURE);
+  }
 
   // Initialize histogram
   pressv_hist_init();
 
   // Fill histogram
-  pressv_compute_hist();
+  pressv_compute_hist(cl_num_tot, cl_max_part, cl_part_cell,
+		      cl_neigh_num, cl_neigh);
 
   // compute Radial distribution function close to contact
   pressv_compute_rdf();
@@ -53,7 +62,8 @@ void pressv_hist_init(){
   
 }
 
-void pressv_compute_hist(){
+void pressv_compute_hist(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+			 int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
   
   // Variable declaration
   int cell_idx, neigh_idx, n_part_cell, part_idx;
@@ -109,13 +119,16 @@ void pressv_compute_rdf(){
 }
 
 
-void compute_presst(bool init){
+void compute_presst(bool init,
+		    int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+		    int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
 
   //Initialize histogram
   presst_hist_init();
 
   // Fill histogram
-  presst_compute_hist();
+  presst_compute_hist(cl_num_tot, cl_max_part, cl_part_cell,
+		      cl_neigh_num, cl_neigh);
   
   // Write output
   presst_output(init);
@@ -144,7 +157,8 @@ void presst_hist_init(){
   
 }
 
-void presst_compute_hist(){
+void presst_compute_hist(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
+			 int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
   
   // Variable declaration
   double vol_ratio, sf;
@@ -161,7 +175,9 @@ void presst_compute_hist(){
     // Check if there is overlap
     for (int jj=0; jj<part_info.NN; jj++){
       
-      overlap = check_overlap(jj, sf, sf, sf);
+      overlap = check_overlap(jj, sf, sf, sf,
+			      cl_num_tot, cl_max_part, cl_part_cell,
+			      cl_neigh_num, cl_neigh);
 
       if (overlap) break;
 
