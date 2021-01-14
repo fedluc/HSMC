@@ -4,8 +4,8 @@
 #include <argp.h>
 #include "read_input.h"
 #include "nvt.h"
-#include "npt.h"
-#include "cavity_nvt.h"
+//#include "npt.h"
+//#include "cavity_nvt.h"
 
 // ----------------------------------------
 // ------ Set-up command line parser ------
@@ -115,11 +115,11 @@ int main (int argc, char **argv){
     // Select which type of simulation to run
     if (in.press > 0){
       // NpT simulation
-      hs_npt();
+      // hs_npt();
     }
     else if (in.cavity_pcav > 0){
       // NVT cavity simulation
-      cavity_hs_nvt();
+      //cavity_hs_nvt();
     }
     else {
       // NVT simulation

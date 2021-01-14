@@ -4,17 +4,13 @@
 #include <stdbool.h>
 
 
-void part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-               int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
+void part_move();
 
 
-void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-              int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
+void vol_move();
 
 bool check_overlap(int idx_ref,
-                   double sf_x, double sf_y, double sf_z,
-                   int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-                   int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]);
+                   double sf_x, double sf_y, double sf_z);
 
 double compute_dist(int idx1, int idx2,
                     double sf_x, double sf_y, double sf_z);

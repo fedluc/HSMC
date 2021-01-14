@@ -5,12 +5,12 @@
 #include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
-#include "compute_press.h"
-#include "compute_order_parameter.h"
-#include "compute_widom_chem_pot.h"
+//#include "compute_press.h"
+//#include "compute_order_parameter.h"
+//#include "compute_widom_chem_pot.h"
 #include "moves.h"
 #include "io_config.h"
-#include "optimizer.h"
+//#include "optimizer.h"
 #include "nvt.h"
 
 // Hard-sphere simulation in the NVT ensemble
@@ -32,7 +32,7 @@ void hs_nvt() {
 
   }
   else { // Read from restart file
-    read_restart(in.restart_name);
+    //read_restart(in.restart_name);
   }
 
   // Print simulation info on screen
@@ -41,21 +41,15 @@ void hs_nvt() {
   printf("Number of particles: %d\n", part_info.NN);
 
   // Set-up the neighbor list
-  int cl_neigh_num, cl_num_tot;
-  compute_cell_list_info();
-  get_cell_list_info(&cl_neigh_num, &cl_num_tot, NULL, NULL, NULL,
-                     NULL, NULL, NULL);
-  int (*cl_neigh)[cl_neigh_num] = (int (*)[cl_neigh_num])cell_list_alloc(cl_num_tot, cl_neigh_num);
-  int (*cl_part_cell)[in.neigh_max_part] = (int (*)[in.neigh_max_part])cell_list_alloc(cl_num_tot, in.neigh_max_part);
-  cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
+  cell_list_init();
 
-  // Optmize maximum displacement
-  if (in.opt_flag == 1){
-    opt_nvt(cl_num_tot, in.neigh_max_part, cl_part_cell,
-	    cl_neigh_num, cl_neigh);
-    part_init();
-    cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell);
-  }
+  /* // Optmize maximum displacement */
+  /* if (in.opt_flag == 1){ */
+  /*   opt_nvt(cl_num_tot, in.neigh_max_part, cl_part_cell, */
+  /* 	    cl_neigh_num, cl_neigh); */
+  /*   part_init(); */
+  /*   cell_list_init(cl_neigh_num, cl_neigh, in.neigh_max_part, cl_part_cell); */
+  /* } */
 
   // Start timing
   clock_t start = clock();
@@ -66,22 +60,20 @@ void hs_nvt() {
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
-  run_nvt(false,0, cl_num_tot, in.neigh_max_part, cl_part_cell, 
-	  cl_neigh_num, cl_neigh);
+  run_nvt(false,0);
   printf("Equilibration completed.\n");
 
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  run_nvt(true,in.sweep_eq, cl_num_tot, in.neigh_max_part, cl_part_cell,
-          cl_neigh_num, cl_neigh);
+  run_nvt(true,in.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
   // Print acceptance and rejection percentages
   int part_moves, acc_part_moves, rej_part_moves;
   get_moves_counters(&part_moves, &acc_part_moves, &rej_part_moves,
-		     NULL, NULL, NULL);
+  		     NULL, NULL, NULL);
   printf("---------------------------------------------------\n");
   printf("-- Particle moves: %.8e\n", (double)part_moves);
   printf("   Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves));
@@ -92,17 +84,14 @@ void hs_nvt() {
   printf("Elapsed time: %f seconds\n",
   	 (double)(end - start) / CLOCKS_PER_SEC);
 
-  // Free memory 
+  /* // Free memory  */
   free(part);
-  free(cl_neigh);
-  free(cl_part_cell);
+  cell_list_free();
   rng_free();
 
 }
 
-void run_nvt(bool prod_flag, int sweep_offset,
-	     int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-             int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void run_nvt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
   bool pressv_init = true, presst_init = true;
@@ -142,63 +131,60 @@ void run_nvt(bool prod_flag, int sweep_offset,
     	}
       }
 
-      // Compute pressure via virial route
-      if (in.pressv_sample_int > 0){
-      	if (ii % in.pressv_sample_int == 0) {
-      	  compute_pressv(pressv_init,
-			 cl_num_tot, cl_max_part, cl_part_cell,
-			 cl_neigh_num, cl_neigh);
-      	  if (pressv_init) pressv_init = false;
-      	}
-      }
+    /*   // Compute pressure via virial route */
+    /*   if (in.pressv_sample_int > 0){ */
+    /*   	if (ii % in.pressv_sample_int == 0) { */
+    /*   	  compute_pressv(pressv_init, */
+    /* 			 cl_num_tot, cl_max_part, cl_part_cell, */
+    /* 			 cl_neigh_num, cl_neigh); */
+    /*   	  if (pressv_init) pressv_init = false; */
+    /*   	} */
+    /*   } */
 
-      // Compute pressure via thermodynamic route
-      if (in.presst_sample_int > 0){
-      	if (ii % in.presst_sample_int == 0) {
-      	  compute_presst(presst_init,
-			 cl_num_tot, cl_max_part, cl_part_cell,
-			 cl_neigh_num, cl_neigh);
-      	  if (presst_init) presst_init = false;
-      	}
-      }
+    /*   // Compute pressure via thermodynamic route */
+    /*   if (in.presst_sample_int > 0){ */
+    /*   	if (ii % in.presst_sample_int == 0) { */
+    /*   	  compute_presst(presst_init, */
+    /* 			 cl_num_tot, cl_max_part, cl_part_cell, */
+    /* 			 cl_neigh_num, cl_neigh); */
+    /*   	  if (presst_init) presst_init = false; */
+    /*   	} */
+    /*   } */
 
-      // Compute order parameter
-      if (in.ql_sample_int > 0){
-      	if (ii % in.ql_sample_int == 0) {
-      	  compute_op(ql_ave_init,
-		     cl_num_tot, cl_max_part, cl_part_cell,
-		     cl_neigh_num, cl_neigh);
-      	  if (ql_ave_init) ql_ave_init = false;
-      	}
-      }
+    /*   // Compute order parameter */
+    /*   if (in.ql_sample_int > 0){ */
+    /*   	if (ii % in.ql_sample_int == 0) { */
+    /*   	  compute_op(ql_ave_init, */
+    /* 		     cl_num_tot, cl_max_part, cl_part_cell, */
+    /* 		     cl_neigh_num, cl_neigh); */
+    /*   	  if (ql_ave_init) ql_ave_init = false; */
+    /*   	} */
+    /*   } */
 
-      // Compute chemical potential via Widom insertions
-      if (in.mu_sample_int > 0){
-      	if (ii % in.mu_sample_int == 0) {
-      	  compute_mu(mu_ave_init,
-		     cl_num_tot, cl_max_part, cl_part_cell,
-		     cl_neigh_num, cl_neigh);
-      	  if (mu_ave_init) mu_ave_init = false;
-      	}
-      }
+    /*   // Compute chemical potential via Widom insertions */
+    /*   if (in.mu_sample_int > 0){ */
+    /*   	if (ii % in.mu_sample_int == 0) { */
+    /*   	  compute_mu(mu_ave_init, */
+    /* 		     cl_num_tot, cl_max_part, cl_part_cell, */
+    /* 		     cl_neigh_num, cl_neigh); */
+    /*   	  if (mu_ave_init) mu_ave_init = false; */
+    /*   	} */
+    /*   } */
 
     }
 
     // Generate new configuration
-    sweep_nvt(cl_num_tot, cl_max_part, cl_part_cell,
-	      cl_neigh_num, cl_neigh);
+    sweep_nvt();
 
   }
 
 }
 
-void sweep_nvt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_max_part],
-	       int cl_neigh_num, int cl_neigh[cl_num_tot][cl_neigh_num]){
+void sweep_nvt(){
 
   // Create N trial moves (N = number of particles)
     for (int ii=0; ii<part_info.NN; ii++){
-      part_move(cl_num_tot, cl_max_part, cl_part_cell,
-	      cl_neigh_num, cl_neigh);
+      part_move();
     }
 
 }
