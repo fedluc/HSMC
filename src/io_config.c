@@ -4,6 +4,7 @@
 #include <zlib.h>
 #include <gsl/gsl_rng.h>
 #include "init.h"
+#include "rng.h"
 #include "read_input.h"
 #include "io_config.h"
 
@@ -39,7 +40,7 @@ void write_restart(int sweep){
   fwrite(part, sizeof(double), part_info.NN*4, fid);
 
   // Write random number generator status
-  gsl_rng_fwrite(fid, rng_mt);
+  rng_write(fid);
 
   // Close binary file
   fclose(fid);
@@ -48,9 +49,6 @@ void write_restart(int sweep){
 
 
 void read_restart(char *restart_file){
-
-  // Declare the type of random number generator
-  rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
 
   // Open binary file
   printf("Reading data from restart file %s...\n", restart_file);
@@ -80,16 +78,13 @@ void read_restart(char *restart_file){
   fread(part, sizeof(double), part_info.NN*4, fid);
 
   // Read random number generator status
-  gsl_rng_fread(fid, rng_mt);
+  rng_read(fid);
   
   // Close binary file
   fclose(fid);
 
   // Compute the density
   in.rho = part_info.NN/sim_box_info.vol;
-
-  // Initialize maximum number produced by random number generator
-  r_num_max = gsl_rng_max(rng_mt);
 
   // Print message on screen
   printf("The following data was initialized via the restart file:\n"

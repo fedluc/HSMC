@@ -1,6 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <complex.h>
 #include "init.h"
+#include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "moves.h"
@@ -20,12 +23,12 @@ void part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_
   double x_old, y_old, z_old;
 
   // Random number in [0, NN-1] to select the particle
-  r_idx = gsl_rng_uniform_int(rng_mt, part_info.NN);
+  r_idx = rng_get_int(part_info.NN);
     
   // Three random numbers in [0,1] for the displacement
-  r_x = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-  r_y = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-  r_z = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
+  r_x = rng_get_double();
+  r_y = rng_get_double();
+  r_z = rng_get_double();
  
   // Store old coordinates (if the move gets rejected)
   x_old = part[r_idx][1];
@@ -82,7 +85,7 @@ void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_m
   bool overlap = false;
 
   // Random number for volume perturbation
-  r_dv = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
+  r_dv = rng_get_double();
 
   // Proposed volume move
   log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*in.dv_max;
@@ -110,7 +113,7 @@ void vol_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_m
 
     boltz_fact = exp(in.press*(sim_box_info.vol - vol_new) +
 		     (part_info.NN + 1)*log(vol_ratio));
-    r_acc = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
+    r_acc = rng_get_double();
     
     if (r_acc >= boltz_fact){
       // Reject move
@@ -228,22 +231,22 @@ void cavity_part_move(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_t
 
   // Select particle to move (cavities are moved with probability in.cavity_pcav)
   // Note: The cavities have indexes 0 and 1
-  r_type = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
+  r_type = rng_get_double();
   if (r_type > in.cavity_pcav ) {
     // Move standard particles
-    r_idx = gsl_rng_uniform_int(rng_mt, part_info.NN-2) + 2;
+    r_idx = rng_get_int(part_info.NN-2) + 2;
     move_type = 0;
   }
   else {
     // Move cavity
-    r_idx = gsl_rng_uniform_int(rng_mt, 2);
+    r_idx = rng_get_int(2);
     move_type = 1;
   }
 
   // Three random numbers in [0,1] for the displacement
-  r_x = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-  r_y = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-  r_z = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
+  r_x = rng_get_double();
+  r_y = rng_get_double();
+  r_z = rng_get_double();
 
   // Store old coordinates (if the move gets rejected)
   x_old = part[r_idx][1];
@@ -325,7 +328,7 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old,
     }
     // Reject according to metropolis algorithm
     boltz_fact =  exp(-(cavity_interaction(dr_cavity,false) - en_old));
-    r_acc = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
+    r_acc = rng_get_double();
     if (r_acc > boltz_fact) return false;
   }
 

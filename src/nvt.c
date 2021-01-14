@@ -1,6 +1,8 @@
+#include <stdlib.h>
 #include <time.h>
 #include <math.h>
 #include "init.h"
+#include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_press.h"
@@ -90,11 +92,11 @@ void hs_nvt() {
   printf("Elapsed time: %f seconds\n",
   	 (double)(end - start) / CLOCKS_PER_SEC);
 
-  /* // Free memory */
+  // Free memory 
   free(part);
-  gsl_rng_free(rng_mt);
   free(cl_neigh);
   free(cl_part_cell);
+  rng_free();
 
 }
 

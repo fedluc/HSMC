@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "init.h"
+#include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_widom_chem_pot.h"
@@ -68,12 +69,9 @@ void widom_insertion(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_to
 
 void widom_rand_pos(){
 
-    r_x = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-    r_y = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-    r_z = (double)gsl_rng_get(rng_mt)/(double)r_num_max;
-    r_x *= sim_box_info.lx;
-    r_y *= sim_box_info.ly;
-    r_z *= sim_box_info.lz;
+    r_x = rng_get_double() * sim_box_info.lx;
+    r_y = rng_get_double() * sim_box_info.ly;
+    r_z = rng_get_double() * sim_box_info.lz;
   
 }
 

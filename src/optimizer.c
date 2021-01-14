@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "init.h"
 #include "read_input.h"
 #include "compute_press.h"

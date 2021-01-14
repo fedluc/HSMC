@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #include <time.h>
 #include "init.h"
+#include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_press.h"
@@ -96,9 +98,9 @@ void hs_npt() {
   
   // Free memory
   free(part);
-  gsl_rng_free(rng_mt);
   free(cl_neigh);
   free(cl_part_cell);
+  rng_free();
 
 }
 
@@ -183,7 +185,7 @@ void sweep_npt(int cl_num_tot, int cl_max_part, int cl_part_cell[cl_num_tot][cl_
   for (int ii=0; ii<part_info.NN; ii++){
 
     // Perform (on average) one volume move every N particles moves
-    r_move_id = gsl_rng_uniform_int(rng_mt, part_info.NN+1);
+    r_move_id = rng_get_int(part_info.NN+1);
 
     if (r_move_id < part_info.NN){
       part_move(cl_num_tot, cl_max_part, cl_part_cell,

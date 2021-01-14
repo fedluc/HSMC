@@ -1,10 +1,9 @@
+#include <stdlib.h>
 #include <time.h>
 #include "init.h"
+#include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
-#include "compute_press.h"
-#include "compute_order_parameter.h"
-#include "compute_widom_chem_pot.h"
 #include "moves.h"
 #include "io_config.h"
 #include "optimizer.h"
@@ -103,7 +102,7 @@ void cavity_hs_nvt() {
   
   // Free memory
   free(part);
-  gsl_rng_free(rng_mt);
+  rng_free();
   free(cl_neigh);
   free(cl_part_cell);
 

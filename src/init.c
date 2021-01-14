@@ -4,10 +4,6 @@
 #include "read_input.h"
 #include "init.h"
 
-// Global variable for random number generator
-gsl_rng *rng_mt;
-long unsigned int r_num_max;
-
 // Global variable for simulation box information
 struct box_info sim_box_info;
 
@@ -157,16 +153,6 @@ void part_init_err(){
   printf("-- If SC lattice was selected, try to change to FCC\n");
   printf("-- If FCC lattice was selected, the selected value of density is unphysical\n");
   exit(EXIT_FAILURE);
-
-}
-
-// ------ Initialize random number generator ------
-void rng_init(){
-
-  // Set-up random number generator (Marsenne-Twister)
-  rng_mt = gsl_rng_alloc(gsl_rng_mt19937);
-  gsl_rng_set(rng_mt,in.seed);
-  r_num_max = gsl_rng_max(rng_mt);
 
 }
 
