@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "init.h"
+#include "sim_info.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_press.h"
 #include "moves.h"
+
+// ------ Global variables ------
 
 // Variables for the calculation of the pressure via the virial
 static int pressv_hist_nn;
@@ -18,6 +20,8 @@ static int presst_hist_nn;
 static double *presst_xi, *presst_hist;
 
 
+// ------ Caller to compute pressure via the virial route ------
+ 
 void compute_pressv(bool init){
 
   // Check if the neighbor list allows for a correct calculation of the pressure
@@ -41,7 +45,7 @@ void compute_pressv(bool init){
 
 
 
-  if (in.neigh_dr < pressv_rmax){
+  if (G_IN.neigh_dr < pressv_rmax){
 
   }
 
@@ -63,9 +67,11 @@ void compute_pressv(bool init){
   
 }
 
+// ------ Initialize histogram for the calculation of the pressure via the virial route ------
+
 void pressv_hist_init(){
 
-  pressv_hist_nn = (int)((pressv_rmax - 1.0)/in.pressv_dr);
+  pressv_hist_nn = (int)((pressv_rmax - 1.0)/G_IN.pressv_dr);
   pressv_rr = (double*)malloc(sizeof(double) * pressv_hist_nn);
   pressv_hist = (double*)malloc(sizeof(double) * pressv_hist_nn);
   if (pressv_rr == NULL ||  pressv_hist == NULL){
@@ -73,12 +79,14 @@ void pressv_hist_init(){
     exit(EXIT_FAILURE);
   }
   for (int ii=0; ii<pressv_hist_nn; ii++){
-    pressv_rr[ii] = (ii+1./2.)*in.pressv_dr + 1.0;
+    pressv_rr[ii] = (ii+1./2.)*G_IN.pressv_dr + 1.0;
     pressv_hist[ii] = 0.0;
   }
 
   
 }
+
+// ------ Fill histogrmas for the calculation of  the pressure via the virial route ------
 
 void pressv_compute_hist(){
   
@@ -94,6 +102,7 @@ void pressv_compute_hist(){
                      NULL, NULL, NULL, NULL);
 
   // Fill histograms
+  struct p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
 
     cell_idx = cell_part_idx(ii);
@@ -111,7 +120,7 @@ void pressv_compute_hist(){
 	  dr = compute_dist(ii, part_idx, 1.0, 1.0, 1.0);
 
 	  if (dr <= pressv_rmax && part_idx > ii) {
-	    bin = (int)((dr-1.0)/in.pressv_dr);
+	    bin = (int)((dr-1.0)/G_IN.pressv_dr);
 	    pressv_hist[bin] += 2.0;
 	  }
 
@@ -125,10 +134,16 @@ void pressv_compute_hist(){
 
 }
 
+
+// ------ Normalize the histograms for the calculation of the pressure from the virial route ------
+
 void pressv_compute_rdf(){
 
   // Variable declaration
   double r1,r2, dr, bin_vol;
+  
+  // Number of particles
+  struct p_info part_info = part_info_get();
   
   // Normalize histograms
   dr = pressv_rr[1] - pressv_rr[0];
@@ -136,11 +151,12 @@ void pressv_compute_rdf(){
     r1 = pressv_rr[ii] - dr/2.;
     r2 = pressv_rr[ii] + dr/2.;
     bin_vol = (4.*M_PI/3.) * (pow(r2,3.) - pow(r1,3.));
-    pressv_hist[ii] = pressv_hist[ii]/(bin_vol * in.rho * part_info.NN);
+    pressv_hist[ii] = pressv_hist[ii]/(bin_vol * G_IN.rho * part_info.NN);
   }
 
 }
 
+// ------ Caller to compute pressure via the thermodynamic route ------
 
 void compute_presst(bool init){
 
@@ -159,10 +175,11 @@ void compute_presst(bool init){
   
 }
 
+// ------ Initialize histogram for the calculation of the pressure via the thermodynamic route ------
 
 void presst_hist_init(){
 
-  presst_hist_nn = (int)(in.presst_xi_max/in.presst_dxi);
+  presst_hist_nn = (int)(G_IN.presst_xi_max/G_IN.presst_dxi);
   presst_xi = (double*)malloc(sizeof(double) * presst_hist_nn);
   presst_hist = (double*)malloc(sizeof(double) * presst_hist_nn);
   if (presst_xi == NULL ||  presst_hist == NULL){
@@ -170,12 +187,14 @@ void presst_hist_init(){
     exit(EXIT_FAILURE);
   }
   for (int ii=0; ii<presst_hist_nn; ii++){
-    presst_xi[ii] = (ii+1)*in.presst_dxi;
+    presst_xi[ii] = (ii+1)*G_IN.presst_dxi;
     presst_hist[ii] = 0.0;
   }
 
   
 }
+
+// ------ Fill the  histogram for the calculation of the pressure via the thermodynamic route ------
 
 void presst_compute_hist(){
   
@@ -191,7 +210,8 @@ void presst_compute_hist(){
     
     sf = pow(vol_ratio, 1./3.);
     
-    // Check if there is overlap
+    // Check if there is overla
+    struct p_info part_info = part_info_get();
     for (int jj=0; jj<part_info.NN; jj++){
       
       overlap = check_overlap(jj, sf, sf, sf);
@@ -208,7 +228,15 @@ void presst_compute_hist(){
     
 }
 
+// ------ Print to file the pressure obtained from the virial route ------
+
 void pressv_output(bool init){
+
+  // Get simulation box information
+  struct box_info sim_box_info = sim_box_info_get();
+
+  // Get number of particles
+  struct p_info part_info = part_info_get();
 
   // Print to file the sample needed to compute the pressure
   FILE* fid;
@@ -234,7 +262,15 @@ void pressv_output(bool init){
 
 }
 
+// ------ Print to file the pressure obtained from the thermodynamic route ------
+
 void presst_output(bool init){
+
+  // Get simulation box information
+  struct box_info sim_box_info = sim_box_info_get();
+
+  // Get number of particles
+  struct p_info part_info = part_info_get();
 
   // Print to file the sample needed to compute the pressure
   FILE* fid;
@@ -259,7 +295,7 @@ void presst_output(bool init){
   fclose(fid);
 
   // For NpT calculations print to file also the density 
-  if (in.press > 0) {
+  if (G_IN.press > 0) {
     
     if (init) fid = fopen("density.dat", "w");
     else fid = fopen("density.dat", "a");
@@ -272,7 +308,7 @@ void presst_output(bool init){
       fprintf(fid, "# Density (each line is one sample)\n");
       fprintf(fid, "######################################\n");
     }
-    fprintf(fid, "%.8e\n", in.rho);
+    fprintf(fid, "%.8e\n", G_IN.rho);
     fclose(fid);
   }
 
@@ -282,7 +318,7 @@ void presst_output(bool init){
 /* void average_hist(double *hist, int nn){ */
   
 /*   for (int ii=0; ii<nn; ii++){ */
-/*      hist[ii] /= in.rdf_tave; */
+/*      hist[ii] /= G_IN.rdf_tave; */
 /*   } */
 
 /* } */
@@ -335,7 +371,7 @@ void presst_output(bool init){
 /* 		 &cov01,  &cov11, &chisq); */
 
 /*   //Pressure (ideal + excess) */
-/*   *press = 1. + (2.*M_PI/3.) * in.rho * (c0 + c1); */
+/*   *press = 1. + (2.*M_PI/3.) * G_IN.rho * (c0 + c1); */
 
 /*   // Free memory */
 /*   free(rr_fit); */

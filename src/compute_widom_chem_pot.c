@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "init.h"
+#include "sim_info.h"
 #include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_widom_chem_pot.h"
 #include "moves.h"
+
+// ------ Global variables ------
 
 // Variables for the random positions generated during the insertions
 static double r_x, r_y, r_z;
@@ -23,6 +25,8 @@ static double cell_size_y;
 static double cell_size_z;
 static int **cl_part_cell, **cl_neigh;
 
+// ------ Caller to compute the chemical potential ------
+
 void compute_mu(bool init){
 
   // Compute the chemical potential via widom insertion method
@@ -32,6 +36,8 @@ void compute_mu(bool init){
   mu_output(init);
  
 }
+
+// ----- Functions to perform the Widom insertion ------
 
 void widom_insertion(){
 
@@ -45,7 +51,7 @@ void widom_insertion(){
 
 
   // Perform the insertions prescribed in input
-  for (int ii=0; ii<in.mu_insertions; ii++){
+  for (int ii=0; ii<G_IN.mu_insertions; ii++){
 
     // Generate one random position inside the simulation box
     widom_rand_pos();
@@ -57,7 +63,7 @@ void widom_insertion(){
 
   // Chemical potential
   if (wtest > 0){
-    mu = -log((double)wtest/in.mu_insertions);
+    mu = -log((double)wtest/G_IN.mu_insertions);
   }
   else {
     mu = 0.0; // No insertion was accepted
@@ -65,15 +71,14 @@ void widom_insertion(){
 
 }
 
-
 void widom_rand_pos(){
-
-    r_x = rng_get_double() * sim_box_info.lx;
-    r_y = rng_get_double() * sim_box_info.ly;
-    r_z = rng_get_double() * sim_box_info.lz;
+  
+  struct box_info sim_box_info = sim_box_info_get();
+  r_x = rng_get_double() * sim_box_info.lx;
+  r_y = rng_get_double() * sim_box_info.ly;
+  r_z = rng_get_double() * sim_box_info.lz;
   
 }
-
 
 bool widom_check_overlap(){
   
@@ -125,6 +130,7 @@ int widom_cell_part_idx(){
 
 double widom_compute_dist(int idx){
 
+  struct box_info sim_box_info = sim_box_info_get();
   double lx = sim_box_info.lx;
   double ly = sim_box_info.ly;
   double lz = sim_box_info.lz;
@@ -153,6 +159,8 @@ double widom_compute_dist(int idx){
 
 }
 
+// ------- Write chemical potential to file ------
+
 void mu_output(bool init){
 
   // Print to file the global order parameter 
@@ -165,10 +173,10 @@ void mu_output(bool init){
   }
   if (init){
     fprintf(fid, "##################################################################################\n");
-    fprintf(fid, "# Chemical potenital (average over %d insertions, Fraction of accepted insertions)\n", in.mu_insertions);
+    fprintf(fid, "# Chemical potenital (average over %d insertions, Fraction of accepted insertions)\n", G_IN.mu_insertions);
     fprintf(fid, "##################################################################################\n");
   }
-  fprintf(fid, "%.8e %.8e\n", mu, (double)wtest/in.mu_insertions);
+  fprintf(fid, "%.8e %.8e\n", mu, (double)wtest/G_IN.mu_insertions);
   fclose(fid);
 
 }

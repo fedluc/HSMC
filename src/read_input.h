@@ -59,7 +59,7 @@ struct input {
   int config_write;
 };
 
-extern struct input in;
+extern struct input G_IN;
 
 void print_example();
 

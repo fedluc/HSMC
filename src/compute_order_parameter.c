@@ -2,14 +2,17 @@
 #include <stdlib.h>
 #include <math.h>
 #include <gsl/gsl_sf_legendre.h>
-#include "init.h"
+#include "sim_info.h"
 #include "read_input.h"
 #include "cell_list.h"
 #include "compute_order_parameter.h"
 
+// ------ Global variables ------
 static double ql_ave;
 static double *ql, *qlm2;
 static double lx_2, ly_2, lz_2;
+
+// ------ Caller for the other functions in the file ------
 
 void compute_op(bool init){
 
@@ -25,9 +28,9 @@ void compute_op(bool init){
     cell_size_min = cell_size_x;
     if (cell_size_min < cell_size_y) cell_size_min = cell_size_y;
     if (cell_size_min < cell_size_z) cell_size_min = cell_size_z;
-    if (cell_size_min < in.ql_rmax){
+    if (cell_size_min < G_IN.ql_rmax){
       printf("WARNING: The cutoff for the order parameter was reduced to %f in order to be consistent with the neighbor list size\n", cell_size_min);
-      in.ql_rmax = cell_size_min;
+      G_IN.ql_rmax = cell_size_min;
     }
 
   }
@@ -40,10 +43,13 @@ void compute_op(bool init){
 
 }
 
+// ------ Compute the average (over all the particles) order paramter ------
+
 void global_ql_compute(){
     
 
   // Allocate array for order parameter per particle
+  struct p_info part_info = part_info_get();
   ql = (double*)malloc(sizeof(double) * part_info.NN);
   
   // Compute the order parameter per particle
@@ -60,20 +66,25 @@ void global_ql_compute(){
 
 }
 
+
+// ------ Compute the ql order parameter for each particle ------
+
 void ql_compute(){
 
    // Variable declaration
-  int tlp1 = 2*in.ql_order + 1;
+  int tlp1 = 2*G_IN.ql_order + 1;
 
   // Allocate array to store the various m-components of ql
   qlm2 = (double*)malloc(sizeof(double) * tlp1);
 
   // Half-box size
+  struct box_info sim_box_info = sim_box_info_get();
   lx_2 = sim_box_info.lx/2.0;
   ly_2 = sim_box_info.ly/2.0;
   lz_2 = sim_box_info.lz/2.0;  
 
   // Compute ql
+  struct p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
 
     // Obtain all the m-components of ql
@@ -94,6 +105,8 @@ void ql_compute(){
 }
 
 
+// ------ Compute the qlm order parameter for each particle ------
+
 void qlm2_compute(int ref_idx){
   
   int num_bonds = 0;
@@ -109,11 +122,14 @@ void qlm2_compute(int ref_idx){
   get_cell_list_info(&cl_part_cell, &cl_neigh, &cl_neigh_num, NULL, 
 		     NULL, NULL, NULL, NULL, NULL, NULL);
       
+  // Simulation box
+  struct box_info sim_box_info = sim_box_info_get();
+
   // Cell with the reference particle
   cell_idx = cell_part_idx(ref_idx);
  
   // Loop over all possible values of m
-  for (int mm=0; mm<in.ql_order+1; mm++){
+  for (int mm=0; mm<G_IN.ql_order+1; mm++){
 
     num_bonds = 0;
     qlm_real_tmp = 0.;
@@ -151,7 +167,7 @@ void qlm2_compute(int ref_idx){
     	  dr = sqrt(dx*dx + dy*dy + dz*dz);
 	  
     	  // Update count if the radial distance falls within the cutoff
-    	  if (part_idx != ref_idx && dr <= in.ql_rmax){
+    	  if (part_idx != ref_idx && dr <= G_IN.ql_rmax){
 	    
     	    // Spherical coordinates
     	    phi = atan2(dy,dx);
@@ -159,7 +175,7 @@ void qlm2_compute(int ref_idx){
     	    // Update number of bonds
     	    num_bonds++;
     	    // Legendre polynomial
-    	    plm =  gsl_sf_legendre_sphPlm(in.ql_order, mm, dz/dr);
+    	    plm =  gsl_sf_legendre_sphPlm(G_IN.ql_order, mm, dz/dr);
     	    // Spherical harmonics
     	    qlm_real_tmp += plm * cos(mm*phi);
     	    qlm_imag_tmp += plm * sin(mm*phi);
@@ -178,9 +194,9 @@ void qlm2_compute(int ref_idx){
       qlmm_real_tmp /= num_bonds;
       qlmm_imag_tmp /= num_bonds;
     }
-    qlm2[in.ql_order+mm] = qlm_real_tmp*qlm_real_tmp +
+    qlm2[G_IN.ql_order+mm] = qlm_real_tmp*qlm_real_tmp +
                            qlm_imag_tmp*qlm_imag_tmp;
-    qlm2[in.ql_order-mm] = qlmm_real_tmp*qlmm_real_tmp +
+    qlm2[G_IN.ql_order-mm] = qlmm_real_tmp*qlmm_real_tmp +
                            qlmm_imag_tmp*qlmm_imag_tmp;
                            
     
@@ -189,6 +205,7 @@ void qlm2_compute(int ref_idx){
 }
  
 
+// ------ Print output to file ------
 
 void global_ql_output(bool init){
 
@@ -202,7 +219,7 @@ void global_ql_output(bool init){
   }
   if (init){
     fprintf(fid, "###############################################################\n");
-    fprintf(fid, "# Average order parameter of order %d (each line is one sample)\n", in.ql_order);
+    fprintf(fid, "# Average order parameter of order %d (each line is one sample)\n", G_IN.ql_order);
     fprintf(fid, "###############################################################\n");
   }
   fprintf(fid, "%.8e\n", ql_ave);

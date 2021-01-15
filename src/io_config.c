@@ -3,7 +3,7 @@
 #include <math.h>
 #include <zlib.h>
 #include <gsl/gsl_rng.h>
-#include "init.h"
+#include "sim_info.h"
 #include "rng.h"
 #include "read_input.h"
 #include "io_config.h"
@@ -11,7 +11,7 @@
 void write_restart(int sweep){
   
   // Name of restart file (defined by the sweep number)
-  int max_out_length = ceil(log10(in.sweep_stat+in.sweep_eq));
+  int max_out_length = ceil(log10(G_IN.sweep_stat+G_IN.sweep_eq));
   char restart_file_template[20], restart_file[max_out_length+20];
   sprintf(restart_file_template, "restart_%%0%dd.bin", max_out_length);
   sprintf(restart_file, restart_file_template, sweep);
@@ -25,18 +25,19 @@ void write_restart(int sweep){
   }
 
   // Write maximum step information (could be affected by optimization)  
-  fwrite(&in.dr_max, sizeof(double), 1, fid); 
+  fwrite(&G_IN.dr_max, sizeof(double), 1, fid); 
 
   // Write maximum volume step information (could be affected by optimization)  
-  fwrite(&in.dv_max, sizeof(double), 1, fid); 
+  fwrite(&G_IN.dv_max, sizeof(double), 1, fid); 
 
   // Write Simulation box information
-  fwrite(&sim_box_info, sizeof(struct box_info), 1, fid);
+  sim_box_info_write(fid);
 
   // Write particles information
-  fwrite(&part_info, sizeof(struct p_info), 1, fid);
+  part_info_write(fid);
 
   // Write configuration
+  struct p_info part_info = part_info_get();  
   fwrite(part, sizeof(double), part_info.NN*4, fid);
 
   // Write random number generator status
@@ -60,21 +61,22 @@ void read_restart(char *restart_file){
   }
 
   // Read maximum displacement 
-  fread(&in.dr_max, sizeof(double), 1, fid);
+  fread(&G_IN.dr_max, sizeof(double), 1, fid);
 
   // Read maximum volume displacement 
-  fread(&in.dv_max, sizeof(double), 1, fid);
+  fread(&G_IN.dv_max, sizeof(double), 1, fid);
   
   // Read simulation box
-  fread(&sim_box_info, sizeof(struct box_info), 1, fid);
+  sim_box_info_read(fid);
 
   // Read particles information
-  fread(&part_info, sizeof(struct p_info), 1, fid);
+  part_info_read(fid);
 
   // Allocate particles
   part_alloc();
  
   // Read configuration
+  struct p_info part_info = part_info_get();
   fread(part, sizeof(double), part_info.NN*4, fid);
 
   // Read random number generator status
@@ -84,7 +86,8 @@ void read_restart(char *restart_file){
   fclose(fid);
 
   // Compute the density
-  in.rho = part_info.NN/sim_box_info.vol;
+  struct box_info sim_box_info = sim_box_info_get();
+  G_IN.rho = part_info.NN/sim_box_info.vol;
 
   // Print message on screen
   printf("The following data was initialized via the restart file:\n"
@@ -102,7 +105,7 @@ void read_restart(char *restart_file){
 void write_config(int sweep){
   
   // Name of restart file (defined by the sweep number)
-  int max_out_length = ceil(log10(in.sweep_stat+in.sweep_eq));
+  int max_out_length = ceil(log10(G_IN.sweep_stat+G_IN.sweep_eq));
   char config_file_template[20], config_file[max_out_length+20];
   sprintf(config_file_template, "config_%%0%dd.dat.gz", max_out_length);
   sprintf(config_file, config_file_template, sweep);
@@ -115,6 +118,8 @@ void write_config(int sweep){
   }
 
   // Write configuration
+  struct p_info part_info = part_info_get();
+  struct box_info sim_box_info = sim_box_info_get();
   gzprintf(fid, "# Sweep number\n");
   gzprintf(fid, "%d\n", sweep);
   gzprintf(fid, "# Number of particles\n");

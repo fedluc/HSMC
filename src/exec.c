@@ -113,11 +113,11 @@ int main (int argc, char **argv){
     read_input_file(arguments.input_file);
 
     // Select which type of simulation to run
-    if (in.press > 0){
+    if (G_IN.press > 0){
       // NpT simulation
       hs_npt();
     }
-    else if (in.cavity_pcav > 0){
+    else if (G_IN.cavity_pcav > 0){
       // NVT cavity simulation
       cavity_hs_nvt();
     }

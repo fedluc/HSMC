@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
-#include "init.h"
+#include "sim_info.h"
 #include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
@@ -22,6 +22,7 @@ void part_move(){
   double x_old, y_old, z_old;
 
   // Random number in [0, NN-1] to select the particle
+  struct p_info part_info = part_info_get();
   r_idx = rng_get_int(part_info.NN);
     
   // Three random numbers in [0,1] for the displacement
@@ -36,11 +37,12 @@ void part_move(){
   cell_idx_old = cell_part_idx(r_idx);
 
   // Proposed move
-  part[r_idx][1] += (r_x - 0.5)*in.dr_max;
-  part[r_idx][2] += (r_y - 0.5)*in.dr_max;
-  part[r_idx][3] += (r_z - 0.5)*in.dr_max;
+  part[r_idx][1] += (r_x - 0.5)*G_IN.dr_max;
+  part[r_idx][2] += (r_y - 0.5)*G_IN.dr_max;
+  part[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
 
   // Periodic boundary conditions
+  struct box_info sim_box_info = sim_box_info_get();
   if (part[r_idx][1] > sim_box_info.lx) part[r_idx][1] -= sim_box_info.lx;
   else if (part[r_idx][1] < 0.0)        part[r_idx][1] += sim_box_info.lx;
   if (part[r_idx][2] > sim_box_info.ly) part[r_idx][2] -= sim_box_info.ly;
@@ -83,7 +85,8 @@ void vol_move(){
   r_dv = rng_get_double();
 
   // Proposed volume move
-  log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*in.dv_max;
+  struct box_info sim_box_info = sim_box_info_get();
+  log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*G_IN.dv_max;
   vol_new = exp(log_vol_new);
 
   // Volume ratio
@@ -93,6 +96,7 @@ void vol_move(){
   sf = pow(vol_ratio, 1./3.);
      
   // Check if there is overlap with re-scaled coordinates
+  struct p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
 
     overlap = check_overlap(ii, sf, sf, sf);
@@ -104,7 +108,7 @@ void vol_move(){
   // If there is no overlap accept move according to npt acceptance rule
   if (!overlap){
 
-    boltz_fact = exp(in.press*(sim_box_info.vol - vol_new) +
+    boltz_fact = exp(G_IN.press*(sim_box_info.vol - vol_new) +
 		     (part_info.NN + 1)*log(vol_ratio));
     r_acc = rng_get_double();
     
@@ -116,9 +120,9 @@ void vol_move(){
       // Accept move
       acc_vol_moves+=1;
       // Update density
-      in.rho = part_info.NN / vol_new;
+      G_IN.rho = part_info.NN / vol_new;
       // Update the simulation box
-      sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+      sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, G_IN.rho);
       // Re-scale particle's positions
       for (int ii=0; ii<part_info.NN; ii++){
 	part[ii][1] *= sf;
@@ -238,10 +242,11 @@ void cavity_part_move(){
   double r_type, r_x, r_y, r_z;
   double x_old, y_old, z_old, dr_old, en_old=0.0;
 
-  // Select particle to move (cavities are moved with probability in.cavity_pcav)
+  // Select particle to move (cavities are moved with probability G_IN.cavity_pcav)
   // Note: The cavities have indexes 0 and 1
-  r_type = rng_get_double();
-  if (r_type > in.cavity_pcav ) {
+  struct p_info part_info = part_info_get();
+  r_type = rng_get_double();  
+  if (r_type > G_IN.cavity_pcav ) {
     // Move standard particles
     r_idx = rng_get_int(part_info.NN-2) + 2;
     move_type = 0;
@@ -266,11 +271,11 @@ void cavity_part_move(){
   // If a cavity has to be moved, compute old interaction energy
   if (move_type == 1){
     dr_old = compute_dist(0,1,1.0,1.0,1.0);
-    if (dr_old < in.cavity_mindr) {
+    if (dr_old < G_IN.cavity_mindr) {
 	printf("Error, cavities are too close!, Distance: %.8e\n", dr_old);
 	exit(EXIT_FAILURE);
     }
-    if (dr_old > in.cavity_maxdr) {
+    if (dr_old > G_IN.cavity_maxdr) {
       printf("Error, cavities are too far apart!, Distance: %.8e\n", dr_old);
       exit(EXIT_FAILURE);
     }
@@ -278,11 +283,12 @@ void cavity_part_move(){
   }
 
   // Proposed move
-  part[r_idx][1] += (r_x - 0.5)*in.dr_max;
-  part[r_idx][2] += (r_y - 0.5)*in.dr_max;
-  part[r_idx][3] += (r_z - 0.5)*in.dr_max;
+  part[r_idx][1] += (r_x - 0.5)*G_IN.dr_max;
+  part[r_idx][2] += (r_y - 0.5)*G_IN.dr_max;
+  part[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
 
   // Periodic boundary conditions
+  struct box_info sim_box_info = sim_box_info_get();
   if (part[r_idx][1] > sim_box_info.lx) part[r_idx][1] -= sim_box_info.lx;
   else if (part[r_idx][1] < 0.0)        part[r_idx][1] += sim_box_info.lx;
   if (part[r_idx][2] > sim_box_info.ly) part[r_idx][2] -= sim_box_info.ly;
@@ -328,7 +334,7 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old){
   if (move_type == 1) {
     dr_cavity = compute_dist(0,1,1.0,1.0,1.0);
     // Reject if the cavities are too far or too close
-    if (dr_cavity < in.cavity_mindr || dr_cavity > in.cavity_maxdr){
+    if (dr_cavity < G_IN.cavity_mindr || dr_cavity > G_IN.cavity_maxdr){
       return false;
     }
     // Reject according to metropolis algorithm
@@ -383,7 +389,8 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old){
 // ------ Compute distance between two particles ------
 double compute_dist(int idx1, int idx2,
 		    double sf_x, double sf_y, double sf_z){
-
+  
+  struct box_info sim_box_info = sim_box_info_get();
   double lx = sim_box_info.lx*sf_x;
   double ly = sim_box_info.ly*sf_y;
   double lz = sim_box_info.lz*sf_z;
@@ -416,7 +423,7 @@ double compute_dist(int idx1, int idx2,
 
 double cavity_interaction(double xx, bool cavity_init){
  
-  return lny_gh(xx, M_PI*in.rho/6.0, 1.0, cavity_init);
+  return lny_gh(xx, M_PI*G_IN.rho/6.0, 1.0, cavity_init);
   //return 0.0;
 
 }

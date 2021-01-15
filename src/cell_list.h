@@ -1,7 +1,9 @@
 #ifndef CELL_LIST_H
 #define CELL_LIST_H
 
-void cell_list_init();
+#include <stdbool.h>
+
+void cell_list_init(bool alloc);
 
 void cell_list_free();
 

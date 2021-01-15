@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
-#include "init.h"
+#include "sim_info.h"
 #include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
@@ -14,10 +14,10 @@
 // Hard-sphere simulation in the NpT ensemble
 void hs_npt() {
 
-  if (in.restart_read == 0){ // Read from input file
+  if (G_IN.restart_read == 0){ // Read from input file
 
     // Initialize simulation box
-    sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+    sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, G_IN.rho);
   
     // Particles
     part_alloc();
@@ -30,26 +30,23 @@ void hs_npt() {
 
   }
   else { // Read from restart file
-    read_restart(in.restart_name);
+    read_restart(G_IN.restart_name);
   }
 
   // Print simulation info on screen
-  printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
-         sim_box_info.ly, sim_box_info.lz);
-  printf("Number of particles: %d\n", part_info.NN);
-  printf("Pressure: %.8f\n", in.press);
+  print_sim_info();
 
   // Set-up the neighbor list
-  cell_list_init();
+  cell_list_init(true);
 
 
   // Optmize maximum displacement
-  if (in.opt_flag == 1){
-    double rho_start = in.rho;
+  if (G_IN.opt_flag == 1){
+    double rho_start = G_IN.rho;
     opt_npt();
-    sim_box_init(in.type, in.nx, in.ny, in.nz, rho_start);
+    sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, rho_start);
     part_init();
-    cell_list_init();
+    cell_list_init(false);
   }
 
   // Start timing
@@ -67,7 +64,7 @@ void hs_npt() {
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  run_npt(true,in.sweep_eq);
+  run_npt(true,G_IN.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -89,7 +86,7 @@ void hs_npt() {
 	 (double)(end - start) / CLOCKS_PER_SEC);
   
   // Free memory
-  free(part);
+  part_free();
   cell_list_free();
   rng_free();
 
@@ -102,8 +99,8 @@ void run_npt(bool prod_flag, int sweep_offset){
   bool presst_init = true, ql_ave_init = true;
   int n_sweeps;
 
-  if (prod_flag) n_sweeps = in.sweep_stat;
-  else n_sweeps = in.sweep_eq;
+  if (prod_flag) n_sweeps = G_IN.sweep_stat;
+  else n_sweeps = G_IN.sweep_eq;
 
   // Run MC simulation
   for (int ii=sweep_offset; ii<n_sweeps+sweep_offset; ii++){
@@ -112,14 +109,14 @@ void run_npt(bool prod_flag, int sweep_offset){
     if (ii == 0){
       printf("Sweep number  Density\n");
     }
-    if (ii % in.output_int == 0) {
-      printf("%d  %.8f\n", ii,in.rho);
+    if (ii % G_IN.output_int == 0) {
+      printf("%d  %.8f\n", ii,G_IN.rho);
       fflush(stdout);
     }
 
     // Write restart file
-    if (in.restart_write > 0){
-      if (ii % in.restart_write == 0) {
+    if (G_IN.restart_write > 0){
+      if (ii % G_IN.restart_write == 0) {
         write_restart(ii);
       }
     }
@@ -129,24 +126,24 @@ void run_npt(bool prod_flag, int sweep_offset){
     if (prod_flag){      
 
       // Write configuration
-      if (in.config_write > 0){
-        if (ii % in.config_write == 0) {
+      if (G_IN.config_write > 0){
+        if (ii % G_IN.config_write == 0) {
           write_config(ii);
         }
       }
 
 
       // Compute pressure via thermodynamic route
-      if (in.presst_sample_int > 0){
-      	if (ii % in.presst_sample_int == 0) {
+      if (G_IN.presst_sample_int > 0){
+      	if (ii % G_IN.presst_sample_int == 0) {
       	  compute_presst(presst_init);
       	  if (presst_init) presst_init = false;
       	}
       }
 
       // Compute order parameter
-      if (in.ql_sample_int > 0){
-        if (ii % in.ql_sample_int == 0) {
+      if (G_IN.ql_sample_int > 0){
+        if (ii % G_IN.ql_sample_int == 0) {
           compute_op(ql_ave_init);
           if (ql_ave_init) ql_ave_init = false;
         }
@@ -165,7 +162,7 @@ void run_npt(bool prod_flag, int sweep_offset){
 void sweep_npt(){
 
   int r_move_id;
-
+  struct p_info part_info = part_info_get();
   // Create N trial moves (N = number of particles)
   for (int ii=0; ii<part_info.NN; ii++){
 

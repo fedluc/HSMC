@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "init.h"
+#include "sim_info.h"
 #include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
@@ -16,10 +16,10 @@
 // Hard-sphere simulation in the NVT ensemble
 void hs_nvt() {
 
-  if (in.restart_read == 0){ // Read from input file  
+  if (G_IN.restart_read == 0){ // Read from input file  
 
     // Simulation box
-    sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+    sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, G_IN.rho);
 
     // Particles
     part_alloc();
@@ -32,22 +32,20 @@ void hs_nvt() {
 
   }
   else { // Read from restart file
-    read_restart(in.restart_name);
+    read_restart(G_IN.restart_name);
   }
 
   // Print simulation info on screen
-  printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
-	 sim_box_info.ly, sim_box_info.lz);
-  printf("Number of particles: %d\n", part_info.NN);
+  print_sim_info();
 
   // Set-up the neighbor list
-  cell_list_init();
+  cell_list_init(true);
 
   // Optmize maximum displacement
-  if (in.opt_flag == 1){
+  if (G_IN.opt_flag == 1){
     opt_nvt();
     part_init();
-    cell_list_init();
+    cell_list_init(false);
   }
 
   // Start timing
@@ -65,7 +63,7 @@ void hs_nvt() {
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  run_nvt(true,in.sweep_eq);
+  run_nvt(true,G_IN.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -84,7 +82,7 @@ void hs_nvt() {
   	 (double)(end - start) / CLOCKS_PER_SEC);
 
   /* // Free memory  */
-  free(part);
+  part_free();
   cell_list_free();
   rng_free();
 
@@ -98,8 +96,8 @@ void run_nvt(bool prod_flag, int sweep_offset){
   int n_sweeps;
 
   // Number of sweeps
-  if (prod_flag) n_sweeps = in.sweep_stat;
-  else n_sweeps = in.sweep_eq;
+  if (prod_flag) n_sweeps = G_IN.sweep_stat;
+  else n_sweeps = G_IN.sweep_eq;
   
   // Run MC simulation
   for (int ii=sweep_offset; ii<n_sweeps+sweep_offset; ii++){
@@ -108,14 +106,14 @@ void run_nvt(bool prod_flag, int sweep_offset){
     if (ii == sweep_offset){
       printf("Sweep number\n");
     }
-    if (ii % in.output_int == 0) {
+    if (ii % G_IN.output_int == 0) {
       printf("%d\n", ii);
       fflush(stdout);
     }
 
     // Write restart file
-    if (in.restart_write > 0){
-      if (ii % in.restart_write == 0) {
+    if (G_IN.restart_write > 0){
+      if (ii % G_IN.restart_write == 0) {
     	write_restart(ii);
       }
     }
@@ -124,39 +122,39 @@ void run_nvt(bool prod_flag, int sweep_offset){
     if (prod_flag){
 
       // Write configuration
-      if (in.config_write > 0){
-    	if (ii % in.config_write == 0) {
+      if (G_IN.config_write > 0){
+    	if (ii % G_IN.config_write == 0) {
     	  write_config(ii);
     	}
       }
 
       // Compute pressure via virial route
-      if (in.pressv_sample_int > 0){
-      	if (ii % in.pressv_sample_int == 0) {
+      if (G_IN.pressv_sample_int > 0){
+      	if (ii % G_IN.pressv_sample_int == 0) {
       	  compute_pressv(pressv_init);
       	  if (pressv_init) pressv_init = false;
       	}
       }
 
       // Compute pressure via thermodynamic route
-      if (in.presst_sample_int > 0){
-      	if (ii % in.presst_sample_int == 0) {
+      if (G_IN.presst_sample_int > 0){
+      	if (ii % G_IN.presst_sample_int == 0) {
       	  compute_presst(presst_init);
       	  if (presst_init) presst_init = false;
       	}
       }
 
       // Compute order parameter
-      if (in.ql_sample_int > 0){
-      	if (ii % in.ql_sample_int == 0) {
+      if (G_IN.ql_sample_int > 0){
+      	if (ii % G_IN.ql_sample_int == 0) {
       	  compute_op(ql_ave_init);
       	  if (ql_ave_init) ql_ave_init = false;
       	}
       }
 
       // Compute chemical potential via Widom insertions
-      if (in.mu_sample_int > 0){
-      	if (ii % in.mu_sample_int == 0) {
+      if (G_IN.mu_sample_int > 0){
+      	if (ii % G_IN.mu_sample_int == 0) {
       	  compute_mu(mu_ave_init);
       	  if (mu_ave_init) mu_ave_init = false;
       	}
@@ -174,8 +172,9 @@ void run_nvt(bool prod_flag, int sweep_offset){
 void sweep_nvt(){
 
   // Create N trial moves (N = number of particles)
-    for (int ii=0; ii<part_info.NN; ii++){
-      part_move();
-    }
+  struct p_info part_info = part_info_get();
+  for (int ii=0; ii<part_info.NN; ii++){
+    part_move();
+  }
 
 }

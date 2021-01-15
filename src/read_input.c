@@ -7,6 +7,7 @@
 // ------------- Read Input ---------------
 // ----------------------------------------
 
+struct input G_IN; // WARNING: This is a global variable
 
 void print_example(){
 
@@ -71,8 +72,6 @@ void print_example(){
 
 }
 
-struct input in;
-
 void read_input_file(char *filename){
 
   FILE *in_file;
@@ -82,42 +81,42 @@ void read_input_file(char *filename){
   ssize_t line_size;
 
   // Initialize input structure 
-  in.rho = 0;
-  in.nx = 0;
-  in.ny = 0;
-  in.nz = 0;
-  in.type = 0;
-  in.neigh_dr = 1.0;
-  in.neigh_max_part = 10;
-  in.dr_max = 0;
-  in.sweep_eq = 0;
-  in.sweep_stat = 0;
-  in.output_int = 0;
-  in.pressv_dr = 0;
-  in.pressv_sample_int = 0;
-  in.presst_dxi = 0;
-  in.presst_xi_max = 0;
-  in.presst_sample_int = 0;
-  in.press = 0;
-  in.dv_max = 0;
-  in.opt_flag = 1;
-  in.opt_sweeps = 1000;
-  in.opt_samples = 10;
-  in.opt_part_target = 0.5;
-  in.opt_vol_target = 0.5;
-  in.seed = 0;
-  in.ql_order = -1;
-  in.ql_rmax = 0;
-  in.ql_sample_int = 0;
-  in.mu_sample_int = 0;
-  in.mu_insertions = 0;
-  in.cavity_pcav = 0;
-  in.cavity_maxdr = 0;
-  in.cavity_mindr = 0;
-  in.cavity_sample_int = 0;
-  in.restart_read = 0;
-  in.restart_write = 0;
-  in.config_write = 0;
+  G_IN.rho = 0;
+  G_IN.nx = 0;
+  G_IN.ny = 0;
+  G_IN.nz = 0;
+  G_IN.type = 0;
+  G_IN.neigh_dr = 1.0;
+  G_IN.neigh_max_part = 10;
+  G_IN.dr_max = 0;
+  G_IN.sweep_eq = 0;
+  G_IN.sweep_stat = 0;
+  G_IN.output_int = 0;
+  G_IN.pressv_dr = 0;
+  G_IN.pressv_sample_int = 0;
+  G_IN.presst_dxi = 0;
+  G_IN.presst_xi_max = 0;
+  G_IN.presst_sample_int = 0;
+  G_IN.press = 0;
+  G_IN.dv_max = 0;
+  G_IN.opt_flag = 1;
+  G_IN.opt_sweeps = 1000;
+  G_IN.opt_samples = 10;
+  G_IN.opt_part_target = 0.5;
+  G_IN.opt_vol_target = 0.5;
+  G_IN.seed = 0;
+  G_IN.ql_order = -1;
+  G_IN.ql_rmax = 0;
+  G_IN.ql_sample_int = 0;
+  G_IN.mu_sample_int = 0;
+  G_IN.mu_insertions = 0;
+  G_IN.cavity_pcav = 0;
+  G_IN.cavity_maxdr = 0;
+  G_IN.cavity_mindr = 0;
+  G_IN.cavity_sample_int = 0;
+  G_IN.restart_read = 0;
+  G_IN.restart_write = 0;
+  G_IN.config_write = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -143,7 +142,7 @@ void read_input_file(char *filename){
       if (strcmp(key,"rho") == 0 || strcmp(key,"rho\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.rho = atof(value);
+	  G_IN.rho = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -151,7 +150,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"cells_x") == 0 || strcmp(key,"cells_x\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.nx = atoi(value);
+	  G_IN.nx = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -160,7 +159,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"cells_y") == 0 || strcmp(key,"cells_y\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.ny = atoi(value);
+	  G_IN.ny = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -169,7 +168,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"cells_z") == 0 || strcmp(key,"cells_z\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.nz = atoi(value);
+	  G_IN.nz = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -178,7 +177,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"type") == 0 || strcmp(key,"type\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.type = atoi(value);
+	  G_IN.type = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -186,12 +185,12 @@ void read_input_file(char *filename){
       else if (strcmp(key,"neigh_list") == 0 || strcmp(key,"neigh_list\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.neigh_dr = atof(value);
+	  G_IN.neigh_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.neigh_max_part = atoi(value);
+	  G_IN.neigh_max_part = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -199,7 +198,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"dr_max") == 0 || strcmp(key,"dr_max\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.dr_max = atof(value);
+	  G_IN.dr_max = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -207,7 +206,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"sweep_eq") == 0 || strcmp(key,"sweep_eq\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.sweep_eq = atoi(value);
+	  G_IN.sweep_eq = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -215,7 +214,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"sweep_stat") == 0 || strcmp(key,"sweep_stat\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.sweep_stat = atoi(value);
+	  G_IN.sweep_stat = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -223,7 +222,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"out") == 0 || strcmp(key,"out\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.output_int = atoi(value);
+	  G_IN.output_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -231,12 +230,12 @@ void read_input_file(char *filename){
       else if (strcmp(key,"press_virial") == 0 || strcmp(key,"press_virial\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.pressv_dr = atof(value);
+	  G_IN.pressv_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.pressv_sample_int = atoi(value);
+	  G_IN.pressv_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -244,17 +243,17 @@ void read_input_file(char *filename){
       else if (strcmp(key,"press_thermo") == 0 || strcmp(key,"press_thermo\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.presst_dxi = atof(value);
+	  G_IN.presst_dxi = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
         value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.presst_xi_max = atof(value);
+	  G_IN.presst_xi_max = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.presst_sample_int = atoi(value);
+	  G_IN.presst_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -262,12 +261,12 @@ void read_input_file(char *filename){
       else if (strcmp(key,"npt") == 0 || strcmp(key,"npt\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.press = atof(value);
+	  G_IN.press = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
         value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.dv_max = atof(value);
+	  G_IN.dv_max = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -275,27 +274,27 @@ void read_input_file(char *filename){
       else if (strcmp(key,"opt") == 0 || strcmp(key,"opt\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.opt_flag = atoi(value);
+	  G_IN.opt_flag = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.opt_sweeps = atoi(value);
+	  G_IN.opt_sweeps = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.opt_samples = atoi(value);
+	  G_IN.opt_samples = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.opt_part_target = atof(value);
+	  G_IN.opt_part_target = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.opt_vol_target = atof(value);
+	  G_IN.opt_vol_target = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -303,7 +302,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"seed") == 0 || strcmp(key,"seed\n") == 0){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  in.seed = atoi(value);
+	  G_IN.seed = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -311,17 +310,17 @@ void read_input_file(char *filename){
       else if (strcmp(key,"ql") == 0 || strcmp(key,"ql\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.ql_order = atoi(value);
+	  G_IN.ql_order = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.ql_rmax = atof(value);
+	  G_IN.ql_rmax = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.ql_sample_int = atoi(value);
+	  G_IN.ql_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -329,12 +328,12 @@ void read_input_file(char *filename){
       else if (strcmp(key,"widom") == 0 || strcmp(key,"widom\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.mu_insertions = atoi(value);
+	  G_IN.mu_insertions = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.mu_sample_int = atoi(value);
+	  G_IN.mu_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -342,27 +341,27 @@ void read_input_file(char *filename){
       else if (strcmp(key,"cavity") == 0 || strcmp(key,"cavity\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.cavity_pcav = atof(value);
+	  G_IN.cavity_pcav = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.cavity_maxdr = atof(value);
+	  G_IN.cavity_maxdr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.cavity_mindr = atof(value);
+	  G_IN.cavity_mindr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.cavity_sample_int = atoi(value);
+	  G_IN.cavity_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.cavity_out_dr = atof(value);
+	  G_IN.cavity_out_dr = atof(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -370,14 +369,14 @@ void read_input_file(char *filename){
       else if (strcmp(key,"restart_read") == 0 || strcmp(key,"restart_read\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.restart_read = atoi(value);
+	  G_IN.restart_read = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
         if(value != NULL ) {
 	  int len = strlen(value);
 	  if (value[len-1] == '\n') value[len-1] = '\0';
-	  if (len < 100) strcpy(in.restart_name,value);
+	  if (len < 100) strcpy(G_IN.restart_name,value);
 	  else read_input_file_err(3,line_buf);
 	}
 	else read_input_file_err(1,line_buf);
@@ -386,7 +385,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"restart_write") == 0 || strcmp(key,"restart_write\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.restart_write = atoi(value);
+	  G_IN.restart_write = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -394,7 +393,7 @@ void read_input_file(char *filename){
       else if (strcmp(key,"config_write") == 0 || strcmp(key,"config_write\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
-	  in.config_write = atoi(value);
+	  G_IN.config_write = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -415,20 +414,20 @@ void read_input_file(char *filename){
   fclose(in_file);
 
   // Print content of input structure
-  /* printf("Density: %.8f\n", in.rho); */
-  /* printf("Number of cells along x: %d\n", in.nx); */
-  /* printf("Number of cells along y: %d\n", in.ny); */
-  /* printf("Number of cells along z: %d\n", in.nz); */
-  /* printf("Cell type: %d\n", in.type); */
-  /* printf("Maximum MC displacement: %.8f\n", in.dr_max); */
-  /* printf("Number of sweeps (equilibration): %d\n", in.sweep_eq); */
-  /* printf("Number of sweeps (statistics): %d\n", in.sweep_stat); */
-  /* printf("Output interval (sweeps): %d\n", in.output_int); */
-  /* printf("Pressure - virial (resolution): %.8f\n", in.pressv_dr); */
-  /* printf("Pressure - virial (sweeps/sample): %d\n", in.pressv_sample_int); */
-  /* printf("Pressure - thermo (resolution): %.8f\n", in.presst_dxi); */
-  /* printf("Pressure - thermo (max compression): %.8f\n", in.presst_xi_max); */
-  /* printf("Pressure - thermo (sweeps/sample): %d\n", in.presst_sample_int); */
+  /* printf("Density: %.8f\n", G_IN.rho); */
+  /* printf("Number of cells along x: %d\n", G_IN.nx); */
+  /* printf("Number of cells along y: %d\n", G_IN.ny); */
+  /* printf("Number of cells along z: %d\n", G_IN.nz); */
+  /* printf("Cell type: %d\n", G_IN.type); */
+  /* printf("Maximum MC displacement: %.8f\n", G_IN.dr_max); */
+  /* printf("Number of sweeps (equilibration): %d\n", G_IN.sweep_eq); */
+  /* printf("Number of sweeps (statistics): %d\n", G_IN.sweep_stat); */
+  /* printf("Output interval (sweeps): %d\n", G_IN.output_int); */
+  /* printf("Pressure - virial (resolution): %.8f\n", G_IN.pressv_dr); */
+  /* printf("Pressure - virial (sweeps/sample): %d\n", G_IN.pressv_sample_int); */
+  /* printf("Pressure - thermo (resolution): %.8f\n", G_IN.presst_dxi); */
+  /* printf("Pressure - thermo (max compression): %.8f\n", G_IN.presst_xi_max); */
+  /* printf("Pressure - thermo (sweeps/sample): %d\n", G_IN.presst_sample_int); */
   fflush(stdout);
 
 }
@@ -456,3 +455,4 @@ void read_input_file_err(int err_id, char *last_string){
   exit(EXIT_FAILURE);
 
 }
+

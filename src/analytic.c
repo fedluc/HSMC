@@ -6,6 +6,8 @@
 #include "read_input.h"
 #include "analytic.h"
 
+// ------ Global variables ------
+
 // Coefficients for the Grundke-Henderson parametrization of the cavity function
 static double ay0, ay1, ay2, ay3;
 // Coefficients for the Verlet-Weiss parametrization of the rdf

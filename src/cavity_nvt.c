@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
-#include "init.h"
+#include "sim_info.h"
 #include "rng.h"
 #include "read_input.h"
 #include "cell_list.h"
@@ -10,13 +10,14 @@
 #include "cavity_nvt.h"
 #include "analytic.h"
 
-// Cavity simulation for hard-spheres in the NVT ensemble
+// ------ Cavity simulation for hard-spheres in the NVT ensemble ------
+
 void cavity_hs_nvt() {
 
-  if (in.restart_read == 0){ // Read from input file
+  if (G_IN.restart_read == 0){ // Read from input file
 
     // Simulation box
-    sim_box_init(in.type, in.nx, in.ny, in.nz, in.rho);
+    sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, G_IN.rho);
 
     // Particles
     part_alloc();
@@ -32,13 +33,11 @@ void cavity_hs_nvt() {
 
   }
   else { // Read from restart file
-    read_restart(in.restart_name);
+    read_restart(G_IN.restart_name);
   }
 
-  // Print simulation info on screen
-  printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
-         sim_box_info.ly, sim_box_info.lz);
-  printf("Number of particles: %d\n", part_info.NN);
+  // Print simulation info on screen  
+  print_sim_info();
 
   // Initialize cavity interaction potential (0.5 is just a dummy distance)
   cavity_interaction(0.5, true);
@@ -47,14 +46,14 @@ void cavity_hs_nvt() {
   cavity_psi_output();
 
   // Set-up the neighbor list
-  cell_list_init();
+  cell_list_init(true);
 
   // Optmize maximum displacement
-  if (in.opt_flag == 1){
+  if (G_IN.opt_flag == 1){
     opt_cavity_nvt();
     part_init();
     cavity_set_distance();
-    cell_list_init();
+    cell_list_init(false);
   }
 
   // Start timing
@@ -72,7 +71,7 @@ void cavity_hs_nvt() {
   // Run statistics
   printf("---------------------------------------------------\n");
   printf("Production...\n");
-  cavity_run_nvt(true,in.sweep_eq);
+  cavity_run_nvt(true,G_IN.sweep_eq);
   printf("Production completed.\n");
   clock_t end = clock();
 
@@ -91,7 +90,7 @@ void cavity_hs_nvt() {
 	 (double)(end - start) / CLOCKS_PER_SEC);
   
   // Free memory
-  free(part);
+  part_free();
   rng_free();
   cell_list_free();
 
@@ -104,8 +103,8 @@ void cavity_run_nvt(bool prod_flag, int sweep_offset){
   int n_sweeps;
 
   // Number of sweeps
-  if (prod_flag) n_sweeps = in.sweep_stat;
-  else n_sweeps = in.sweep_eq;
+  if (prod_flag) n_sweeps = G_IN.sweep_stat;
+  else n_sweeps = G_IN.sweep_eq;
   
   // Run MC simulation
   for (int ii=sweep_offset; ii<n_sweeps+sweep_offset; ii++){
@@ -114,14 +113,14 @@ void cavity_run_nvt(bool prod_flag, int sweep_offset){
     if (ii == 0){
       printf("Sweep number\n");
     }
-    if (ii % in.output_int == 0) {
+    if (ii % G_IN.output_int == 0) {
       printf("%d\n", ii);
       fflush(stdout);
     }
 
     // Write restart file
-    if (in.restart_write > 0){
-      if (ii % in.restart_write == 0) {
+    if (G_IN.restart_write > 0){
+      if (ii % G_IN.restart_write == 0) {
         write_restart(ii);
       }
     }
@@ -130,16 +129,16 @@ void cavity_run_nvt(bool prod_flag, int sweep_offset){
     if (prod_flag){
 
       // Write configuration
-      if (in.config_write > 0){
-        if (ii % in.config_write == 0) {
+      if (G_IN.config_write > 0){
+        if (ii % G_IN.config_write == 0) {
           write_config(ii);
         }
       }
 
 
       // Output distance between the cavities
-      if (in.cavity_sample_int > 0){
-        if (ii % in.cavity_sample_int == 0) {
+      if (G_IN.cavity_sample_int > 0){
+        if (ii % G_IN.cavity_sample_int == 0) {
           cavity_dist_output(cavity_init);
           if (cavity_init) cavity_init = false;
         }
@@ -157,15 +156,19 @@ void cavity_run_nvt(bool prod_flag, int sweep_offset){
 void cavity_sweep_nvt(){
 
   // Create N trial moves (N = number of particles)
+  struct p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
     cavity_part_move();
   }
 
 }
 
+// ------ Set cavity distance to a value allowed from input ------
+
 void cavity_set_distance(){
   
-  double cavity_avedr = (in.cavity_maxdr + in.cavity_mindr)/ 2.0;
+  double cavity_avedr = (G_IN.cavity_maxdr + G_IN.cavity_mindr)/ 2.0;
+  struct box_info sim_box_info = sim_box_info_get();
   part[1][1] = part[0][1];
   part[1][2] = part[0][2];
   part[1][3] = part[0][3] + cavity_avedr;
@@ -173,6 +176,9 @@ void cavity_set_distance(){
   else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
 
 }
+
+
+// ------ Write cavity interaction potential to file ------
 
 void cavity_psi_output(){
 
@@ -186,15 +192,17 @@ void cavity_psi_output(){
   fprintf(fid, "# Interaction potential  between the cavities \n");
   fprintf(fid, "# Distance, potential\n");
   fprintf(fid, "#########################################################\n");
-  double xx = in.cavity_mindr;
-  int n_points = (int)((in.cavity_maxdr - in.cavity_mindr)/in.cavity_out_dr);
+  double xx = G_IN.cavity_mindr;
+  int n_points = (int)((G_IN.cavity_maxdr - G_IN.cavity_mindr)/G_IN.cavity_out_dr);
   for (int ii=0; ii < n_points; ii++){
     fprintf(fid, "%.8e %.8e\n", xx, cavity_interaction(xx, false));
-    xx += in.cavity_out_dr;
+    xx += G_IN.cavity_out_dr;
   }
   fclose(fid);
 
 }
+
+// ------ Write cavity distance to file ------
 
 void cavity_dist_output(bool init){
 

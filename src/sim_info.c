@@ -2,17 +2,19 @@
 #include <stdlib.h>
 #include <math.h>
 #include "read_input.h"
-#include "init.h"
+#include "sim_info.h"
+
+// ------ Global variables ------
 
 // Global variable for simulation box information
-struct box_info sim_box_info;
+static struct box_info sim_box_info;
 
 // Global variables for particles information
-struct p_info part_info;
+static struct p_info part_info;
 double (*part)[4];
 
-
 // ------ Initialize simulation box ------
+
 void sim_box_init(int cell_type, int nx, int ny, int nz, double rho){
 
   // Variable declaration
@@ -56,6 +58,7 @@ void sim_box_init(int cell_type, int nx, int ny, int nz, double rho){
 
 
 // ------ Allocate multidimensional array for particles positions  ------
+
 void part_alloc(){
 
   // Variable declaration
@@ -93,6 +96,7 @@ void part_alloc(){
 
 
 // ------ Initialize particles positions  ------
+
 void part_init(){
 
   if (sim_box_info.cell_type == 1){
@@ -155,4 +159,75 @@ void part_init_err(){
   exit(EXIT_FAILURE);
 
 }
+
+// ------ Functions to access the simulation box and the particle's information ------
+
+struct box_info sim_box_info_get(){
+  return sim_box_info;
+}
+
+struct p_info part_info_get(){
+  return part_info;
+}
+
+/* double part_config_get(){ */
+/*   return part; */
+/* } */
+
+void print_sim_info(){
+
+  if (G_IN.press > 0){
+    // Output for NpT simulations
+    printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
+	   sim_box_info.ly, sim_box_info.lz);
+    printf("Number of particles: %d\n", part_info.NN);
+    printf("Pressure: %.8f\n", G_IN.press);   
+  }
+  else if (G_IN.cavity_pcav > 0){
+    // Output for NVT cavity simulations
+      printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
+	     sim_box_info.ly, sim_box_info.lz);
+      printf("Number of particles: %d\n", part_info.NN);  
+  }
+  else {
+    // Output for NVT simulations
+      printf("Simulation box size (x, y, z): %.5f %.5f %.5f\n", sim_box_info.lx,
+         sim_box_info.ly, sim_box_info.lz);
+      printf("Number of particles: %d\n", part_info.NN);   
+  }
+
+
+}
+
+// ------ Functions to write and read simulation box information to file ------
+
+void sim_box_info_write(FILE *fid){
+  fwrite(&sim_box_info, sizeof(struct box_info), 1, fid);
+}
+
+void sim_box_info_read(FILE *fid){
+  fread(&sim_box_info, sizeof(struct p_info), 1, fid);
+}
+
+
+// ------ Functions to write and read particles information to file ------
+
+void part_info_write(FILE *fid){
+  fwrite(&part_info, sizeof(struct p_info), 1, fid);
+}
+
+void part_info_read(FILE *fid){
+  fread(&part_info, sizeof(struct p_info), 1, fid);
+}
+
+
+// ------ Function to free the matrix that stores the configuration -------
+
+void part_free(){
+  free(part);
+}
+
+
+
+
 

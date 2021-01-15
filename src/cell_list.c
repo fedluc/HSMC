@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include "init.h"
+#include "sim_info.h"
 #include "read_input.h"
 #include "cell_list.h"
 
+// ------ Global variables ------
 static int neigh_num;
 static int cell_num_x;
 static int cell_num_y;
@@ -19,16 +20,18 @@ static int **neigh_mat;
 
 // ------- Functions used to initialize the cell list -------
 
-void cell_list_init(){
+void cell_list_init(bool alloc){
   
   // Compute neighbor list parameters
   compute_cell_list_info();
   
-  // Allocate matrix used to keep track of which particles belong to each cell
-  cell_list_alloc_arr(&part_cell, cell_num_tot, in.neigh_max_part);
+  if (alloc){
+    // Allocate matrix used to keep track of which particles belong to each cell
+    cell_list_alloc_arr(&part_cell, cell_num_tot, G_IN.neigh_max_part);
 
-  // Allocate topology matrix that defines neighbor interactions
-  cell_list_alloc_arr(&neigh_mat, cell_num_tot, neigh_num);
+    // Allocate topology matrix that defines neighbor interactions
+    cell_list_alloc_arr(&neigh_mat, cell_num_tot, neigh_num);
+  }
 
   // Initialize cell list
   cell_list_new();
@@ -71,10 +74,13 @@ void cell_list_free(){
 
 void compute_cell_list_info(){
 
+  // Get simulation box information
+  struct box_info sim_box_info = sim_box_info_get();
+
   // Number of cells
-  cell_num_x = (int)floor(sim_box_info.lx/in.neigh_dr);
-  cell_num_y = (int)floor(sim_box_info.ly/in.neigh_dr);
-  cell_num_z = (int)floor(sim_box_info.lz/in.neigh_dr);
+  cell_num_x = (int)floor(sim_box_info.lx/G_IN.neigh_dr);
+  cell_num_y = (int)floor(sim_box_info.ly/G_IN.neigh_dr);
+  cell_num_z = (int)floor(sim_box_info.lz/G_IN.neigh_dr);
   cell_num_tot = cell_num_x * cell_num_y * cell_num_z;
   
   // Do not allow less than 27 cells
@@ -132,7 +138,7 @@ void cell_list_new(){
   // Initialize the cell lists
   for (int ii=0; ii<cell_num_tot; ii++){
     part_cell[ii][0] = 0;
-    for (int jj=1; jj<in.neigh_max_part; jj++){
+    for (int jj=1; jj<G_IN.neigh_max_part; jj++){
       part_cell[ii][jj] = -1;
     }
   }
@@ -140,6 +146,7 @@ void cell_list_new(){
   // Fill the cell list with the particles indexes
   int idx_row;
   int *idx_col  = (int*)malloc(sizeof(int) * cell_num_tot);
+  struct p_info part_info = part_info_get();
   for (int ii=0; ii<cell_num_tot; ii++){
     idx_col[ii] = 1;
   }
@@ -209,8 +216,8 @@ void cell_list_check(int cell_idx){
     printf("ERROR: Trying to remove one particle from an empty cell\n");
     exit(EXIT_FAILURE);
   }
-  if (part_cell[cell_idx][0] > in.neigh_max_part){
-    printf("ERROR: More than %d particles in one cell\n", in.neigh_max_part);
+  if (part_cell[cell_idx][0] > G_IN.neigh_max_part){
+    printf("ERROR: More than %d particles in one cell\n", G_IN.neigh_max_part);
     exit(EXIT_FAILURE);
   }
 }
