@@ -14,6 +14,8 @@ struct box_info {
   int cell_type;
 };
 
+typedef double part_array[][4];
+
 extern double (*part)[4]; // THIS SHOULD BE REMOVED
 
 void sim_box_init(int cell_type, int nx, int ny,
@@ -35,7 +37,8 @@ struct box_info sim_box_info_get();
 
 struct p_info part_info_get();
 
-double part_config_get();
+//double (*part_config_get())[4];
+part_array *part_config_get();
 
 void part_free();
 

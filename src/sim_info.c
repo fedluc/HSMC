@@ -12,6 +12,7 @@ static struct box_info sim_box_info;
 // Global variables for particles information
 static struct p_info part_info;
 double (*part)[4];
+static part_array *part_test;
 
 // ------ Initialize simulation box ------
 
@@ -88,6 +89,13 @@ void part_alloc(){
     exit(EXIT_FAILURE);
   }
 
+  // Allocate matrix to store particle information
+  part_test = malloc(part_tot * sizeof(*part_test));
+  if (part_test == NULL){
+    printf("ERROR: Failed particle allocation\n");
+    exit(EXIT_FAILURE);
+  }
+
   // Output
   part_info.Ncell = part_cell;
   part_info.NN = part_tot;
@@ -149,6 +157,11 @@ void add_particle(int id, double xx, double yy, double zz){
   part[id][2] = yy;
   part[id][3] = zz;
 
+  part_test[id][0] = id;
+  part_test[id][1] = xx;
+  part_test[id][2] = yy;
+  part_test[id][3] = zz;
+
 }
 
 void part_init_err(){
@@ -170,9 +183,13 @@ struct p_info part_info_get(){
   return part_info;
 }
 
-/* double part_config_get(){ */
-/*   return part; */
+/* double (*part_config_get())[4]{ */
+/*   return part_test;  */
 /* } */
+part_array *part_config_get(){
+  return part_test;
+}
+
 
 void print_sim_info(){
 
@@ -225,6 +242,7 @@ void part_info_read(FILE *fid){
 
 void part_free(){
   free(part);
+  free(part_test);
 }
 
 

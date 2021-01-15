@@ -35,6 +35,13 @@ void hs_nvt() {
     read_restart(G_IN.restart_name);
   }
 
+  // ---------------- TESTING ----------------------
+  double (*part_test)[4] = part_config_get();
+  for (int ii=0; ii<100; ii++){
+    printf("%f %f %f %f\n", part_test[ii][0], part_test[ii][1],
+	   part_test[ii][2], part_test[ii][3]);
+  }
+  // ---------------- TESTING ----------------------  
   // Print simulation info on screen
   print_sim_info();
 

@@ -123,6 +123,7 @@ void vol_move(){
       G_IN.rho = part_info.NN / vol_new;
       // Update the simulation box
       sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, G_IN.rho);
+      sim_box_info = sim_box_info_get();
       // Re-scale particle's positions
       for (int ii=0; ii<part_info.NN; ii++){
 	part[ii][1] *= sf;
