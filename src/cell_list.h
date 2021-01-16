@@ -3,6 +3,21 @@
 
 #include <stdbool.h>
 
+typedef struct {
+
+  int neigh_num;
+  int num_x;
+  int num_y;
+  int num_z;
+  int num_tot;
+  double size_x;
+  double size_y;
+  double size_z;
+  int **part_cell;
+  int **neigh_mat;
+
+} cl_info;
+
 void cell_list_init(bool alloc);
 
 void cell_list_free();
@@ -13,10 +28,7 @@ void cell_list_free_arr(int ***arr, int rows);
 
 void compute_cell_list_info();
 
-void get_cell_list_info(int ***pc, int ***nm,
-			int *num_neigh_cell, int *num_tot,
-			int *num_x, int *num_y, int *num_z,
-			double *size_x, double *size_y, double *size_z);
+cl_info get_cell_list_info();
 
 void cell_list_new();
 

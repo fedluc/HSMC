@@ -16,14 +16,7 @@ static double mu;
 static int wtest;
 
 // Variables to assign the virtual particles to the cell lists
-static int cell_num_x;
-static int cell_num_y;
-static int cell_num_z;
-static int cl_neigh_num;
-static double cell_size_x;
-static double cell_size_y;
-static double cell_size_z;
-static int **cl_part_cell, **cl_neigh;
+static cl_info nl;
 
 // ------ Caller to compute the chemical potential ------
 
@@ -45,10 +38,7 @@ void widom_insertion(){
   wtest = 0;
 
   // Neighbor list information
-  get_cell_list_info(&cl_part_cell, &cl_neigh, &cl_neigh_num, NULL,
-		     &cell_num_x, &cell_num_y, &cell_num_z,
-		     &cell_size_x, &cell_size_y, &cell_size_z);
-
+  nl = get_cell_list_info();
 
   // Perform the insertions prescribed in input
   for (int ii=0; ii<G_IN.mu_insertions; ii++){
@@ -73,7 +63,7 @@ void widom_insertion(){
 
 void widom_rand_pos(){
   
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
   r_x = rng_get_double() * sim_box_info.lx;
   r_y = rng_get_double() * sim_box_info.ly;
   r_z = rng_get_double() * sim_box_info.lz;
@@ -91,17 +81,17 @@ bool widom_check_overlap(){
   cell_idx = widom_cell_part_idx();
 
   // Loop over the neighboring cells
-  for (int ii=0; ii<cl_neigh_num; ii++){
+  for (int ii=0; ii<nl.neigh_num; ii++){
 
-    neigh_idx = cl_neigh[cell_idx][ii];
+    neigh_idx = nl.neigh_mat[cell_idx][ii];
 
     // Loop over the particles in the neighboring cell
-    n_part_cell = cl_part_cell[neigh_idx][0];
+    n_part_cell = nl.part_cell[neigh_idx][0];
     if (n_part_cell > 0){
       for (int jj=1; jj<=n_part_cell; jj++){
 
         // Particle index
-        part_idx = cl_part_cell[neigh_idx][jj];
+        part_idx = nl.part_cell[neigh_idx][jj];
 
         //Compute inter-particle distance
         dr = widom_compute_dist(part_idx);
@@ -122,15 +112,16 @@ bool widom_check_overlap(){
 
 int widom_cell_part_idx(){
 
-  return  (int)(r_x/cell_size_x)*cell_num_x*cell_num_x
-    + (int)(r_y/cell_size_y)*cell_num_y
-    + (int)(r_z/cell_size_z);
+  return  (int)(r_x/nl.size_x)*nl.num_x*nl.num_x
+    + (int)(r_y/nl.size_y)*nl.num_y
+    + (int)(r_z/nl.size_z);
 
 }
 
 double widom_compute_dist(int idx){
 
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
+  config part_conf = part_config_get();
   double lx = sim_box_info.lx;
   double ly = sim_box_info.ly;
   double lz = sim_box_info.lz;
@@ -140,9 +131,9 @@ double widom_compute_dist(int idx){
   double dx, dy, dz, dr;
 
   // Cartesian components of the distance
-  dx = r_x - part[idx][1];
-  dy = r_y - part[idx][2];
-  dz = r_z - part[idx][3];
+  dx = r_x - part_conf[idx][1];
+  dy = r_y - part_conf[idx][2];
+  dz = r_z - part_conf[idx][3];
   
   // Periodic boundary conditions
   if (dx > lx_2)       dx -= lx;

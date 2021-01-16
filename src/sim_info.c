@@ -7,12 +7,13 @@
 // ------ Global variables ------
 
 // Global variable for simulation box information
-static struct box_info sim_box_info;
+static box_info sim_box_info;
 
 // Global variables for particles information
-static struct p_info part_info;
-double (*part)[4];
-static part_array *part_test;
+static p_info part_info;
+
+// Global variable for the configuration
+static config part_conf;
 
 // ------ Initialize simulation box ------
 
@@ -83,15 +84,8 @@ void part_alloc(){
              sim_box_info.cell_z *  part_cell;
   
   // Allocate matrix to store particle information
-  part = malloc(part_tot * sizeof(*part));
-  if (part == NULL){
-    printf("ERROR: Failed particle allocation\n");
-    exit(EXIT_FAILURE);
-  }
-
-  // Allocate matrix to store particle information
-  part_test = malloc(part_tot * sizeof(*part_test));
-  if (part_test == NULL){
+  part_conf = malloc(part_tot * sizeof(*part_conf));
+  if (part_conf == NULL){
     printf("ERROR: Failed particle allocation\n");
     exit(EXIT_FAILURE);
   }
@@ -152,15 +146,10 @@ void part_init_fcc(){
 
 void add_particle(int id, double xx, double yy, double zz){
 
-  part[id][0] = id;
-  part[id][1] = xx;
-  part[id][2] = yy;
-  part[id][3] = zz;
-
-  part_test[id][0] = id;
-  part_test[id][1] = xx;
-  part_test[id][2] = yy;
-  part_test[id][3] = zz;
+  part_conf[id][0] = id;
+  part_conf[id][1] = xx;
+  part_conf[id][2] = yy;
+  part_conf[id][3] = zz;
 
 }
 
@@ -175,19 +164,17 @@ void part_init_err(){
 
 // ------ Functions to access the simulation box and the particle's information ------
 
-struct box_info sim_box_info_get(){
+box_info sim_box_info_get(){
   return sim_box_info;
 }
 
-struct p_info part_info_get(){
+p_info part_info_get(){
   return part_info;
 }
 
-/* double (*part_config_get())[4]{ */
-/*   return part_test;  */
-/* } */
-part_array *part_config_get(){
-  return part_test;
+
+config part_config_get(){
+  return part_conf;
 }
 
 
@@ -219,30 +206,41 @@ void print_sim_info(){
 // ------ Functions to write and read simulation box information to file ------
 
 void sim_box_info_write(FILE *fid){
-  fwrite(&sim_box_info, sizeof(struct box_info), 1, fid);
+  fwrite(&sim_box_info, sizeof(box_info), 1, fid);
 }
 
 void sim_box_info_read(FILE *fid){
-  fread(&sim_box_info, sizeof(struct p_info), 1, fid);
+  fread(&sim_box_info, sizeof(p_info), 1, fid);
 }
 
 
 // ------ Functions to write and read particles information to file ------
 
 void part_info_write(FILE *fid){
-  fwrite(&part_info, sizeof(struct p_info), 1, fid);
+  fwrite(&part_info, sizeof(p_info), 1, fid);
 }
 
 void part_info_read(FILE *fid){
-  fread(&part_info, sizeof(struct p_info), 1, fid);
+  fread(&part_info, sizeof(p_info), 1, fid);
+}
+
+// ------ Functions to write and read particles information to file ------
+
+void part_conf_write(FILE *fid){
+  p_info part_info = part_info_get();
+  fwrite(part_conf, sizeof(double), part_info.NN*4, fid);
+}
+
+void part_conf_read(FILE *fid){
+  p_info part_info = part_info_get();
+  fread(part_conf, sizeof(double), part_info.NN*4, fid);
 }
 
 
 // ------ Function to free the matrix that stores the configuration -------
 
 void part_free(){
-  free(part);
-  free(part_test);
+  free(part_conf);
 }
 
 

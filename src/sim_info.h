@@ -3,20 +3,21 @@
 
 #include <stdio.h>
 
-struct p_info {int NN, Ncell; };
+typedef struct {
+  int NN; 
+  int Ncell; 
+} p_info;
 
-struct box_info {
+typedef struct {
   double vol;
   double lx, ly, lz;
   double min_size;
   double cell_size;
   int cell_x, cell_y, cell_z;
   int cell_type;
-};
+} box_info ;
 
-typedef double part_array[][4];
-
-extern double (*part)[4]; // THIS SHOULD BE REMOVED
+typedef double (*config)[4];
 
 void sim_box_init(int cell_type, int nx, int ny,
 		  int nz, double rho);
@@ -33,12 +34,11 @@ void part_init_err();
 
 void add_particle(int id, double xx, double yy, double zz);
 
-struct box_info sim_box_info_get();
+box_info sim_box_info_get();
 
-struct p_info part_info_get();
+p_info part_info_get();
 
-//double (*part_config_get())[4];
-part_array *part_config_get();
+config part_config_get();
 
 void part_free();
 
@@ -51,6 +51,10 @@ void sim_box_info_read(FILE *fid);
 void part_info_write(FILE *fid);
 
 void part_info_read(FILE *fid);
+
+void part_conf_write(FILE *fid);
+
+void part_conf_read(FILE *fid);
 
 
 #endif

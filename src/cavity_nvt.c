@@ -156,7 +156,7 @@ void cavity_run_nvt(bool prod_flag, int sweep_offset){
 void cavity_sweep_nvt(){
 
   // Create N trial moves (N = number of particles)
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
     cavity_part_move();
   }
@@ -168,12 +168,13 @@ void cavity_sweep_nvt(){
 void cavity_set_distance(){
   
   double cavity_avedr = (G_IN.cavity_maxdr + G_IN.cavity_mindr)/ 2.0;
-  struct box_info sim_box_info = sim_box_info_get();
-  part[1][1] = part[0][1];
-  part[1][2] = part[0][2];
-  part[1][3] = part[0][3] + cavity_avedr;
-  if (part[1][3] > sim_box_info.lz) part[1][3] -= sim_box_info.lz;
-  else if (part[1][3] < 0.0)        part[1][3] += sim_box_info.lz;
+  box_info sim_box_info = sim_box_info_get();
+  config part_conf = part_config_get();
+  part_conf[1][1] = part_conf[0][1];
+  part_conf[1][2] = part_conf[0][2];
+  part_conf[1][3] = part_conf[0][3] + cavity_avedr;
+  if (part_conf[1][3] > sim_box_info.lz) part_conf[1][3] -= sim_box_info.lz;
+  else if (part_conf[1][3] < 0.0)        part_conf[1][3] += sim_box_info.lz;
 
 }
 

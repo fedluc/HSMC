@@ -21,8 +21,11 @@ void part_move(){
   double r_x, r_y, r_z;
   double x_old, y_old, z_old;
 
+  // Get current configuration
+  config part_conf = part_config_get();  
+
   // Random number in [0, NN-1] to select the particle
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   r_idx = rng_get_int(part_info.NN);
     
   // Three random numbers in [0,1] for the displacement
@@ -31,31 +34,31 @@ void part_move(){
   r_z = rng_get_double();
  
   // Store old coordinates (if the move gets rejected)
-  x_old = part[r_idx][1];
-  y_old = part[r_idx][2];
-  z_old = part[r_idx][3];
+  x_old = part_conf[r_idx][1];
+  y_old = part_conf[r_idx][2];
+  z_old = part_conf[r_idx][3];
   cell_idx_old = cell_part_idx(r_idx);
 
   // Proposed move
-  part[r_idx][1] += (r_x - 0.5)*G_IN.dr_max;
-  part[r_idx][2] += (r_y - 0.5)*G_IN.dr_max;
-  part[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
+  part_conf[r_idx][1] += (r_x - 0.5)*G_IN.dr_max;
+  part_conf[r_idx][2] += (r_y - 0.5)*G_IN.dr_max;
+  part_conf[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
 
   // Periodic boundary conditions
-  struct box_info sim_box_info = sim_box_info_get();
-  if (part[r_idx][1] > sim_box_info.lx) part[r_idx][1] -= sim_box_info.lx;
-  else if (part[r_idx][1] < 0.0)        part[r_idx][1] += sim_box_info.lx;
-  if (part[r_idx][2] > sim_box_info.ly) part[r_idx][2] -= sim_box_info.ly;
-  else if (part[r_idx][2] < 0.0)        part[r_idx][2] += sim_box_info.ly;
-  if (part[r_idx][3] > sim_box_info.lz) part[r_idx][3] -= sim_box_info.lz;
-  else if (part[r_idx][3] < 0.0)        part[r_idx][3] += sim_box_info.lz;
+  box_info sim_box_info = sim_box_info_get();
+  if (part_conf[r_idx][1] > sim_box_info.lx) part_conf[r_idx][1] -= sim_box_info.lx;
+  else if (part_conf[r_idx][1] < 0.0)        part_conf[r_idx][1] += sim_box_info.lx;
+  if (part_conf[r_idx][2] > sim_box_info.ly) part_conf[r_idx][2] -= sim_box_info.ly;
+  else if (part_conf[r_idx][2] < 0.0)        part_conf[r_idx][2] += sim_box_info.ly;
+  if (part_conf[r_idx][3] > sim_box_info.lz) part_conf[r_idx][3] -= sim_box_info.lz;
+  else if (part_conf[r_idx][3] < 0.0)        part_conf[r_idx][3] += sim_box_info.lz;
       
   // Accept or reject move according to metropolis algorithm
   if (check_overlap(r_idx, 1.0, 1.0, 1.0)){
     // Reject move
-    part[r_idx][1] = x_old;
-    part[r_idx][2] = y_old;
-    part[r_idx][3] = z_old;
+    part_conf[r_idx][1] = x_old;
+    part_conf[r_idx][2] = y_old;
+    part_conf[r_idx][3] = z_old;
     rej_part_moves+=1;
   }
   else {
@@ -85,7 +88,7 @@ void vol_move(){
   r_dv = rng_get_double();
 
   // Proposed volume move
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
   log_vol_new = log(sim_box_info.vol) + (r_dv - 0.5)*G_IN.dv_max;
   vol_new = exp(log_vol_new);
 
@@ -96,7 +99,7 @@ void vol_move(){
   sf = pow(vol_ratio, 1./3.);
      
   // Check if there is overlap with re-scaled coordinates
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
 
     overlap = check_overlap(ii, sf, sf, sf);
@@ -125,18 +128,19 @@ void vol_move(){
       sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, G_IN.rho);
       sim_box_info = sim_box_info_get();
       // Re-scale particle's positions
+      config part_conf = part_config_get();
       for (int ii=0; ii<part_info.NN; ii++){
-	part[ii][1] *= sf;
-	part[ii][2] *= sf;
-	part[ii][3] *= sf;
-	if (part[ii][1] > sim_box_info.lx) part[ii][1] -= sim_box_info.lx;
-	else if (part[ii][1] < 0.0)        part[ii][1] += sim_box_info.lx;
-	if (part[ii][2] > sim_box_info.ly) part[ii][2] -= sim_box_info.ly;
-	else if (part[ii][2] < 0.0)        part[ii][2] += sim_box_info.ly;
-	if (part[ii][3] > sim_box_info.lz) part[ii][3] -= sim_box_info.lz;
-	else if (part[ii][3] < 0.0)        part[ii][3] += sim_box_info.lz;
+	part_conf[ii][1] *= sf;
+	part_conf[ii][2] *= sf;
+	part_conf[ii][3] *= sf;
+	if (part_conf[ii][1] > sim_box_info.lx) part_conf[ii][1] -= sim_box_info.lx;
+	else if (part_conf[ii][1] < 0.0)        part_conf[ii][1] += sim_box_info.lx;
+	if (part_conf[ii][2] > sim_box_info.ly) part_conf[ii][2] -= sim_box_info.ly;
+	else if (part_conf[ii][2] < 0.0)        part_conf[ii][2] += sim_box_info.ly;
+	if (part_conf[ii][3] > sim_box_info.lz) part_conf[ii][3] -= sim_box_info.lz;
+	else if (part_conf[ii][3] < 0.0)        part_conf[ii][3] += sim_box_info.lz;
       }
-      // Construct new  cell-list (the simulation box has changed)
+      // Connew  cell-list (the simulation box has changed)
       cell_list_new();
     }
   }
@@ -156,31 +160,28 @@ bool check_overlap(int idx_ref,
                    double sf_x, double sf_y, double sf_z){
 
   // Variable declaration
-  int **cl_part_cell, **cl_neigh, cl_neigh_num;
   int cell_idx, neigh_idx, part_idx;
   int n_part_cell;
   double dr;
 
   // Neighbor list
-  get_cell_list_info(&cl_part_cell, &cl_neigh,
-		     &cl_neigh_num, NULL, NULL, NULL,
-		     NULL, NULL, NULL, NULL);
+  cl_info nl = get_cell_list_info();
 
   // Cell that contains the particle
   cell_idx = cell_part_idx(idx_ref);
     
   // Loop over the neighboring cells
-  for (int ii=0; ii<cl_neigh_num; ii++){
+  for (int ii=0; ii<nl.neigh_num; ii++){
 
-    neigh_idx = cl_neigh[cell_idx][ii];
+    neigh_idx = nl.neigh_mat[cell_idx][ii];
     
     // Loop over the particles in the neighboring cell
-    n_part_cell = cl_part_cell[neigh_idx][0];
+    n_part_cell = nl.part_cell[neigh_idx][0];
     if (n_part_cell > 0){
       for (int jj=1; jj<=n_part_cell; jj++){
 	
   	// Particle index
-  	part_idx = cl_part_cell[neigh_idx][jj];
+  	part_idx = nl.part_cell[neigh_idx][jj];
 
   	//Compute inter-particle distance
   	dr = compute_dist(idx_ref, part_idx, sf_x, sf_y, sf_z);
@@ -242,10 +243,13 @@ void cavity_part_move(){
   int move_type;
   double r_type, r_x, r_y, r_z;
   double x_old, y_old, z_old, dr_old, en_old=0.0;
+  
+  // Get current configuration
+  config part_conf = part_config_get();
 
   // Select particle to move (cavities are moved with probability G_IN.cavity_pcav)
   // Note: The cavities have indexes 0 and 1
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   r_type = rng_get_double();  
   if (r_type > G_IN.cavity_pcav ) {
     // Move standard particles
@@ -264,9 +268,9 @@ void cavity_part_move(){
   r_z = rng_get_double();
 
   // Store old coordinates (if the move gets rejected)
-  x_old = part[r_idx][1];
-  y_old = part[r_idx][2];
-  z_old = part[r_idx][3];
+  x_old = part_conf[r_idx][1];
+  y_old = part_conf[r_idx][2];
+  z_old = part_conf[r_idx][3];
   cell_idx_old = cell_part_idx(r_idx);
 
   // If a cavity has to be moved, compute old interaction energy
@@ -284,18 +288,18 @@ void cavity_part_move(){
   }
 
   // Proposed move
-  part[r_idx][1] += (r_x - 0.5)*G_IN.dr_max;
-  part[r_idx][2] += (r_y - 0.5)*G_IN.dr_max;
-  part[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
+  part_conf[r_idx][1] += (r_x - 0.5)*G_IN.dr_max;
+  part_conf[r_idx][2] += (r_y - 0.5)*G_IN.dr_max;
+  part_conf[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
 
   // Periodic boundary conditions
-  struct box_info sim_box_info = sim_box_info_get();
-  if (part[r_idx][1] > sim_box_info.lx) part[r_idx][1] -= sim_box_info.lx;
-  else if (part[r_idx][1] < 0.0)        part[r_idx][1] += sim_box_info.lx;
-  if (part[r_idx][2] > sim_box_info.ly) part[r_idx][2] -= sim_box_info.ly;
-  else if (part[r_idx][2] < 0.0)        part[r_idx][2] += sim_box_info.ly;
-  if (part[r_idx][3] > sim_box_info.lz) part[r_idx][3] -= sim_box_info.lz;
-  else if (part[r_idx][3] < 0.0)        part[r_idx][3] += sim_box_info.lz;
+  box_info sim_box_info = sim_box_info_get();
+  if (part_conf[r_idx][1] > sim_box_info.lx) part_conf[r_idx][1] -= sim_box_info.lx;
+  else if (part_conf[r_idx][1] < 0.0)        part_conf[r_idx][1] += sim_box_info.lx;
+  if (part_conf[r_idx][2] > sim_box_info.ly) part_conf[r_idx][2] -= sim_box_info.ly;
+  else if (part_conf[r_idx][2] < 0.0)        part_conf[r_idx][2] += sim_box_info.ly;
+  if (part_conf[r_idx][3] > sim_box_info.lz) part_conf[r_idx][3] -= sim_box_info.lz;
+  else if (part_conf[r_idx][3] < 0.0)        part_conf[r_idx][3] += sim_box_info.lz;
 
   // Accept or reject move according to metropolis algorithm
   if (cavity_check_move(r_idx,move_type,en_old)){
@@ -309,9 +313,9 @@ void cavity_part_move(){
   }
   else {
     // Reject move
-    part[r_idx][1] = x_old;
-    part[r_idx][2] = y_old;
-    part[r_idx][3] = z_old;
+    part_conf[r_idx][1] = x_old;
+    part_conf[r_idx][2] = y_old;
+    part_conf[r_idx][3] = z_old;
     rej_part_moves+=1;
   }
 
@@ -325,7 +329,6 @@ void cavity_part_move(){
 bool cavity_check_move(int idx_ref, int move_type, double en_old){
 
   // Variable declaration
-  int **cl_part_cell, **cl_neigh, cl_neigh_num;
   int cell_idx, neigh_idx, part_idx;
   int n_part_cell;
   double dr, dr_cavity;
@@ -348,25 +351,23 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old){
   // Check for overlaps
 
   // Neighbor list
-  get_cell_list_info(&cl_part_cell, &cl_neigh,
-                     &cl_neigh_num, NULL, NULL, NULL,
-                     NULL, NULL, NULL, NULL);
+  cl_info nl = get_cell_list_info();
 
   // Cell that contains the particle
   cell_idx = cell_part_idx(idx_ref);
 
   // Loop over the neighboring cells
-  for (int ii=0; ii<cl_neigh_num; ii++){
+  for (int ii=0; ii<nl.neigh_num; ii++){
 
-    neigh_idx = cl_neigh[cell_idx][ii];
+    neigh_idx = nl.neigh_mat[cell_idx][ii];
 
     // Loop over the particles in the neighboring cell
-    n_part_cell = cl_part_cell[neigh_idx][0];
+    n_part_cell = nl.part_cell[neigh_idx][0];
     if (n_part_cell > 0){
       for (int jj=1; jj<=n_part_cell; jj++){
 
         // Particle index
-        part_idx = cl_part_cell[neigh_idx][jj];
+        part_idx = nl.part_cell[neigh_idx][jj];
 
         //Compute inter-particle distance
         dr = compute_dist(idx_ref, part_idx, 1.0, 1.0, 1.0);
@@ -391,7 +392,8 @@ bool cavity_check_move(int idx_ref, int move_type, double en_old){
 double compute_dist(int idx1, int idx2,
 		    double sf_x, double sf_y, double sf_z){
   
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
+  config part_conf = part_config_get();
   double lx = sim_box_info.lx*sf_x;
   double ly = sim_box_info.ly*sf_y;
   double lz = sim_box_info.lz*sf_z;
@@ -401,9 +403,9 @@ double compute_dist(int idx1, int idx2,
   double dx, dy, dz, dr;
 
   // Cartesian components of the distance
-  dx = (part[idx1][1] - part[idx2][1])*sf_x;
-  dy = (part[idx1][2] - part[idx2][2])*sf_y;
-  dz = (part[idx1][3] - part[idx2][3])*sf_z;
+  dx = (part_conf[idx1][1] - part_conf[idx2][1])*sf_x;
+  dy = (part_conf[idx1][2] - part_conf[idx2][2])*sf_y;
+  dz = (part_conf[idx1][3] - part_conf[idx2][3])*sf_z;
   
   // Periodic boundary conditions
   if (dx > lx_2)       dx -= lx;

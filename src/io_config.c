@@ -37,8 +37,7 @@ void write_restart(int sweep){
   part_info_write(fid);
 
   // Write configuration
-  struct p_info part_info = part_info_get();  
-  fwrite(part, sizeof(double), part_info.NN*4, fid);
+  part_conf_write(fid);
 
   // Write random number generator status
   rng_write(fid);
@@ -76,8 +75,7 @@ void read_restart(char *restart_file){
   part_alloc();
  
   // Read configuration
-  struct p_info part_info = part_info_get();
-  fread(part, sizeof(double), part_info.NN*4, fid);
+  part_conf_read(fid);
 
   // Read random number generator status
   rng_read(fid);
@@ -86,7 +84,8 @@ void read_restart(char *restart_file){
   fclose(fid);
 
   // Compute the density
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
+  p_info part_info = part_info_get();
   G_IN.rho = part_info.NN/sim_box_info.vol;
 
   // Print message on screen
@@ -118,8 +117,9 @@ void write_config(int sweep){
   }
 
   // Write configuration
-  struct p_info part_info = part_info_get();
-  struct box_info sim_box_info = sim_box_info_get();
+  p_info part_info = part_info_get();
+  box_info sim_box_info = sim_box_info_get();
+  config part_conf = part_config_get();
   gzprintf(fid, "# Sweep number\n");
   gzprintf(fid, "%d\n", sweep);
   gzprintf(fid, "# Number of particles\n");
@@ -130,8 +130,9 @@ void write_config(int sweep){
   gzprintf(fid, "%.8f\n", sim_box_info.lz);
   gzprintf(fid, "# Configuration\n");
   for (int ii=0; ii<part_info.NN; ii++){
-    gzprintf(fid, "%d %.8f %.8f %.8f\n", (int)part[ii][0], part[ii][1],
-	     part[ii][2], part[ii][3]);
+    gzprintf(fid, "%d %.8f %.8f %.8f\n", 
+	     (int)part_conf[ii][0], part_conf[ii][1],
+	     part_conf[ii][2], part_conf[ii][3]);
   }
 
   // Close binary file

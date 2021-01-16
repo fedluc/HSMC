@@ -162,7 +162,7 @@ void run_npt(bool prod_flag, int sweep_offset){
 void sweep_npt(){
 
   int r_move_id;
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   // Create N trial moves (N = number of particles)
   for (int ii=0; ii<part_info.NN; ii++){
 

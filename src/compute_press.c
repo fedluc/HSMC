@@ -91,31 +91,29 @@ void pressv_hist_init(){
 void pressv_compute_hist(){
   
   // Variable declaration
-  int **cl_part_cell, **cl_neigh, cl_neigh_num;
-  int cell_idx, neigh_idx, n_part_cell, part_idx;
+  int cell_idx, neigh_idx, part_idx;
+  int n_part_cell;
   double dr;
   int bin;
 
   // Neighbor list
-  get_cell_list_info(&cl_part_cell, &cl_neigh,
-                     &cl_neigh_num, NULL, NULL, NULL,
-                     NULL, NULL, NULL, NULL);
+  cl_info nl = get_cell_list_info();
 
   // Fill histograms
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
 
     cell_idx = cell_part_idx(ii);
 
-    for (int jj=0; jj<cl_neigh_num; jj++){
+    for (int jj=0; jj<nl.neigh_num; jj++){
 
-      neigh_idx = cl_neigh[cell_idx][jj];
-      n_part_cell = cl_part_cell[neigh_idx][0];
+      neigh_idx = nl.neigh_mat[cell_idx][jj];
 
+      n_part_cell = nl.part_cell[neigh_idx][0];
       if (n_part_cell > 0){
 	for (int kk=1; kk<=n_part_cell; kk++){
 
-	  part_idx = cl_part_cell[neigh_idx][kk];
+	  part_idx = nl.part_cell[neigh_idx][kk];
 
 	  dr = compute_dist(ii, part_idx, 1.0, 1.0, 1.0);
 
@@ -143,7 +141,7 @@ void pressv_compute_rdf(){
   double r1,r2, dr, bin_vol;
   
   // Number of particles
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   
   // Normalize histograms
   dr = pressv_rr[1] - pressv_rr[0];
@@ -211,7 +209,7 @@ void presst_compute_hist(){
     sf = pow(vol_ratio, 1./3.);
     
     // Check if there is overla
-    struct p_info part_info = part_info_get();
+    p_info part_info = part_info_get();
     for (int jj=0; jj<part_info.NN; jj++){
       
       overlap = check_overlap(jj, sf, sf, sf);
@@ -233,10 +231,10 @@ void presst_compute_hist(){
 void pressv_output(bool init){
 
   // Get simulation box information
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
 
   // Get number of particles
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
 
   // Print to file the sample needed to compute the pressure
   FILE* fid;
@@ -267,10 +265,10 @@ void pressv_output(bool init){
 void presst_output(bool init){
 
   // Get simulation box information
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
 
   // Get number of particles
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
 
   // Print to file the sample needed to compute the pressure
   FILE* fid;

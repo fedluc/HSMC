@@ -21,16 +21,13 @@ void compute_op(bool init){
   if (init){
     
     // Get info on the neighbor list
-    double cell_size_x, cell_size_y, cell_size_z, cell_size_min;
-    get_cell_list_info(NULL, NULL, NULL, NULL, 
-		       NULL, NULL, NULL, &cell_size_x, 
-		       &cell_size_y, &cell_size_z);
-    cell_size_min = cell_size_x;
-    if (cell_size_min < cell_size_y) cell_size_min = cell_size_y;
-    if (cell_size_min < cell_size_z) cell_size_min = cell_size_z;
-    if (cell_size_min < G_IN.ql_rmax){
-      printf("WARNING: The cutoff for the order parameter was reduced to %f in order to be consistent with the neighbor list size\n", cell_size_min);
-      G_IN.ql_rmax = cell_size_min;
+    cl_info nl = get_cell_list_info();
+    double nl_size_min = nl.size_x;
+    if (nl_size_min < nl.size_y) nl_size_min = nl.size_y;
+    if (nl_size_min < nl.size_z) nl_size_min = nl.size_z;
+    if (nl_size_min < G_IN.ql_rmax){
+      printf("WARNING: The cutoff for the order parameter was reduced to %f in order to be consistent with the neighbor list size\n", nl_size_min);
+      G_IN.ql_rmax = nl_size_min;
     }
 
   }
@@ -49,7 +46,7 @@ void global_ql_compute(){
     
 
   // Allocate array for order parameter per particle
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   ql = (double*)malloc(sizeof(double) * part_info.NN);
   
   // Compute the order parameter per particle
@@ -78,13 +75,13 @@ void ql_compute(){
   qlm2 = (double*)malloc(sizeof(double) * tlp1);
 
   // Half-box size
-  struct box_info sim_box_info = sim_box_info_get();
+  box_info sim_box_info = sim_box_info_get();
   lx_2 = sim_box_info.lx/2.0;
   ly_2 = sim_box_info.ly/2.0;
   lz_2 = sim_box_info.lz/2.0;  
 
   // Compute ql
-  struct p_info part_info = part_info_get();
+  p_info part_info = part_info_get();
   for (int ii=0; ii<part_info.NN; ii++){
 
     // Obtain all the m-components of ql
@@ -110,8 +107,8 @@ void ql_compute(){
 void qlm2_compute(int ref_idx){
   
   int num_bonds = 0;
-  int **cl_part_cell, **cl_neigh, cl_neigh_num;
-  int cell_idx, neigh_idx, part_idx, n_part_cell;
+  int cell_idx, neigh_idx, part_idx;
+  int n_part_cell;
   double qlm_real_tmp, qlmm_real_tmp;
   double qlm_imag_tmp, qlmm_imag_tmp;
   double plm;
@@ -119,12 +116,14 @@ void qlm2_compute(int ref_idx){
   double phi;
 
   // Neighbor list
-  get_cell_list_info(&cl_part_cell, &cl_neigh, &cl_neigh_num, NULL, 
-		     NULL, NULL, NULL, NULL, NULL, NULL);
-      
-  // Simulation box
-  struct box_info sim_box_info = sim_box_info_get();
+  cl_info nl = get_cell_list_info();
 
+  // Simulation box
+  box_info sim_box_info = sim_box_info_get();
+
+  // Configuration
+  config part_conf = part_config_get();
+  
   // Cell with the reference particle
   cell_idx = cell_part_idx(ref_idx);
  
@@ -138,22 +137,22 @@ void qlm2_compute(int ref_idx){
     qlmm_imag_tmp = 0.;
 
     // Loop over the neighboring cells
-    for (int ii=0; ii<cl_neigh_num; ii++){
+    for (int ii=0; ii<nl.neigh_num; ii++){
 
-      neigh_idx = cl_neigh[cell_idx][ii];
+      neigh_idx = nl.neigh_mat[cell_idx][ii];
 
       // Loop over the particles in the neighboring cell
-      n_part_cell = cl_part_cell[neigh_idx][0];
+      n_part_cell = nl.part_cell[neigh_idx][0];
       if (n_part_cell > 0){
     	for (int jj=1; jj<=n_part_cell; jj++){
 
     	  // Particle index
-    	  part_idx = cl_part_cell[neigh_idx][jj];
+    	  part_idx = nl.part_cell[neigh_idx][jj];
 
     	  // Cartesian components of the distance
-    	  dx = (part[ref_idx][1] - part[part_idx][1]);
-    	  dy = (part[ref_idx][2] - part[part_idx][2]);
-    	  dz = (part[ref_idx][3] - part[part_idx][3]);
+    	  dx = (part_conf[ref_idx][1] - part_conf[part_idx][1]);
+    	  dy = (part_conf[ref_idx][2] - part_conf[part_idx][2]);
+    	  dz = (part_conf[ref_idx][3] - part_conf[part_idx][3]);
       
     	  // Periodic boundary conditions
     	  if (dx > lx_2)       dx -= sim_box_info.lx;
