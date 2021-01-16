@@ -31,17 +31,6 @@ struct input {
 
   // Seed for random number generator
   unsigned long int seed;
-  
-  // Compute: pressure (virial and thermodynamic)
-  double pressv_dr, presst_xi_max, presst_dxi;
-  int pressv_sample_int, presst_sample_int;
-  
-  // Compute: order parameter
-  int ql_order, ql_sample_int;
-  double ql_rmax;
-
-  // Compute: chemical potential
-  int mu_insertions, mu_sample_int;
 
   // Cavity simulations
   double cavity_pcav, cavity_maxdr, cavity_mindr;
@@ -57,6 +46,22 @@ struct input {
 
   // Write configuration
   int config_write;
+  
+  // Compute: pressure (virial and thermodynamic)
+  double pressv_dr, presst_xi_max, presst_dxi;
+  int pressv_sample_int, presst_sample_int;
+  
+  // Compute: order parameter
+  int ql_order, ql_sample_int;
+  double ql_rmax;
+
+  // Compute: chemical potential
+  int mu_insertions, mu_sample_int;
+
+  // Compute: radial distribution function
+  int rdf_sample_int;
+  double rdf_dr, rdf_rmax;
+
 };
 
 extern struct input G_IN;

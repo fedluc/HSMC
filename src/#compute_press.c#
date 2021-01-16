@@ -32,11 +32,10 @@ void compute_pressv(bool init){
     double nl_size_min = nl.size_x;
     if (nl_size_min < nl.size_y) nl_size_min = nl.size_y;
     if (nl_size_min < nl.size_z) nl_size_min = nl.size_z;
-    if (nl_size_min < pressv_rmax){
-      printf("ERROR: The size of the cells in the neighbor list does not allow a correct calculation of the pressure, increase to %f\n", 
-	     pressv_rmax);
-      exit(EXIT_FAILURE);
-    }
+    if (nl_size_min < G_IN.ql_rmax){
+      printf("WARNING: The cutoff for the order parameter was reduced to %f in order to be consistent with the neighbor list size\n", nl_size_min);
+      G_IN.ql_rmax = nl_size_min;
+
 
   }
 

@@ -5,6 +5,7 @@ import hsmc_op as op
 import hsmc_pressure as press
 import hsmc_chem_pot as mu
 import hsmc_cavity as cavity
+import hsmc_rdf as rdf
 
 # NVT simulations
 # data_dir = '../../HSMC_tests'
@@ -33,7 +34,11 @@ import hsmc_cavity as cavity
 # mu.hist(data_dir)
 
 # cavity NVT simulations
+# data_dir = '../../HSMC_tests'
+# cavity.rdf(data_dir,normalize=True)
+# cavity.lny(data_dir)
+# cavity.psi(data_dir)
+
+# Radial distribution function
 data_dir = '../../HSMC_tests'
-cavity.rdf(data_dir,normalize=True)
-cavity.lny(data_dir)
-cavity.psi(data_dir)
+rdf.rdf(data_dir)

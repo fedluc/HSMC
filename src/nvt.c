@@ -8,6 +8,7 @@
 #include "compute_press.h"
 #include "compute_order_parameter.h"
 #include "compute_widom_chem_pot.h"
+#include "compute_rdf.h"
 #include "moves.h"
 #include "io_config.h"
 #include "optimizer.h"
@@ -93,6 +94,7 @@ void run_nvt(bool prod_flag, int sweep_offset){
   // Variable declaration
   bool pressv_init = true, presst_init = true;
   bool ql_ave_init = true, mu_ave_init = true;
+  bool rdf_init = true;
   int n_sweeps;
 
   // Number of sweeps
@@ -157,6 +159,14 @@ void run_nvt(bool prod_flag, int sweep_offset){
       	if (ii % G_IN.mu_sample_int == 0) {
       	  compute_mu(mu_ave_init);
       	  if (mu_ave_init) mu_ave_init = false;
+      	}
+      }
+
+      // Compute radial distribution function
+      if (G_IN.rdf_sample_int > 0){
+      	if (ii % G_IN.rdf_sample_int == 0) {
+      	  compute_rdf(rdf_init);
+      	  if (rdf_init) rdf_init = false;
       	}
       }
 

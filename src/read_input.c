@@ -49,6 +49,8 @@ void print_example(){
     "ql 6 1.5 1 \n\n"
     "# Chemical potential via Widom insertions (insertions, saving interval)\n"
     "widom 100 5 \n\n"
+    "# Radial distribution function (resolution, cutoff, saving interval)\n"
+    "rdf 0.01 5 10\n\n"
     "# Cavity simulations (probability of moving a cavity, maximum and minimum distance,\n"
     "# saving interval, potential resolution)\n"
     "cavity 0.1 1.2 0.0 4 0.01\n\n"
@@ -92,6 +94,13 @@ void read_input_file(char *filename){
   G_IN.sweep_eq = 0;
   G_IN.sweep_stat = 0;
   G_IN.output_int = 0;
+  G_IN.cavity_pcav = 0;
+  G_IN.cavity_maxdr = 0;
+  G_IN.cavity_mindr = 0;
+  G_IN.cavity_sample_int = 0;
+  G_IN.restart_read = 0;
+  G_IN.restart_write = 0;
+  G_IN.config_write = 0;
   G_IN.pressv_dr = 0;
   G_IN.pressv_sample_int = 0;
   G_IN.presst_dxi = 0;
@@ -110,13 +119,8 @@ void read_input_file(char *filename){
   G_IN.ql_sample_int = 0;
   G_IN.mu_sample_int = 0;
   G_IN.mu_insertions = 0;
-  G_IN.cavity_pcav = 0;
-  G_IN.cavity_maxdr = 0;
-  G_IN.cavity_mindr = 0;
-  G_IN.cavity_sample_int = 0;
-  G_IN.restart_read = 0;
-  G_IN.restart_write = 0;
-  G_IN.config_write = 0;
+  G_IN.rdf_dr = 0;
+  G_IN.rdf_sample_int = 0;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -227,37 +231,6 @@ void read_input_file(char *filename){
 	else read_input_file_err(1,line_buf);
       }
 
-      else if (strcmp(key,"press_virial") == 0 || strcmp(key,"press_virial\n") == 0){
-	value = strtok(NULL, " ");
-	if(value != NULL ) {
-	  G_IN.pressv_dr = atof(value);
-	}
-	else read_input_file_err(1,line_buf);
-	value = strtok(NULL, " ");
-	if(value != NULL ) {
-	  G_IN.pressv_sample_int = atoi(value);
-	}
-	else read_input_file_err(1,line_buf);
-      }
-
-      else if (strcmp(key,"press_thermo") == 0 || strcmp(key,"press_thermo\n") == 0){
-	value = strtok(NULL, " ");
-        if(value != NULL ) {
-	  G_IN.presst_dxi = atof(value);
-	}
-	else read_input_file_err(1,line_buf);
-        value = strtok(NULL, " ");
-	if(value != NULL ) {
-	  G_IN.presst_xi_max = atof(value);
-	}
-	else read_input_file_err(1,line_buf);
-	value = strtok(NULL, " ");
-	if(value != NULL ) {
-	  G_IN.presst_sample_int = atoi(value);
-	}
-	else read_input_file_err(1,line_buf);
-      }
-
       else if (strcmp(key,"npt") == 0 || strcmp(key,"npt\n") == 0){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
@@ -303,37 +276,6 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
 	  G_IN.seed = atoi(value);
-	}
-	else read_input_file_err(1,line_buf);
-      }
-
-      else if (strcmp(key,"ql") == 0 || strcmp(key,"ql\n") == 0){
-	value = strtok(NULL, " ");
-        if(value != NULL ) {
-	  G_IN.ql_order = atoi(value);
-	}
-	else read_input_file_err(1,line_buf);
-	value = strtok(NULL, " ");
-        if(value != NULL ) {
-	  G_IN.ql_rmax = atof(value);
-	}
-	else read_input_file_err(1,line_buf);
-	value = strtok(NULL, " ");
-        if(value != NULL ) {
-	  G_IN.ql_sample_int = atoi(value);
-	}
-	else read_input_file_err(1,line_buf);
-      }
-
-      else if (strcmp(key,"widom") == 0 || strcmp(key,"widom\n") == 0){
-	value = strtok(NULL, " ");
-        if(value != NULL ) {
-	  G_IN.mu_insertions = atoi(value);
-	}
-	else read_input_file_err(1,line_buf);
-	value = strtok(NULL, " ");
-        if(value != NULL ) {
-	  G_IN.mu_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }
@@ -398,6 +340,85 @@ void read_input_file(char *filename){
 	else read_input_file_err(1,line_buf);
       }
 
+      else if (strcmp(key,"press_virial") == 0 || strcmp(key,"press_virial\n") == 0){
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.pressv_dr = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.pressv_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"press_thermo") == 0 || strcmp(key,"press_thermo\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.presst_dxi = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+        value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.presst_xi_max = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.presst_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"ql") == 0 || strcmp(key,"ql\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.ql_order = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.ql_rmax = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.ql_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"widom") == 0 || strcmp(key,"widom\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.mu_insertions = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.mu_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"rdf") == 0 || strcmp(key,"rdf\n") == 0){
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.rdf_dr = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.rdf_rmax = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.rdf_sample_int = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
 
       else read_input_file_err(2,line_buf);
 
