@@ -50,8 +50,8 @@ void print_example(){
     "# Chemical potential via Widom insertions (insertions, saving interval)\n"
     "widom 100 5 \n\n"
     "# Radial distribution function (resolution, cutoff, saving interval\n"
-    "output type, 1 = one single file, 2 = one compressed file per timestep)\n"
-    "rdf 0.01 5 10 2\n\n"
+    "number of samples per output file)\n"
+    "rdf 0.01 5 10 128\n\n"
     "# Cavity simulations (probability of moving a cavity, maximum and minimum distance,\n"
     "# saving interval, potential resolution)\n"
     "cavity 0.1 1.2 0.0 4 0.01\n\n"
@@ -123,7 +123,7 @@ void read_input_file(char *filename){
   G_IN.mu_insertions = 0;
   G_IN.rdf_dr = 0;
   G_IN.rdf_sample_int = 0;
-  G_IN.rdf_out = 2;
+  G_IN.rdf_samples = 128;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -428,7 +428,7 @@ void read_input_file(char *filename){
 	else read_input_file_err(1,line_buf);
 	value = strtok(NULL, " ");
 	if(value != NULL ) {
-	  G_IN.rdf_out = atoi(value);
+	  G_IN.rdf_samples = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }

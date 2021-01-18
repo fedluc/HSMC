@@ -15,10 +15,6 @@ void rdf_hist_compute();
 
 void rdf_hist_norm();
 
-void rdf_output(bool init, int sweep);
-
-void rdf_output_single_file(bool init);
-
-void rdf_output_multiple_file(int sweep);
+void rdf_output(bool init);
 
 #endif

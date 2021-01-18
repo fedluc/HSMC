@@ -16,9 +16,14 @@
 
 // ------ Global variables ------
 
-// Variables for the calculation of the pressure via the virial
+// Variables for the calculation of the radial distribution function
 static int rdf_hist_nn;
 static double *rdf_rr, *rdf_hist;
+
+// Variables for the output
+static int rdf_samples = 0;
+static int rdf_file_id = 0;
+
 
 // ------ Caller to compute the radial distribution function ------
  
@@ -54,7 +59,7 @@ void compute_rdf(bool init, int sweep){
   rdf_hist_norm();
   
   // Write output
-  rdf_output(init, sweep);
+  rdf_output(init);
   
 }
 
@@ -137,72 +142,33 @@ void rdf_hist_norm(){
 
 // ------ Print to file the pressure obtained from the virial route ------
 
-void rdf_output(bool init, int sweep){
+void rdf_output(bool init){
 
-  if (G_IN.rdf_out == 1){
-    rdf_output_single_file(init);
-  }
-  else if (G_IN.rdf_out == 2){
-    rdf_output_multiple_file(sweep);
-  }
-  else {
-    if (init){
-      printf("Unknown output option for rdf calculation, default to multiple files\n");
+  // Check that not too many output files are produced
+  if (init){
+    if ((double)(G_IN.sweep_stat+G_IN.sweep_eq)/(G_IN.rdf_sample_int * G_IN.rdf_samples) > 100000){
+      printf("ERROR: Too many (> 100000) rdf files will be produced. Consider increasing number of samples per file\n");
     }
-    rdf_output_multiple_file(sweep);
   }
 
-}
-
-
-void rdf_output_single_file(bool init){
-
-  // Get simulation box information
-  box_info sim_box_info = sim_box_info_get();
-
-  // Get number of particles
-  p_info part_info = part_info_get();
-
-  // Print to file the sample needed to compute the pressure
-  FILE* fid;
-  if (init) fid = fopen("rdf.dat", "w");
-  else fid = fopen("rdf.dat", "a");
-  if (fid == NULL) {
-    perror("Error while creating the rdf file\n");
-    exit(EXIT_FAILURE);
-  }
-  fprintf(fid, "######################################\n");
-  fprintf(fid, "# Bins, volume, number of particles\n");
-  fprintf(fid, "######################################\n");
-  fprintf(fid, "%d %.8e %d\n", rdf_hist_nn, 
-	  sim_box_info.vol, part_info.NN);
-  fprintf(fid, "###############################\n");
-  fprintf(fid, "# rr, rdf\n");
-  fprintf(fid, "###############################\n");
-  for (int ii = 0; ii < rdf_hist_nn; ii++)
-    {
-      fprintf(fid, "%.8e %.8e\n", rdf_rr[ii], rdf_hist[ii]);
-    }
-  fclose(fid);
-
-}
-
-void rdf_output_multiple_file(int sweep){
-
-  // Name of rdf file (defined by the sweep number)
-  int max_out_length = ceil(log10(G_IN.sweep_stat+G_IN.sweep_eq));
-  char rdf_file_template[20], rdf_file[max_out_length+20];
-  sprintf(rdf_file_template, "rdf_%%0%dd.dat.gz", max_out_length);
-  sprintf(rdf_file, rdf_file_template, sweep);
+  // Name of rdf file
+  char rdf_file[30];
+  sprintf(rdf_file, "rdf_%06d.dat.gz", rdf_file_id);
 
   // Open file
-  gzFile fid = gzopen(rdf_file, "w");
-  if (fid == NULL) {
-    perror("Error while creating rdf file\n");
+  gzFile fid = Z_NULL;
+  if (rdf_samples == 0){
+    fid = gzopen(rdf_file, "w");
+  }
+  else if (rdf_samples > 0 && rdf_samples <= G_IN.rdf_samples){
+    fid = gzopen(rdf_file, "a");
+  }
+  if (fid == Z_NULL) {
+    perror("Error while creating rdf file");
     exit(EXIT_FAILURE);
   }
 
-  // Write rdfuration
+    // Write rdf
   p_info part_info = part_info_get();
   box_info sim_box_info = sim_box_info_get();
   gzprintf(fid, "######################################\n");
@@ -219,5 +185,12 @@ void rdf_output_multiple_file(int sweep){
 
   // Close binary file
   gzclose(fid);
+
+  // Update counters
+  rdf_samples += 1;
+  if (rdf_samples > G_IN.rdf_samples){
+    rdf_samples = 0;
+    rdf_file_id += 1;
+  }
 
 }

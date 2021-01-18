@@ -59,7 +59,7 @@ struct input {
   int mu_insertions, mu_sample_int;
 
   // Compute: radial distribution function
-  int rdf_sample_int, rdf_out;
+  int rdf_sample_int, rdf_samples;
   double rdf_dr, rdf_rmax;
 
 };

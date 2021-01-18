@@ -125,7 +125,7 @@ void write_config(int sweep){
     config_output_check = false;
   }
 
-  // Name of configuration file (defined by the sweep number)
+  // Name of configuration file
   char config_file[30];
   sprintf(config_file, "config_%06d.dat.gz", config_file_id);
 
