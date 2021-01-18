@@ -96,7 +96,7 @@ void hs_npt() {
 void run_npt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
-  bool presst_init = true, ql_ave_init = true;
+  bool presst_init = true, ql_init = true;
   int n_sweeps;
 
   if (prod_flag) n_sweeps = G_IN.sweep_stat;
@@ -144,8 +144,8 @@ void run_npt(bool prod_flag, int sweep_offset){
       // Compute order parameter
       if (G_IN.ql_sample_int > 0){
         if (ii % G_IN.ql_sample_int == 0) {
-          compute_op(ql_ave_init);
-          if (ql_ave_init) ql_ave_init = false;
+          compute_op(ql_init);
+          if (ql_init) ql_init = false;
         }
       }
 
@@ -156,6 +156,10 @@ void run_npt(bool prod_flag, int sweep_offset){
     sweep_npt();
 
   }  
+
+  // Free memory from compute
+  if (!presst_init) presst_hist_free();
+  if (!ql_init) ql_free();
 
 }
 

@@ -49,8 +49,9 @@ void print_example(){
     "ql 6 1.5 1 \n\n"
     "# Chemical potential via Widom insertions (insertions, saving interval)\n"
     "widom 100 5 \n\n"
-    "# Radial distribution function (resolution, cutoff, saving interval)\n"
-    "rdf 0.01 5 10\n\n"
+    "# Radial distribution function (resolution, cutoff, saving interval\n"
+    "output type, 1 = one single file, 2 = one compressed file per timestep)\n"
+    "rdf 0.01 5 10 2\n\n"
     "# Cavity simulations (probability of moving a cavity, maximum and minimum distance,\n"
     "# saving interval, potential resolution)\n"
     "cavity 0.1 1.2 0.0 4 0.01\n\n"
@@ -60,8 +61,8 @@ void print_example(){
     "restart_write 1024\n\n"
     "# Read restart data (activation flag (0 or 1), name with restart file\n"
     "# restart_read 1 restart_04096.bin\n\n"
-    "# Write configuration to file (saving interval)\n"
-    "config_write 1024\n\n"
+    "# Write configuration to file (saving interval, samples per file)\n"
+    "config_write 1024 256\n\n"
     "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
     "sweep_eq 10000\n\n"
     "# Number of sweeps for statistics\n"
@@ -101,6 +102,7 @@ void read_input_file(char *filename){
   G_IN.restart_read = 0;
   G_IN.restart_write = 0;
   G_IN.config_write = 0;
+  G_IN.config_samples = 128;
   G_IN.pressv_dr = 0;
   G_IN.pressv_sample_int = 0;
   G_IN.presst_dxi = 0;
@@ -121,6 +123,7 @@ void read_input_file(char *filename){
   G_IN.mu_insertions = 0;
   G_IN.rdf_dr = 0;
   G_IN.rdf_sample_int = 0;
+  G_IN.rdf_out = 2;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
@@ -338,6 +341,11 @@ void read_input_file(char *filename){
 	  G_IN.config_write = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.config_samples = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
       }
 
       else if (strcmp(key,"press_virial") == 0 || strcmp(key,"press_virial\n") == 0){
@@ -418,6 +426,11 @@ void read_input_file(char *filename){
 	  G_IN.rdf_sample_int = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+	if(value != NULL ) {
+	  G_IN.rdf_out = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
       }
 
       else read_input_file_err(2,line_buf);
@@ -433,6 +446,7 @@ void read_input_file(char *filename){
 
   // Close file
   fclose(in_file);
+  printf("Done\n");
 
   // Print content of input structure
   /* printf("Density: %.8f\n", G_IN.rho); */

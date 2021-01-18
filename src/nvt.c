@@ -82,10 +82,11 @@ void hs_nvt() {
   printf("Elapsed time: %f seconds\n",
   	 (double)(end - start) / CLOCKS_PER_SEC);
 
-  /* // Free memory  */
+  // Free memory
   part_free();
   cell_list_free();
   rng_free();
+
 
 }
 
@@ -93,7 +94,7 @@ void run_nvt(bool prod_flag, int sweep_offset){
 
   // Variable declaration
   bool pressv_init = true, presst_init = true;
-  bool ql_ave_init = true, mu_ave_init = true;
+  bool ql_init = true, mu_ave_init = true;
   bool rdf_init = true;
   int n_sweeps;
 
@@ -149,8 +150,8 @@ void run_nvt(bool prod_flag, int sweep_offset){
       // Compute order parameter
       if (G_IN.ql_sample_int > 0){
       	if (ii % G_IN.ql_sample_int == 0) {
-      	  compute_op(ql_ave_init);
-      	  if (ql_ave_init) ql_ave_init = false;
+      	  compute_op(ql_init);
+      	  if (ql_init) ql_init = false;
       	}
       }
 
@@ -165,7 +166,7 @@ void run_nvt(bool prod_flag, int sweep_offset){
       // Compute radial distribution function
       if (G_IN.rdf_sample_int > 0){
       	if (ii % G_IN.rdf_sample_int == 0) {
-      	  compute_rdf(rdf_init);
+      	  compute_rdf(rdf_init,ii);
       	  if (rdf_init) rdf_init = false;
       	}
       }
@@ -176,6 +177,12 @@ void run_nvt(bool prod_flag, int sweep_offset){
     sweep_nvt();
 
   }
+
+  // Free memory from compute
+  if (!pressv_init) pressv_hist_free();
+  if (!presst_init) presst_hist_free();
+  if (!ql_init) ql_free();
+  if (!rdf_init) rdf_hist_free();
 
 }
 

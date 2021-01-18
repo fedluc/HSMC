@@ -30,6 +30,9 @@ void compute_op(bool init){
       G_IN.ql_rmax = nl_size_min;
     }
 
+    // Allocate vectors for order parameter calculation
+    ql_alloc();
+
   }
 
   // Compute the global order parameter
@@ -40,26 +43,45 @@ void compute_op(bool init){
 
 }
 
-// ------ Compute the average (over all the particles) order paramter ------
-
-void global_ql_compute(){
-    
+// ------ Allocate and free vectors for order parameter calculation ------
+void ql_alloc(){
 
   // Allocate array for order parameter per particle
   p_info part_info = part_info_get();
   ql = (double*)malloc(sizeof(double) * part_info.NN);
+
+  // Allocate array to store the various m-components of ql
+  int tlp1 = 2*G_IN.ql_order + 1;
+  qlm2 = (double*)malloc(sizeof(double) * tlp1);
+
+  if (ql == NULL ||  qlm2 == NULL){
+    printf("ERROR: Failed array allocation\n");
+    exit(EXIT_FAILURE);
+  }
+
+}
+
+void ql_free(){
+
+  free(ql);
+  free(qlm2);
+
+}
+
+
+// ------ Compute the average (over all the particles) order paramter ------
+
+void global_ql_compute(){    
   
   // Compute the order parameter per particle
   ql_compute();
 
   // Average in order to obtain the global order parameter
+  p_info part_info = part_info_get();
   ql_ave = 0.0;
   for (int ii=0; ii<part_info.NN; ii++){
     ql_ave += ql[ii]/part_info.NN;
   }
-
-  // Free memory
-  free(ql);
 
 }
 
@@ -70,9 +92,6 @@ void ql_compute(){
 
    // Variable declaration
   int tlp1 = 2*G_IN.ql_order + 1;
-
-  // Allocate array to store the various m-components of ql
-  qlm2 = (double*)malloc(sizeof(double) * tlp1);
 
   // Half-box size
   box_info sim_box_info = sim_box_info_get();
@@ -87,6 +106,7 @@ void ql_compute(){
     // Obtain all the m-components of ql
     qlm2_compute(ii);
 
+    // Compute ql
     ql[ii] = 0.0;
     for (int jj=0; jj<tlp1; jj++){
       ql[ii] += qlm2[jj];
@@ -95,9 +115,6 @@ void ql_compute(){
     ql[ii] = sqrt(ql[ii]);
 
   }
-
-  // Free memory
-  free(qlm2);
 
 }
 
@@ -126,7 +143,7 @@ void qlm2_compute(int ref_idx){
   
   // Cell with the reference particle
   cell_idx = cell_part_idx(ref_idx);
- 
+
   // Loop over all possible values of m
   for (int mm=0; mm<G_IN.ql_order+1; mm++){
 

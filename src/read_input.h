@@ -45,7 +45,7 @@ struct input {
   int restart_write;
 
   // Write configuration
-  int config_write;
+  int config_write, config_samples;
   
   // Compute: pressure (virial and thermodynamic)
   double pressv_dr, presst_xi_max, presst_dxi;
@@ -59,7 +59,7 @@ struct input {
   int mu_insertions, mu_sample_int;
 
   // Compute: radial distribution function
-  int rdf_sample_int;
+  int rdf_sample_int, rdf_out;
   double rdf_dr, rdf_rmax;
 
 };

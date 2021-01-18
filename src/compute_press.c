@@ -38,6 +38,9 @@ void compute_pressv(bool init){
       exit(EXIT_FAILURE);
     }
 
+    // Allocate histograms
+    pressv_hist_alloc();
+
   }
 
   // Initialize histogram
@@ -52,7 +55,24 @@ void compute_pressv(bool init){
   // Write output
   pressv_output(init);
 
-  // Free memory
+}
+
+// ------ Allocate and free histograms for the calculation of the pressure via the virial route ------
+void pressv_hist_alloc(){
+
+  pressv_hist_nn = (int)((pressv_rmax - 1.0)/G_IN.pressv_dr) + 1;
+  pressv_rr = (double*)malloc(sizeof(double) * pressv_hist_nn);
+  pressv_hist = (double*)malloc(sizeof(double) * pressv_hist_nn);
+  if (pressv_rr == NULL ||  pressv_hist == NULL){
+    printf("ERROR: Failed histogram allocation\n");
+    exit(EXIT_FAILURE);
+  }
+
+}
+
+
+void pressv_hist_free(){
+
   free(pressv_rr);
   free(pressv_hist);
   
@@ -62,13 +82,6 @@ void compute_pressv(bool init){
 
 void pressv_hist_init(){
 
-  pressv_hist_nn = (int)((pressv_rmax - 1.0)/G_IN.pressv_dr);
-  pressv_rr = (double*)malloc(sizeof(double) * pressv_hist_nn);
-  pressv_hist = (double*)malloc(sizeof(double) * pressv_hist_nn);
-  if (pressv_rr == NULL ||  pressv_hist == NULL){
-    printf("ERROR: Failed histogram allocation\n");
-    exit(EXIT_FAILURE);
-  }
   for (int ii=0; ii<pressv_hist_nn; ii++){
     pressv_rr[ii] = (ii+1./2.)*G_IN.pressv_dr + 1.0;
     pressv_hist[ii] = 0.0;
@@ -149,6 +162,10 @@ void pressv_compute_rdf(){
 
 void compute_presst(bool init){
 
+  if (init){
+    presst_hist_alloc();
+  }
+
   //Initialize histogram
   presst_hist_init();
 
@@ -158,7 +175,24 @@ void compute_presst(bool init){
   // Write output
   presst_output(init);
 
-  // Free memory
+}
+
+// ------ Allocate and free histograms for the calculation of the pressure via the thermodynamic route ------
+void presst_hist_alloc(){
+  
+  presst_hist_nn = (int)(G_IN.presst_xi_max/G_IN.presst_dxi);
+  presst_xi = (double*)malloc(sizeof(double) * presst_hist_nn);
+  presst_hist = (double*)malloc(sizeof(double) * presst_hist_nn);
+  if (presst_xi == NULL ||  presst_hist == NULL){
+    printf("ERROR: Failed histogram allocation\n");
+    exit(EXIT_FAILURE);
+  }
+
+}
+
+
+void presst_hist_free(){
+
   free(presst_xi);
   free(presst_hist);
   
@@ -168,13 +202,6 @@ void compute_presst(bool init){
 
 void presst_hist_init(){
 
-  presst_hist_nn = (int)(G_IN.presst_xi_max/G_IN.presst_dxi);
-  presst_xi = (double*)malloc(sizeof(double) * presst_hist_nn);
-  presst_hist = (double*)malloc(sizeof(double) * presst_hist_nn);
-  if (presst_xi == NULL ||  presst_hist == NULL){
-    printf("ERROR: Failed histogram allocation\n");
-    exit(EXIT_FAILURE);
-  }
   for (int ii=0; ii<presst_hist_nn; ii++){
     presst_xi[ii] = (ii+1)*G_IN.presst_dxi;
     presst_hist[ii] = 0.0;

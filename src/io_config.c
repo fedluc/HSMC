@@ -1,14 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
 #include <zlib.h>
-#include <gsl/gsl_rng.h>
 #include "sim_info.h"
 #include "rng.h"
 #include "read_input.h"
 #include "io_config.h"
 
+static bool restart_output_check = true;
+static bool config_output_check = true;
+static int config_samples = 0;
+static int config_file_id = 0;
+
 void write_restart(int sweep){
+
+    // Check that not too many output files are produced
+  if (restart_output_check){
+    if ((double)(G_IN.sweep_stat+G_IN.sweep_eq)/(G_IN.restart_write) > 100000){
+      printf("ERROR: Too many (> 100000) restart files will be produced. Consider writing less often\n");
+    }
+    restart_output_check = false;
+  }
+
   
   // Name of restart file (defined by the sweep number)
   int max_out_length = ceil(log10(G_IN.sweep_stat+G_IN.sweep_eq));
@@ -36,7 +50,7 @@ void write_restart(int sweep){
   // Write particles information
   part_info_write(fid);
 
-  // Write configuration
+  /* // Write configuration */
   part_conf_write(fid);
 
   // Write random number generator status
@@ -102,17 +116,29 @@ void read_restart(char *restart_file){
 }
 
 void write_config(int sweep){
-  
-  // Name of restart file (defined by the sweep number)
-  int max_out_length = ceil(log10(G_IN.sweep_stat+G_IN.sweep_eq));
-  char config_file_template[20], config_file[max_out_length+20];
-  sprintf(config_file_template, "config_%%0%dd.dat.gz", max_out_length);
-  sprintf(config_file, config_file_template, sweep);
-  
-  // Open binary file
-  gzFile fid = gzopen(config_file, "w");
-  if (fid == NULL) {
-    perror("Error while creating configuration file\n");
+
+  // Check that not too many output files are produced
+  if (config_output_check){
+    if ((double)(G_IN.sweep_stat+G_IN.sweep_eq)/(G_IN.config_write * G_IN.config_samples) > 100000){
+      printf("ERROR: Too many (> 100000) configuration files will be produced. Consider increasing number of samples per file\n");
+    }
+    config_output_check = false;
+  }
+
+  // Name of configuration file (defined by the sweep number)
+  char config_file[30];
+  sprintf(config_file, "config_%06d.dat.gz", config_file_id);
+
+  // Open file
+  gzFile fid = Z_NULL;
+  if (config_samples == 0){
+    fid = gzopen(config_file, "w");
+  }
+  else if (config_samples > 0 && config_samples <= G_IN.config_samples){
+    fid = gzopen(config_file, "a");
+  }
+  if (fid == Z_NULL) {
+    perror("Error while creating configuration file");
     exit(EXIT_FAILURE);
   }
 
@@ -135,8 +161,15 @@ void write_config(int sweep){
 	     part_conf[ii][2], part_conf[ii][3]);
   }
 
-  // Close binary file
+  // Close file
   gzclose(fid);
 
+  // Update counters
+  config_samples += 1;
+  if (config_samples > G_IN.config_samples){
+    config_samples = 0;
+    config_file_id += 1;
+  }
+  
 
 }

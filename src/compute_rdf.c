@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <zlib.h>
 #include "sim_info.h"
 #include "read_input.h"
 #include "cell_list.h"
@@ -21,7 +22,7 @@ static double *rdf_rr, *rdf_hist;
 
 // ------ Caller to compute the radial distribution function ------
  
-void compute_rdf(bool init){
+void compute_rdf(bool init, int sweep){
   
   // Limit the cutoff to half the simulation box
   if (init){
@@ -38,6 +39,9 @@ void compute_rdf(bool init){
       
     }
 
+    // Allocate vectors for rdf calculation
+    rdf_hist_alloc();
+
   }
 
   // Initialize histogram
@@ -50,30 +54,39 @@ void compute_rdf(bool init){
   rdf_hist_norm();
   
   // Write output
-  rdf_output(init);
-
-  // Free memory
-  free(rdf_rr);
-  free(rdf_hist);
+  rdf_output(init, sweep);
   
 }
 
-// ------ Initialize histogram for the calculation of the pressure via the virial route ------
+// ------ Allocate and free the histograms for the radial distribution function calculation  ------
 
-void rdf_hist_init(){
+void rdf_hist_alloc(){
 
-  rdf_hist_nn = (int)((G_IN.rdf_rmax - 1.0)/G_IN.rdf_dr);
+  rdf_hist_nn = (int)((G_IN.rdf_rmax - 1.0)/G_IN.rdf_dr)+1;
   rdf_rr = (double*)malloc(sizeof(double) * rdf_hist_nn);
   rdf_hist = (double*)malloc(sizeof(double) * rdf_hist_nn);
   if (rdf_rr == NULL ||  rdf_hist == NULL){
     printf("ERROR: Failed histogram allocation\n");
     exit(EXIT_FAILURE);
   }
+
+}
+
+void rdf_hist_free(){
+
+  free(rdf_hist);
+  free(rdf_rr);
+
+}
+
+// ------ Initialize histogram for the calculation of the pressure via the virial route ------
+
+void rdf_hist_init(){
+
   for (int ii=0; ii<rdf_hist_nn; ii++){
     rdf_rr[ii] = (ii+1./2.)*G_IN.rdf_dr + 1.0;
     rdf_hist[ii] = 0.0;
   }
-
   
 }
 
@@ -124,7 +137,25 @@ void rdf_hist_norm(){
 
 // ------ Print to file the pressure obtained from the virial route ------
 
-void rdf_output(bool init){
+void rdf_output(bool init, int sweep){
+
+  if (G_IN.rdf_out == 1){
+    rdf_output_single_file(init);
+  }
+  else if (G_IN.rdf_out == 2){
+    rdf_output_multiple_file(sweep);
+  }
+  else {
+    if (init){
+      printf("Unknown output option for rdf calculation, default to multiple files\n");
+    }
+    rdf_output_multiple_file(sweep);
+  }
+
+}
+
+
+void rdf_output_single_file(bool init){
 
   // Get simulation box information
   box_info sim_box_info = sim_box_info_get();
@@ -137,7 +168,7 @@ void rdf_output(bool init){
   if (init) fid = fopen("rdf.dat", "w");
   else fid = fopen("rdf.dat", "a");
   if (fid == NULL) {
-    perror("Error while creating the file for the virial pressure\n");
+    perror("Error while creating the rdf file\n");
     exit(EXIT_FAILURE);
   }
   fprintf(fid, "######################################\n");
@@ -153,5 +184,40 @@ void rdf_output(bool init){
       fprintf(fid, "%.8e %.8e\n", rdf_rr[ii], rdf_hist[ii]);
     }
   fclose(fid);
+
+}
+
+void rdf_output_multiple_file(int sweep){
+
+  // Name of rdf file (defined by the sweep number)
+  int max_out_length = ceil(log10(G_IN.sweep_stat+G_IN.sweep_eq));
+  char rdf_file_template[20], rdf_file[max_out_length+20];
+  sprintf(rdf_file_template, "rdf_%%0%dd.dat.gz", max_out_length);
+  sprintf(rdf_file, rdf_file_template, sweep);
+
+  // Open file
+  gzFile fid = gzopen(rdf_file, "w");
+  if (fid == NULL) {
+    perror("Error while creating rdf file\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Write rdfuration
+  p_info part_info = part_info_get();
+  box_info sim_box_info = sim_box_info_get();
+  gzprintf(fid, "######################################\n");
+  gzprintf(fid, "# Bins, volume, number of particles\n");
+  gzprintf(fid, "######################################\n");
+  gzprintf(fid, "%d %.8e %d\n", rdf_hist_nn, 
+	   sim_box_info.vol, part_info.NN);
+  gzprintf(fid, "###############################\n");
+  gzprintf(fid, "# rr, rdf\n");
+  gzprintf(fid, "###############################\n");
+  for (int ii = 0; ii < rdf_hist_nn; ii++){
+      gzprintf(fid, "%.8e %.8e\n", rdf_rr[ii], rdf_hist[ii]);
+  }
+
+  // Close binary file
+  gzclose(fid);
 
 }

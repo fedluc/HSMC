@@ -31,7 +31,7 @@ void cell_list_init(bool alloc){
 
   // Initialize cell list
   cell_list_new();
-  
+
   // Initialize neighbor matrix
   cell_neigh_init();
 
@@ -202,7 +202,7 @@ void cell_list_check(int cell_idx){
     printf("ERROR: Trying to remove one particle from an empty cell\n");
     exit(EXIT_FAILURE);
   }
-  if (neigh_info.part_cell[cell_idx][0] > G_IN.neigh_max_part){
+  if (neigh_info.part_cell[cell_idx][0] > G_IN.neigh_max_part-1){
     printf("ERROR: More than %d particles in one cell\n", G_IN.neigh_max_part);
     exit(EXIT_FAILURE);
   }
