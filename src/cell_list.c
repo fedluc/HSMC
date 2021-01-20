@@ -6,6 +6,25 @@
 #include "read_input.h"
 #include "cell_list.h"
 
+// --------------------------------------------------------
+// The module "cell_list.c" implements the neighbor list
+// via the cell list method which is used to make the 
+// code scale like O(N) where N is the number of particles. 
+// Note that, contrary to what is normally used in Molecular 
+// Dynamics, cell lists do NOT use linked lists since 
+//       -- The continuous update of the linked lists after
+//          every accepted move does not allow to scale
+//          as O(N)
+//       -- Linked list are not suitable for parallel 
+//          calculations (paralllelization is still not
+//          implemented as of January 20, 2021)
+// Instead of linked lists the code uses a matrix to store
+// which particles belong to each cell. This increases the
+// memory consumption but allows to overcome the problems
+// which would be encountered with linked lists
+// --------------------------------------------------------
+
+
 // ------ Global variables ------
 static cl_info neigh_info;
 

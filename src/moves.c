@@ -9,6 +9,15 @@
 #include "moves.h"
 #include "analytic.h"
 
+// --------------------------------------------------------
+// The module "moves.c" contains a set of functions used 
+// to perform particle moves and volume moves (for NPT 
+// simulations). The module contains functions to generate
+// new positions (or new volumes) and to check wheter the
+// resulting configuration can be accepted or not. 
+// --------------------------------------------------------
+
+
 // Global variables
 static int part_moves=0, vol_moves=0;
 static int acc_part_moves=0, rej_part_moves=0;

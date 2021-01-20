@@ -11,7 +11,17 @@
 #include "optimizer.h"
 #include "npt.h"
 
-// Hard-sphere simulation in the NpT ensemble
+// --------------------------------------------------------
+// The module "npt.c" is used to perform NPT simulations. 
+// In the course of NPT simulations the following 
+// observables can be samples:
+//     -- The density
+//     -- The pressure (via the thermodynamic route)
+//     -- The order parameter
+// --------------------------------------------------------
+
+
+// ------ Hard-sphere simulation in the NpT ensemble ------
 void hs_npt() {
 
   if (G_IN.restart_read == 0){ // Read from input file

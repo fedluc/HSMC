@@ -10,6 +10,19 @@
 #include "cavity_nvt.h"
 #include "analytic.h"
 
+// --------------------------------------------------------
+// The module "cavity_nvt.c" allows to perform cavity 
+// simulations in the NVT ensemble. These are the same 
+// simulations described in G. Torrie and G. N. Patey, Mol.
+// Phys. 34, 1623 (1977) and employ umbrella sampling in 
+// order to extract the cavity function of hard-sphere 
+// systems inside the correlation void (r < sigma). In the
+// course of the cavity simulations the following 
+// observables can be sampled:
+//     -- The distance between the cavities
+// --------------------------------------------------------
+
+
 // ------ Cavity simulation for hard-spheres in the NVT ensemble ------
 
 void cavity_hs_nvt() {

@@ -4,6 +4,18 @@
 #include "read_input.h"
 #include "sim_info.h"
 
+// --------------------------------------------------------
+// The module "sim_info.c" is used to set-up some key
+// quantities for the Monte Carlo simulation. Such 
+// quantities include:
+//     -- The simulation box
+//     -- The total number of particles
+//     -- The starting configuration
+//     -- The configuration of the system in the course
+//        of the simulation
+// --------------------------------------------------------
+
+
 // ------ Global variables ------
 
 // Global variable for simulation box information

@@ -40,5 +40,5 @@ import hsmc_rdf as rdf
 # cavity.psi(data_dir)
 
 # Radial distribution function
-data_dir = '../../HSMC_tests'
+data_dir = '/proj/ocp_bridge_function/hard_sphere/saving_interval/'
 rdf.rdf(data_dir)

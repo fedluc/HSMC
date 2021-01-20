@@ -8,6 +8,12 @@
 #include "compute_rdf.h"
 #include "moves.h"
 
+// --------------------------------------------------------
+// The module "compute_rdf.c" is used to compute the 
+// the radial distribution function as defined in any 
+// classical textbook.
+// --------------------------------------------------------
+
 // ------------------------------------------------------
 // NOTE: This compute scales like N^2, it can have a 
 // significant impact on performance if used with large

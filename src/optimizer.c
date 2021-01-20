@@ -9,6 +9,16 @@
 #include "cavity_nvt.h"
 #include "optimizer.h"
 
+// --------------------------------------------------------
+// The module "optimizer.c" is used to find the optimal 
+// maximum displacements for particles motions and volume
+// displacements. Here optimal is intended as the maximum
+// displacement that allows approximately 50% of the moves
+// to be accepted, but the user is free to specify a 
+// different percentage as optimal
+// --------------------------------------------------------
+
+// ------ Optimizer for NVT simulations ------
 
 void opt_nvt(){
 
@@ -67,6 +77,8 @@ void get_sample_nvt(double *dr, double *acc_ratio, int sample_iter){
 
 }
 
+
+// ------ Optimizer for NpT simulations ------
 
 void opt_npt(){
 
@@ -154,6 +166,9 @@ void get_sample_npt(double *dr, double *acc_ratio_part,
 
 }
 
+
+
+// ------ Optimizer for cavity simulations ------
 
 void opt_cavity_nvt(){
 

@@ -7,6 +7,28 @@
 #include "compute_press.h"
 #include "moves.h"
 
+// --------------------------------------------------------
+// The module "compute_press.c" is used to
+// compute the pressure in the system. The pressure can
+// be computed in two independent ways:
+//     -- Via the virial route: the pressure is obtained
+//        by combining the virial equation of state with 
+//        extrapolation of the radial distribution function
+//        to contact
+//     -- Via the thermodynamic route: the pressure is
+//        obtained via virtual volume perturbations
+// For a description of both methods see the following 
+// references:
+//     -- E. de Miguel and G. Jackson, Mol. Phys. 104, 3717 
+//        (2006)
+//     -- E. de Miguel and G. Jackson, J. Chem. Phys. 125, 
+//        164109 (2006) 
+//        (2006)
+//     -- P. E. Brumby, A. J. Haslam, E. de Miguel and
+//        G. Jackson, Mol. Phys. 109, 169 (2011)
+// --------------------------------------------------------
+
+
 // ------ Global variables ------
 
 // Variables for the calculation of the pressure via the virial

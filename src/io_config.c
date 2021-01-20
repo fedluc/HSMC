@@ -8,10 +8,22 @@
 #include "read_input.h"
 #include "io_config.h"
 
+// --------------------------------------------------------
+// The module "io_config.c" is used to write and read 
+// restart files (note that the files are written in binary
+// so they might not be portable across platforms) and 
+// to output the configuration (i.e. a snapshot of the 
+// positions of all particles).
+// --------------------------------------------------------
+
+// ------ Global variables ------
+
 static bool restart_output_check = true;
 static bool config_output_check = true;
 static int config_samples = 0;
 static int config_file_id = 0;
+
+// ------ Function to write the restart files ------
 
 void write_restart(int sweep){
 
@@ -61,6 +73,8 @@ void write_restart(int sweep){
 
 }
 
+
+// ------ Function to read the restart files ------
 
 void read_restart(char *restart_file){
 
@@ -114,6 +128,8 @@ void read_restart(char *restart_file){
 	 "- Status of the random number generator\n");
 
 }
+
+// ------ Function to write the configuration ------
 
 void write_config(int sweep){
 

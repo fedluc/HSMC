@@ -7,6 +7,11 @@
 #include "npt.h"
 #include "cavity_nvt.h"
 
+// --------------------------------------------------------
+// The module "exec.c" is used to parse the command line
+// and start the Monte Carlo simulation. It contains main()
+// --------------------------------------------------------
+
 // ----------------------------------------
 // ------ Set-up command line parser ------
 // ----------------------------------------

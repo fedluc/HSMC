@@ -14,6 +14,18 @@
 #include "optimizer.h"
 #include "nvt.h"
 
+// --------------------------------------------------------
+// The module "npt.c" is used to perform NVT simulations.
+// In the course of NVT simulations the following
+// observables can be samples:
+//     -- The pressure (via the virial and thermodyamic 
+//        route)
+//     -- The order parameter
+//     -- The chemical potential
+//     -- The radial distribution function
+// --------------------------------------------------------
+
+
 // Hard-sphere simulation in the NVT ensemble
 void hs_nvt() {
 

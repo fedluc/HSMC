@@ -3,6 +3,16 @@
 #include <gsl/gsl_rng.h>
 #include "read_input.h"
 
+// --------------------------------------------------------
+// The module "rng.c" is used to initialize, update and
+// eventually free the random number generator. The default
+// choice for the random number generator is the Marsenne-
+// Twister implemented in the GNU Scientific Library and 
+// described at the following link (Accessed January 20, 
+// 2021): https://www.gnu.org/software/gsl/doc/html/rng.html
+// --------------------------------------------------------
+
+
 // Global variable for random number generator
 static gsl_rng *rng_mt;
 static long unsigned int r_num_max;

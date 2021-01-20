@@ -6,6 +6,19 @@
 #include "read_input.h"
 #include "analytic.h"
 
+// --------------------------------------------------------
+// The module "analytic.c" provides a set of functions
+// which can be employed to evaluate some known analytical
+// results for the hard sphere system. The analytical 
+// results computed with this module include:
+//     --- The Grundke-Henderson parametrization for the 
+//         cavity function
+//     --- The Verlet-Weis parametrization for the  
+//         radial distribution function (up to r = 2*sigma)
+//     --- The Percus-Yevick solution for the
+//         radial distribution function (up to r = 2*simga)
+// --------------------------------------------------------
+
 // ------ Global variables ------
 
 // Coefficients for the Grundke-Henderson parametrization of the cavity function

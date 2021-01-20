@@ -8,6 +8,15 @@
 #include "compute_widom_chem_pot.h"
 #include "moves.h"
 
+// --------------------------------------------------------
+// The module "compute_widom_chem_pot.c" is used to
+// compute the chemical potential via the Widom insertion 
+// method. For a discussion of the method see the book
+// "Understanding Molecular Simulation: From Algorithms to 
+// Applications" by B. Smit and D. Frenkel
+// --------------------------------------------------------
+
+
 // ------ Global variables ------
 
 // Variables for the random positions generated during the insertions

@@ -3,11 +3,17 @@
 #include <string.h>
 #include "read_input.h"
 
-// ----------------------------------------
-// ------------- Read Input ---------------
-// ----------------------------------------
+// --------------------------------------------------------
+// The module "read_input.c" is used to read the input file
+// --------------------------------------------------------
 
-struct input G_IN; // WARNING: This is a global variable
+// ------ Global variable ------
+// WARNING: This is a truly global variable in the sense 
+// that its scope is not limited to this module
+struct input G_IN; 
+
+
+// ------ Print example of input file on screen ------
 
 void print_example(){
 
@@ -74,6 +80,8 @@ void print_example(){
     printf(example);
 
 }
+
+// ------ Read input file ------
 
 void read_input_file(char *filename){
 

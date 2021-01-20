@@ -7,6 +7,14 @@
 #include "cell_list.h"
 #include "compute_order_parameter.h"
 
+// --------------------------------------------------------
+// The module "compute_order_parameter.c" is used to 
+// compute the average order parameter in the system. For
+// a definition of the order parameter see W. Lechner and 
+// C. Dellago,  J. Chem. Phys. 129, 114707 (2008).  
+// --------------------------------------------------------
+
+
 // ------ Global variables ------
 static double ql_ave;
 static double *ql, *qlm2;
