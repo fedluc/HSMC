@@ -82,7 +82,7 @@ void compute_pressv(bool init){
 // ------ Allocate and free histograms for the calculation of the pressure via the virial route ------
 void pressv_hist_alloc(){
 
-  pressv_hist_nn = (int)((pressv_rmax - 1.0)/G_IN.pressv_dr) + 1;
+  pressv_hist_nn = (int)((pressv_rmax - 1.0)/G_IN.pressv_dr);
   pressv_rr = (double*)malloc(sizeof(double) * pressv_hist_nn);
   pressv_hist = (double*)malloc(sizeof(double) * pressv_hist_nn);
   if (pressv_rr == NULL ||  pressv_hist == NULL){
@@ -143,7 +143,7 @@ void pressv_compute_hist(){
 
 	  dr = compute_dist(ii, part_idx, 1.0, 1.0, 1.0);
 
-	  if (dr <= pressv_rmax && part_idx > ii) {
+	  if (dr < pressv_rmax && part_idx > ii) {
 	    bin = (int)((dr-1.0)/G_IN.pressv_dr);
 	    pressv_hist[bin] += 2.0;
 	  }

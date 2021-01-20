@@ -73,7 +73,7 @@ void compute_rdf(bool init, int sweep){
 
 void rdf_hist_alloc(){
 
-  rdf_hist_nn = (int)((G_IN.rdf_rmax - 1.0)/G_IN.rdf_dr)+1;
+  rdf_hist_nn = (int)((G_IN.rdf_rmax - 1.0)/G_IN.rdf_dr);
   rdf_rr = (double*)malloc(sizeof(double) * rdf_hist_nn);
   rdf_hist = (double*)malloc(sizeof(double) * rdf_hist_nn);
   if (rdf_rr == NULL ||  rdf_hist == NULL){
@@ -114,7 +114,7 @@ void rdf_hist_compute(){
   for (int ii=0; ii<part_info.NN; ii++){
     for (int jj=ii+1; jj<part_info.NN; jj++){
       dr = compute_dist(ii, jj, 1.0, 1.0, 1.0);
-      if (dr <= G_IN.rdf_rmax) {
+      if (dr < G_IN.rdf_rmax) {
 	bin = (int)((dr-1.0)/G_IN.rdf_dr);
 	rdf_hist[bin] += 2.0;
       }
