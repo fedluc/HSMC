@@ -46,6 +46,14 @@ static double *presst_xi, *presst_hist;
  
 void compute_pressv(bool init){
 
+  // Allocate histograms
+  if (init){
+    pressv_hist_alloc();
+  }
+
+  // Initialize histogram
+  pressv_hist_init();
+
   // Check if the neighbor list allows for a correct calculation of the pressure
   if (init){
 
@@ -60,13 +68,7 @@ void compute_pressv(bool init){
       exit(EXIT_FAILURE);
     }
 
-    // Allocate histograms
-    pressv_hist_alloc();
-
   }
-
-  // Initialize histogram
-  pressv_hist_init();
 
   // Fill histogram
   pressv_compute_hist();
@@ -104,10 +106,14 @@ void pressv_hist_free(){
 
 void pressv_hist_init(){
 
+  // Fill the histograms
   for (int ii=0; ii<pressv_hist_nn; ii++){
     pressv_rr[ii] = (ii+1./2.)*G_IN.pressv_dr + 1.0;
     pressv_hist[ii] = 0.0;
   }
+
+  // Adjust the cutoff to the histograms
+  pressv_rmax = G_IN.pressv_dr*pressv_hist_nn + 1.0;
 
   
 }

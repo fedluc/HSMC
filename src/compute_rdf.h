@@ -15,6 +15,6 @@ void rdf_hist_compute();
 
 void rdf_hist_norm();
 
-void rdf_output(bool init);
+void rdf_output(bool init, int sweep);
 
 #endif

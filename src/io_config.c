@@ -150,7 +150,7 @@ void write_config(int sweep){
   if (config_samples == 0){
     fid = gzopen(config_file, "w");
   }
-  else if (config_samples > 0 && config_samples <= G_IN.config_samples){
+  else if (config_samples > 0 && config_samples < G_IN.config_samples){
     fid = gzopen(config_file, "a");
   }
   if (fid == Z_NULL) {
@@ -182,7 +182,7 @@ void write_config(int sweep){
 
   // Update counters
   config_samples += 1;
-  if (config_samples > G_IN.config_samples){
+  if (config_samples == G_IN.config_samples){
     config_samples = 0;
     config_file_id += 1;
   }

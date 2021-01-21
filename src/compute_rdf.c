@@ -65,7 +65,7 @@ void compute_rdf(bool init, int sweep){
   rdf_hist_norm();
   
   // Write output
-  rdf_output(init);
+  rdf_output(init,sweep);
   
 }
 
@@ -93,11 +93,15 @@ void rdf_hist_free(){
 // ------ Initialize histogram for the calculation of the pressure via the virial route ------
 
 void rdf_hist_init(){
-
+  
+  // Fill the histograms
   for (int ii=0; ii<rdf_hist_nn; ii++){
     rdf_rr[ii] = (ii+1./2.)*G_IN.rdf_dr + 1.0;
     rdf_hist[ii] = 0.0;
   }
+
+  // Adjust the cutoff to the histograms
+  G_IN.rdf_rmax = G_IN.rdf_dr*rdf_hist_nn + 1.0;
   
 }
 
@@ -148,7 +152,7 @@ void rdf_hist_norm(){
 
 // ------ Print to file the pressure obtained from the virial route ------
 
-void rdf_output(bool init){
+void rdf_output(bool init, int sweep){
 
   // Check that not too many output files are produced
   if (init){
@@ -166,7 +170,7 @@ void rdf_output(bool init){
   if (rdf_samples == 0){
     fid = gzopen(rdf_file, "w");
   }
-  else if (rdf_samples > 0 && rdf_samples <= G_IN.rdf_samples){
+  else if (rdf_samples > 0 && rdf_samples < G_IN.rdf_samples){
     fid = gzopen(rdf_file, "a");
   }
   if (fid == Z_NULL) {
@@ -178,23 +182,22 @@ void rdf_output(bool init){
   p_info part_info = part_info_get();
   box_info sim_box_info = sim_box_info_get();
   gzprintf(fid, "######################################\n");
-  gzprintf(fid, "# Bins, volume, number of particles\n");
+  gzprintf(fid, "# Sweep, Bins, volume, number of particles\n");
   gzprintf(fid, "######################################\n");
-  gzprintf(fid, "%d %.8e %d\n", rdf_hist_nn, 
-	   sim_box_info.vol, part_info.NN);
+  gzprintf(fid, "%d %d %.8e %d\n", sweep, rdf_hist_nn,
+  	   sim_box_info.vol, part_info.NN);
   gzprintf(fid, "###############################\n");
   gzprintf(fid, "# rr, rdf\n");
   gzprintf(fid, "###############################\n");
   for (int ii = 0; ii < rdf_hist_nn; ii++){
       gzprintf(fid, "%.8e %.8e\n", rdf_rr[ii], rdf_hist[ii]);
   }
-
   // Close binary file
   gzclose(fid);
 
   // Update counters
   rdf_samples += 1;
-  if (rdf_samples > G_IN.rdf_samples){
+  if (rdf_samples == G_IN.rdf_samples){
     rdf_samples = 0;
     rdf_file_id += 1;
   }
