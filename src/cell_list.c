@@ -33,9 +33,10 @@ static cl_info neigh_info;
 void cell_list_init(bool alloc){
   
   // Compute neighbor list parameters
-  compute_cell_list_info();
+  compute_cell_list_info(true);
   
   if (alloc){
+
     // Allocate matrix used to keep track of which particles belong to each cell
     cell_list_alloc_arr(&neigh_info.part_cell, 
 			neigh_info.num_tot, 
@@ -88,30 +89,33 @@ void cell_list_free(){
 
 // ------ Function used to compute the neighbor list parameters ------
 
-void compute_cell_list_info(){
+void compute_cell_list_info(bool init){
 
   // Get simulation box information
   box_info sim_box_info = sim_box_info_get();
 
-  // Number of cells
-  neigh_info.num_x = (int)floor(sim_box_info.lx/G_IN.neigh_dr);
-  neigh_info.num_y = (int)floor(sim_box_info.ly/G_IN.neigh_dr);
-  neigh_info.num_z = (int)floor(sim_box_info.lz/G_IN.neigh_dr);
-  neigh_info.num_tot = neigh_info.num_x * 
-                       neigh_info.num_y *
-                       neigh_info.num_z;
- 
-  // Do not allow less than 27 cells
-  if (neigh_info.num_tot < 27){
-    printf("WARNING: The specified cell size has been reduced in order to accomodate 27 cells in the simulation box\n");
-    neigh_info.num_x = 3;
-    neigh_info.num_y = 3;
-    neigh_info.num_z = 3;
-    neigh_info.num_tot = 27;
-  }
+  if (init) { // The number of cells is computed only when the cell list is initialized
 
-  // Number of neighbor per cell
-  neigh_info.neigh_num = 27;
+    // Number of cells
+    neigh_info.num_x = (int)floor(sim_box_info.lx/G_IN.neigh_dr);
+    neigh_info.num_y = (int)floor(sim_box_info.ly/G_IN.neigh_dr);
+    neigh_info.num_z = (int)floor(sim_box_info.lz/G_IN.neigh_dr);
+    neigh_info.num_tot = neigh_info.num_x * 
+      neigh_info.num_y *
+      neigh_info.num_z;
+ 
+    // Do not allow less than 27 cells
+    if (neigh_info.num_tot < 27){
+      printf("WARNING: The specified cell size has been reduced in order to accomodate 27 cells in the simulation box\n");
+      neigh_info.num_x = 3;
+      neigh_info.num_y = 3;
+      neigh_info.num_z = 3;
+    }
+
+    // Number of neighbor per cell
+    neigh_info.neigh_num = 27;
+
+  }
 
   // Cell size
   neigh_info.size_x = sim_box_info.lx/neigh_info.num_x;
@@ -138,9 +142,9 @@ cl_info get_cell_list_info(){
 void cell_list_new(){
 
   // Define number and size of the cells
-  compute_cell_list_info();
+  compute_cell_list_info(false);
 
-  // Initialize the cell lists
+  // Initialize the cell lists values
   for (int ii=0; ii<neigh_info.num_tot; ii++){
     neigh_info.part_cell[ii][0] = 0;
     for (int jj=1; jj<G_IN.neigh_max_part; jj++){

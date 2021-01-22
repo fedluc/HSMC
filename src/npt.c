@@ -54,6 +54,7 @@ void hs_npt() {
   if (G_IN.opt_flag == 1){
     double rho_start = G_IN.rho;
     opt_npt();
+    G_IN.rho = rho_start;
     sim_box_init(G_IN.type, G_IN.nx, G_IN.ny, G_IN.nz, rho_start);
     part_init();
     cell_list_init(false);

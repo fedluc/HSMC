@@ -26,7 +26,7 @@ void cell_list_alloc_arr(int ***arr, int rows, int cols);
 
 void cell_list_free_arr(int ***arr, int rows);
 
-void compute_cell_list_info();
+void compute_cell_list_info(bool init);
 
 cl_info get_cell_list_info();
 

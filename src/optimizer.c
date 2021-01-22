@@ -49,8 +49,8 @@ void opt_nvt(){
       G_IN.dr_max = 1.0;
     }
     else if (G_IN.dr_max <= 0.0) {
-      printf("Error: maximum displacement is zero!\n");
-      exit(EXIT_FAILURE);
+      G_IN.dr_max = -G_IN.dr_max;
+      if (G_IN.dr_max > 1.0) G_IN.dr_max = dr_2/2;
     }
     dr_1 = dr_2;
     acc_ratio_1 = acc_ratio_2;
@@ -58,7 +58,7 @@ void opt_nvt(){
   }
 
   printf("Optimal maximum displacement: %.8f\n", G_IN.dr_max);
-  printf("Acceptance ratio: %.8f \n", acc_ratio_2);
+  printf("Acceptance ratio: %.8f\n", acc_ratio_2);
   printf("Maximum displacement optimization completed\n");
 
 }
@@ -119,24 +119,23 @@ void opt_npt(){
     if (G_IN.dr_max > 1.0) {
       G_IN.dr_max = 1.0;
     }
+    // Stop if the optimal values are negative or zero
+    if (G_IN.dr_max <= 0.0) {
+      G_IN.dr_max = -G_IN.dr_max;
+      if (G_IN.dr_max > 1.0) G_IN.dr_max = dr_2/2;
+    }
+    if (G_IN.dv_max <= 0.0) {
+      G_IN.dv_max = -G_IN.dv_max;
+      if (G_IN.dv_max > 0.1) G_IN.dv_max = dv_2/2;
+    }
     dr_1 = dr_2;
     dv_1 = dv_2;
     acc_ratio_part_1 = acc_ratio_part_2;
     acc_ratio_vol_1 = acc_ratio_vol_2;
-    get_sample_npt(&dr_2, &acc_ratio_part_2, 
-		   &dv_2, &acc_ratio_vol_2, 
-		   sample_iter);
+    get_sample_npt(&dr_2, &acc_ratio_part_2,
+    		   &dv_2, &acc_ratio_vol_2,
+    		   sample_iter);
 
-  }
-
-  // Stop if the optimal values are negative
-  if (G_IN.dr_max <= 0.0) {
-      printf("Error: maximum particle displacement is zero!\n");
-      exit(EXIT_FAILURE);
-  }
-  if (G_IN.dv_max <= 0.0) {
-      printf("Error: maximum volume displacement is zero!\n");
-      exit(EXIT_FAILURE);
   }
 
   // Print result of optimization on screen
@@ -199,8 +198,8 @@ void opt_cavity_nvt(){
       G_IN.dr_max = 1.0;
     }
     else if (G_IN.dr_max <= 0.0) {
-      printf("Error: maximum displacement is zero!\n");
-      exit(EXIT_FAILURE);
+      G_IN.dr_max = -G_IN.dr_max;
+      if (G_IN.dr_max > 1.0) G_IN.dr_max = dr_2/2;
     }
     dr_1 = dr_2;
     acc_ratio_1 = acc_ratio_2;

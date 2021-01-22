@@ -149,7 +149,7 @@ void vol_move(){
 	if (part_conf[ii][3] > sim_box_info.lz) part_conf[ii][3] -= sim_box_info.lz;
 	else if (part_conf[ii][3] < 0.0)        part_conf[ii][3] += sim_box_info.lz;
       }
-      // Connew  cell-list (the simulation box has changed)
+      // Construct new  cell-list (the simulation box has changed)
       cell_list_new();
     }
   }
