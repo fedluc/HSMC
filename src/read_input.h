@@ -38,7 +38,8 @@ struct input {
   int cavity_sample_int;
 
   // Cluster moves
-  int cluster_flag, cluster_moves_sweep;
+  int cluster_flag, cluster_moves_sweep,
+      cluster_init_step;
 
   // Read restart
   int restart_read;

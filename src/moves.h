@@ -15,6 +15,8 @@ bool check_overlap(int idx_ref,
 double compute_dist(int idx1, int idx2,
                     double sf_x, double sf_y, double sf_z);
 
+void apply_pbc(int idx);
+
 void cavity_part_move();
 
 bool cavity_check_move(int idx_ref, int move_type, double en_old);

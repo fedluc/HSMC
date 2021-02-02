@@ -169,8 +169,9 @@ void cell_list_new(){
     neigh_info.part_cell[idx_row][idx_col[idx_row]] = ii;
     idx_col[idx_row] += 1;
   }
-  free(idx_col);
-  
+
+  free(idx_col);  
+
 }
 
 
@@ -236,9 +237,14 @@ void cell_list_check(int cell_idx){
 int cell_part_idx(int id){
 
   config part_conf = part_config_get();
-  return  (int)(part_conf[id][1]/neigh_info.size_x)*neigh_info.num_x*neigh_info.num_x
-    + (int)(part_conf[id][2]/neigh_info.size_y)*neigh_info.num_y
-    + (int)(part_conf[id][3]/neigh_info.size_z);
+
+  /* return  (int)(part_conf[id][1]/neigh_info.size_x)*neigh_info.num_x*neigh_info.num_x */
+  /*   + (int)(part_conf[id][2]/neigh_info.size_y)*neigh_info.num_y */
+  /*   + (int)(part_conf[id][3]/neigh_info.size_z); */
+  return  (int)(part_conf[id][1]/neigh_info.size_x)*neigh_info.num_x*neigh_info.num_x +
+          (int)(part_conf[id][2]/neigh_info.size_y)*neigh_info.num_y +
+          (int)(part_conf[id][3]/neigh_info.size_z);
+
 
 }
 
@@ -264,7 +270,7 @@ void neigh_id(int ref_idx_x, int ref_idx_y, int ref_idx_z){
   int ref_idx = ref_idx_x*neigh_info.num_x*neigh_info.num_x +
                 ref_idx_y*neigh_info.num_y +
                 ref_idx_z;
-  
+
   // Loop over neighboring cells (including the reference cell)
   for (int ii=-1; ii<2; ii++){
     for (int jj=-1; jj<2; jj++){

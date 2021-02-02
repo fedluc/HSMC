@@ -54,13 +54,7 @@ void part_move(){
   part_conf[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
 
   // Periodic boundary conditions
-  box_info sim_box_info = sim_box_info_get();
-  if (part_conf[r_idx][1] > sim_box_info.lx) part_conf[r_idx][1] -= sim_box_info.lx;
-  else if (part_conf[r_idx][1] < 0.0)        part_conf[r_idx][1] += sim_box_info.lx;
-  if (part_conf[r_idx][2] > sim_box_info.ly) part_conf[r_idx][2] -= sim_box_info.ly;
-  else if (part_conf[r_idx][2] < 0.0)        part_conf[r_idx][2] += sim_box_info.ly;
-  if (part_conf[r_idx][3] > sim_box_info.lz) part_conf[r_idx][3] -= sim_box_info.lz;
-  else if (part_conf[r_idx][3] < 0.0)        part_conf[r_idx][3] += sim_box_info.lz;
+  apply_pbc(r_idx);
       
   // Accept or reject move according to metropolis algorithm
   if (check_overlap(r_idx, 1.0, 1.0, 1.0)){
@@ -142,12 +136,7 @@ void vol_move(){
 	part_conf[ii][1] *= sf;
 	part_conf[ii][2] *= sf;
 	part_conf[ii][3] *= sf;
-	if (part_conf[ii][1] > sim_box_info.lx) part_conf[ii][1] -= sim_box_info.lx;
-	else if (part_conf[ii][1] < 0.0)        part_conf[ii][1] += sim_box_info.lx;
-	if (part_conf[ii][2] > sim_box_info.ly) part_conf[ii][2] -= sim_box_info.ly;
-	else if (part_conf[ii][2] < 0.0)        part_conf[ii][2] += sim_box_info.ly;
-	if (part_conf[ii][3] > sim_box_info.lz) part_conf[ii][3] -= sim_box_info.lz;
-	else if (part_conf[ii][3] < 0.0)        part_conf[ii][3] += sim_box_info.lz;
+	apply_pbc(ii);
       }
       // Construct new  cell-list (the simulation box has changed)
       cell_list_new();
@@ -222,7 +211,23 @@ bool check_overlap(int idx_ref,
 
 }
 
+// ------ Periodic boundary conditions -----
+void apply_pbc(int idx){
 
+  box_info sim_box_info = sim_box_info_get();
+  config part_conf = part_config_get();
+  if (part_conf[idx][1] > sim_box_info.lx) part_conf[idx][1] -= sim_box_info.lx;
+  else if (part_conf[idx][1] < 0.0)        part_conf[idx][1] += sim_box_info.lx;
+  if (part_conf[idx][2] > sim_box_info.ly) part_conf[idx][2] -= sim_box_info.ly;
+  else if (part_conf[idx][2] < 0.0)        part_conf[idx][2] += sim_box_info.ly;
+  if (part_conf[idx][3] > sim_box_info.lz) part_conf[idx][3] -= sim_box_info.lz;
+  else if (part_conf[idx][3] < 0.0)        part_conf[idx][3] += sim_box_info.lz;
+
+}
+
+
+
+// ------ Keep track of the particle's moves ------
 void get_moves_counters(int *pm, int *apm, int *rpm, 
 			int* vm, int *avm, int *rvm){
 
@@ -302,13 +307,7 @@ void cavity_part_move(){
   part_conf[r_idx][3] += (r_z - 0.5)*G_IN.dr_max;
 
   // Periodic boundary conditions
-  box_info sim_box_info = sim_box_info_get();
-  if (part_conf[r_idx][1] > sim_box_info.lx) part_conf[r_idx][1] -= sim_box_info.lx;
-  else if (part_conf[r_idx][1] < 0.0)        part_conf[r_idx][1] += sim_box_info.lx;
-  if (part_conf[r_idx][2] > sim_box_info.ly) part_conf[r_idx][2] -= sim_box_info.ly;
-  else if (part_conf[r_idx][2] < 0.0)        part_conf[r_idx][2] += sim_box_info.ly;
-  if (part_conf[r_idx][3] > sim_box_info.lz) part_conf[r_idx][3] -= sim_box_info.lz;
-  else if (part_conf[r_idx][3] < 0.0)        part_conf[r_idx][3] += sim_box_info.lz;
+  apply_pbc(r_idx);
 
   // Accept or reject move according to metropolis algorithm
   if (cavity_check_move(r_idx,move_type,en_old)){

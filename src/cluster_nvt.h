@@ -24,4 +24,6 @@ void pocket_add(int idx_ref, int *pocket, int *part_pocket);
 
 void pocket_del(int idx_ref, int *pocket, int *part_pocket);
 
+bool in_pocket(int idx_ref, int *pocket, int part_pocket);
+
 #endif
