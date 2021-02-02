@@ -170,7 +170,7 @@ void cavity_sweep_nvt(){
 
   // Create N trial moves (N = number of particles)
   p_info part_info = part_info_get();
-  for (int ii=0; ii<part_info.NN; ii++){
+  for (int ii=0; ii<part_info.NN; ii++){ 
     cavity_part_move();
   }
 

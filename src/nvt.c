@@ -15,7 +15,7 @@
 #include "nvt.h"
 
 // --------------------------------------------------------
-// The module "npt.c" is used to perform NVT simulations.
+// The module "nvt.c" is used to perform NVT simulations.
 // In the course of NVT simulations the following
 // observables can be samples:
 //     -- The pressure (via the virial and thermodyamic 

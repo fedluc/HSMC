@@ -61,6 +61,8 @@ void print_example(){
     "# Cavity simulations (probability of moving a cavity, maximum and minimum distance,\n"
     "# saving interval, potential resolution)\n"
     "cavity 0.1 1.2 0.0 4 0.01\n\n"
+    "# Cluster moves (activation flag (0 or 1), number of cluster moves per sweep)\n"
+    "cluster 0 1\n\n"
     "# Seed for random number generator\n"
     "seed 124787\n\n"
     "# Write restart data (saving interval)\n"
@@ -107,6 +109,8 @@ void read_input_file(char *filename){
   G_IN.cavity_maxdr = 0;
   G_IN.cavity_mindr = 0;
   G_IN.cavity_sample_int = 0;
+  G_IN.cluster_flag = 0;
+  G_IN.cluster_moves_sweep = 1;
   G_IN.restart_read = 0;
   G_IN.restart_write = 0;
   G_IN.config_write = 0;
@@ -315,6 +319,19 @@ void read_input_file(char *filename){
 	value = strtok(NULL, " ");
         if(value != NULL ) {
 	  G_IN.cavity_out_dr = atof(value);
+	}
+	else read_input_file_err(1,line_buf);
+      }
+
+      else if (strcmp(key,"cluster") == 0 || strcmp(key,"cluster\n") == 0){
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.cluster_flag = atoi(value);
+	}
+	else read_input_file_err(1,line_buf);
+	value = strtok(NULL, " ");
+        if(value != NULL ) {
+	  G_IN.cluster_moves_sweep = atoi(value);
 	}
 	else read_input_file_err(1,line_buf);
       }

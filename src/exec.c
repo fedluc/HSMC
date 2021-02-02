@@ -6,6 +6,7 @@
 #include "nvt.h"
 #include "npt.h"
 #include "cavity_nvt.h"
+#include "cluster_nvt.h"
 
 // --------------------------------------------------------
 // The module "exec.c" is used to parse the command line
@@ -125,6 +126,10 @@ int main (int argc, char **argv){
     else if (G_IN.cavity_pcav > 0){
       // NVT cavity simulation
       cavity_hs_nvt();
+    }
+    else if (G_IN.cluster_flag > 0){
+      // NVT simulation with cluster moves
+      cluster_hs_nvt();
     }
     else {
       // NVT simulation

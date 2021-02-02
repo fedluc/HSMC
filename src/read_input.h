@@ -37,6 +37,9 @@ struct input {
   double cavity_out_dr;
   int cavity_sample_int;
 
+  // Cluster moves
+  int cluster_flag, cluster_moves_sweep;
+
   // Read restart
   int restart_read;
   char restart_name[100];
