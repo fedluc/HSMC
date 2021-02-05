@@ -26,12 +26,12 @@ T is the temperature.
 The key-words and the numerical inputs which are expected for each key-word are listed below:
 
 * **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density normalized.
-                For NpT simulations this value of the density is only used to assign the total number of particles. Default:`rho 0.5`.
+                For NpT simulations this value of the density is only used to assign the total number of particles. Default: `rho 0.5`.
 
 * **Isobaric calculations**: Isobaric calculations in the NpT ensemble can be performed if the command `npt` is specified. If `npt` is not specified then the code runs a
                               a standard isothermal simulation in the NVT ensemble. The command `npt` requires two numerical values: (1) the pressure and (2) the maximum 
                               volume deformation. In the case the optimizer is used (see section "Optimizer") the volume deformation specified with `npt` will only be used 
-                              as an initial guess to the optimization procedure. Default `npt 0 0.001`.                 
+                              as an initial guess to the optimization procedure. Default: `npt 0 0.001`.                 
                    
 
 * **Maximum particle displacement**: The maximum particle displacement in the course of standard Monte Carlo moves is specified with `dr_max`. Default `dr_max 0.05`. In the
@@ -40,7 +40,7 @@ The key-words and the numerical inputs which are expected for each key-word are 
 * **Neighbor list**: For efficient calculations of the particle's interactions, the code uses a neighbor list based on cell lists that scales line O(N), with N being the 
                      number of particles. The cell list is speficied via the command `neigh_list` which requires two numerical values: (1) The minimum size of the cells
                      (sizes smaller than 1.0 are not allowed) and (2) The maximum number of particles which can be expected in each cell (a safe choice is typically 5 or 10).
-                     Default `neigh_list 1.0 10`
+                     Default: `neigh_list 1.0 10`
  
 * **Optimizer**: The optimizer is used to optimize the particle and volume displacements in order to obtain a target acceptance ratio (which is typically 50%). The optimizer
                   is set with the command `opt` which requires five numerical values: (1) An activation flag which can be 0 or 1, (2) the number of sweeps (1 sweep = N moves)
