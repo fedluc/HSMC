@@ -34,8 +34,9 @@ The key-words and the numerical inputs which are expected for each key-word are 
                               as an initial guess to the optimization procedure. Default: `npt 0 0.001`.                 
                    
 
-* **Maximum particle displacement**: The maximum particle displacement in the course of standard Monte Carlo moves is specified with `dr_max`. Default `dr_max 0.05`. In the
-                                     case the optimizer is used (see section "Optimizer") this value will only be used as an initial guess to the optimization procedure.
+* **Maximum particle displacement**: The maximum particle displacement in the course of standard Monte Carlo moves is specified with `dr_max`. In the
+                                     case the optimizer is used (see section "Optimizer") the value speciefied with `opt` will only be used as an initial guess 
+                                     for the optimization procedure. Default `dr_max 0.05`
                                     
 * **Neighbor list**: For efficient calculations of the particle's interactions, the code uses a neighbor list based on cell lists that scales line O(N), with N being the 
                      number of particles. The cell list is speficied via the command `neigh_list` which requires two numerical values: (1) The minimum size of the cells
