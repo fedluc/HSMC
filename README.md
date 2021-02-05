@@ -25,6 +25,11 @@ T is the temperature.
 
 The key-words and the numerical inputs which are expected for each key-word are listed below:
 
+* **Chemical potential**: The chemical potential can be computed via the Widom insertion method via the keyword `widom` which requires two numerical values: (1) The number
+                          of insertions that have to be performed each time the chemical potential is sampled and (2) the sampling interval. The output is written to the 
+                          file *chem_pot.dat*. Default: `widom 100 0`.
+
+
 * **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density normalized.
                 For NpT simulations this value of the density is only used to assign the total number of particles. Default: `rho 0.5`.
 
@@ -48,10 +53,16 @@ The key-words and the numerical inputs which are expected for each key-word are 
                   used for the optimization, (3) the number of samples collected during optimization (<= the number of sweeps), (4) the target acceptance ratio for particle
                   moves and (5) the target acceptance ratio for volume moves (which must be specified also if `npt` is not used). Default: `opt 1 1000 10 0.5 0.5` 
 
-* **Pressure (thermodynamic)**: The pressure calculated via the thermodynamic definition (i.e. via virtual volume compressions) can be compute with the command `press_thermo`                                  which requires three numerical values: (1) The resolution for volume perturbations, (2) maximimum virtual compression and (3) the sampling 
-                                interval. Default: `press_thermo 0.0001 0.002 100`.
+* **Order parameter**: The order parameter (as defined by [Lechner and Dellago](https://aip.scitation.org/doi/full/10.1063/1.2977970?casa_token=Pq7x6pG7HZAAAAAA%3ASDGRrjz3OL1_tOC1qLBvvrGSDBdJEBMMDUxZcJSoyTAOEBNouzPmfF23Z25dh7R4D91fsr_0dEJw)) can be computed with the command `ql` which requires three 
+                        numerical valis: (1) The order of the order parameter, (2) The cutoff distance for the neighbor interaction (typically 1.5 is a good choice) and (3)
+                        the saving interval (in number of sweeps). This command compute an average order parameter for the whole system by averaging over the order parameters
+                        of all the particles inside the system. The output is written to the file *oder_param.dat*. Default: `ql 6 1.5 0`.
 
-* **Pressure (virial)**: The pressure calculated via the virial equation of state (i.e via extrapolating the radial distribution function (RDF) to contact) can be computed                            with the command `press_virial` which requires two numerical values: (1) the resolution for the RDF calculation and (2) the sampling intervals (in                             number of sweeps). Default: `press_virial 0.01 100`.
+* **Pressure (thermodynamic)**: The pressure calculated via the thermodynamic definition (i.e. via virtual volume compressions) can be computed with the command                                                `press_thermo` which requires three numerical values: (1) The resolution for volume perturbations, (2) maximimum virtual compression
+                                  and (3) the sampling interval (in number of sweeps). The output is written to the file *press_thermo.dat*. 
+                                  Default: `press_thermo 0.0001 0.002 0`.
+
+* **Pressure (virial)**: The pressure calculated via the virial equation of state (i.e via extrapolating the radial distribution function (RDF) to contact) can be computed                            with the command `press_virial` which requires two numerical values: (1) the resolution for the RDF calculation and (2) the sampling intervals (in                             number of sweeps). The output is written to the file *press_virial.dat*. Default: `press_virial 0.01 0`.
 
 * **Simulation box**: The simulation box is assumed to be a rectangular parallelepiped whose sides are specified by assign a certain amount of building blocks in each 
                        direction. The building blocks can be either simple cubic (SC) cells or face-centerd cubic (FCC) cells containing, respectively, 1 or 4 particles. 
