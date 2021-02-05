@@ -48,6 +48,11 @@ The key-words and the numerical inputs which are expected for each key-word are 
                   used for the optimization, (3) the number of samples collected during optimization (<= the number of sweeps), (4) the target acceptance ratio for particle
                   moves and (5) the target acceptance ratio for volume moves (which must be specified also if `npt` is not used). Default: `opt 1 1000 10 0.5 0.5` 
 
+* **Pressure (thermodynamic)**: The pressure calculated via the thermodynamic definition (i.e. via virtual volume compressions) can be compute with the command `press_thermo`                                  which requires three numerical values: (1) The resolution for volume perturbations, (2) maximimum virtual compression and (3) the sampling 
+                                interval. Default: `press_thermo 0.0001 0.002 100`.
+
+* **Pressure (virial)**: The pressure calculated via the virial equation of state (i.e via extrapolating the radial distribution function (RDF) to contact) can be computed                            with the command `press_virial` which requires two numerical values: (1) the resolution for the RDF calculation and (2) the sampling intervals (in                             number of sweeps). Default: `press_virial 0.01 100`.
+
 * **Simulation box**: The simulation box is assumed to be a rectangular parallelepiped whose sides are specified by assign a certain amount of building blocks in each 
                        direction. The building blocks can be either simple cubic (SC) cells or face-centerd cubic (FCC) cells containing, respectively, 1 or 4 particles. 
                        The type of building block specifies also the starting configuration, i.e SC blocks will prodoce a starting configuration in which the particles are 
