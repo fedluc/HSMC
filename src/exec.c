@@ -19,10 +19,10 @@
 
 // Documentation
 static char doc[] =
-  "hsmc performs Monte Carlo simulations of "
-  "simple hard-sphere systems. The program is "
-  "run as ./hsmc -i IN_FILE where IN_FILE is a "
-  "file describing the parameters of the simulation";
+  "hsmc performs Monte Carlo simulations of mono-disperse hard-sphere systems. \n"
+  "The program is run as ./hsmc -i IN_FILE where IN_FILE is a file describing \n"
+  "the parameters of the simulation. An example of input file can be obtained by \n"
+  "running ./hsmc -e.";
 
 // Optional arguments
 static struct argp_option options[] = {

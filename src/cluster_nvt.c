@@ -22,6 +22,12 @@
 // Global variable to track the size of the clusters
 static int cluster_size;
 
+// ----------------------------------------------------
+// THIS  WAS ADDED ONLY TO VISUALIZE THE CLUSTER MOVES
+//static int *moved_particles;
+// ----------------------------------------------------
+
+
 // ------ Hard-sphere NVT simulation with cluster moves  ------
 void cluster_hs_nvt() {
 
@@ -61,6 +67,15 @@ void cluster_hs_nvt() {
     sweep_nvt();
   }
 
+
+  // ----------------------------------------------------
+  // THIS  WAS ADDED ONLY TO VISUALIZE THE CLUSTER MOVES
+  //p_info part_info = part_info_get();  
+  //moved_particles = malloc( sizeof(int) * part_info.NN);
+  // ----------------------------------------------------
+
+
+
   // Run equilibration
   printf("---------------------------------------------------\n");
   printf("Equilibration...\n");
@@ -82,6 +97,11 @@ void cluster_hs_nvt() {
   part_free();
   cell_list_free();
   rng_free();
+
+  // ----------------------------------------------------
+  // THIS  WAS ADDED ONLY TO VISUALIZE THE CLUSTER MOVES
+  //free(moved_particles);
+  // ----------------------------------------------------
 
 
 }
@@ -126,6 +146,20 @@ void cluster_run_nvt(bool prod_flag, int sweep_offset){
     	if (ii % G_IN.config_write == 0) {
     	  write_config(ii);
     	}
+	// ----------------------------------------------------
+	// THIS  WAS ADDED ONLY TO VISUALIZE THE CLUSTER MOVES
+	//FILE* fid;
+	//fid = fopen("moved_particles.dat", "a");
+	//if (fid == NULL) {
+	//  perror("Error while creating the file for the virial pressure\n");
+	//  exit(EXIT_FAILURE);
+	//}
+	//for (int ii=0; ii<cluster_size; ii++){
+	//    fprintf(fid, "%d ", moved_particles[ii]);
+	//}
+	//fprintf(fid, "\n");
+	//fclose(fid);
+	// ----------------------------------------------------
       }
 
       // Compute pressure via virial route
@@ -200,6 +234,8 @@ void cluster_move(){
   int r_idx;
   double r_x_p1, r_y_p1, r_z_p1;
   double uu, vv, ww;
+
+
   
   // Select random pivot for the rotation
   box_info sim_box_info = sim_box_info_get();
@@ -224,12 +260,22 @@ void cluster_move(){
     vv = 0.0;
     ww = 1.0;
   }
+
  
   // Move one particle
   p_info part_info = part_info_get();
   r_idx = rng_get_int(part_info.NN);
   cluster_move_part(r_idx, r_x_p1, r_y_p1, r_z_p1,
 		    uu, vv, ww);
+
+  // ----------------------------------------------------
+  // THIS  WAS ADDED ONLY TO VISUALIZE THE CLUSTER MOVES
+  //for (int ii=0; ii<part_info.NN; ii++){
+  //  moved_particles[ii] = -1;
+  //};
+  //moved_particles[0] = r_idx;
+  // ----------------------------------------------------
+
   
   // --- Pocket algorithm to resolve overlaps ---
 
@@ -248,6 +294,10 @@ void cluster_move(){
   while (part_pocket > 0){
     
     r_idx = pocket[rng_get_int(part_pocket)];
+    // ----------------------------------------------------
+    // THIS  WAS ADDED ONLY TO VISUALIZE THE CLUSTER MOVES
+    //moved_particles[cluster_size] = r_idx;
+    // ----------------------------------------------------
     cluster_move_part(r_idx, r_x_p1, r_y_p1, r_z_p1,
   		      uu, vv, ww);
     pocket_del(r_idx, pocket, &part_pocket);
