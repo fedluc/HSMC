@@ -118,4 +118,4 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 * hsmc_op: analyze output for the order parameter
 * hsmc_pressure: analyze output for the pressure calculations. This module can be used to analyze the results for both virial and thermodynamic calculations.
 * hsmc_rdf: compute the average radial distribution function from the rdf files produced by hsmc
-* hsmc_stat: this module contains a series of tools for the statistical analysis of the hsmc results. These tools include the [blocking method discussed by Flyvberg](https://doi.org/10.1063/1.457480)
+* hsmc_stat: this module contains a series of tools for the statistical analysis of the hsmc results. These tools include the [blocking method discussed by Flyvberg](https://doi.org/10.1063/1.457480), the calculation of autocorrelation functions and the jackknife estimate for the standard deviation.
