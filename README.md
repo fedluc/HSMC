@@ -44,7 +44,7 @@ An example of input file which lists all the keyword and their respective defaul
                      crystal used in the initialization. For these simulations is it possible to collect samples for all the observables which can be monitored in the course
                      of standard NVT simulations. Default: `cluster 0 1 10000`
                      
-* **Configuration**: The keyword `config_write` can be used to write the current configuration to file. `config_write` requires two numerical values: (1) the saving interval                      (in number of sweeps) and (2) the number of configurations to write per file. The configurations are written to files called *"config_%.dat.gz* where %                        is a numerical identifier for the file. Default `config_write 0 100`          
+* **Configuration**: The keyword `config_write` can be used to write the current configuration to file. `config_write` requires two numerical values: (1) the saving interval                      (in number of sweeps) and (2) the number of configurations to write per file. The configurations are written to files called *config_%.dat.gz* where %                        is a numerical identifier for the file. Default `config_write 0 100`          
 
 * **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density normalized.
                 For NpT simulations this value of the density is only used to assign the total number of particles. Default: `rho 0.5`.
