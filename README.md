@@ -6,7 +6,7 @@ a number of observables including pressure, chemical potential, radial distribut
 ## Compiling
 
 The code can be compiled with the [make file](src/Makefile) provided in the source directory. Please note that in order to correctly compile the program it is necessary 
-that the [GNU scientific library](https://www.gnu.org/software/gsl/) is installed. 
+that the [GNU scientific library](https://www.gnu.org/software/gsl/) and the [zlib library](https://zlib.net/) are installed. 
 
 
 ## Running
@@ -43,6 +43,8 @@ The key-words and the numerical inputs which are expected for each key-word are 
                      the number of standard (i.e. local, non cluster) moves which have to be performed at the beginning of the simulation in order to perturb the perfect 
                      crystal used in the initialization. For these simulations is it possible to collect samples for all the observables which can be monitored in the course
                      of standard NVT simulations. Default: `cluster 0 1 10000`
+                     
+* **Configuration**: The keyword `config_write` can be used to write the current configuration to file. `config_write` requires two numerical values: (1) the saving interval                      (in number of sweeps) and (2) the number of configurations to write per file. The configurations are written to files called *"config_%.dat.gz* where %                        is a numerical identifier for the file. Default `config_write 0 100`          
 
 * **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density normalized.
                 For NpT simulations this value of the density is only used to assign the total number of particles. Default: `rho 0.5`.
@@ -68,6 +70,9 @@ The key-words and the numerical inputs which are expected for each key-word are 
                   is set with the keyword `opt` which requires five numerical values: (1) An activation flag which can be 0 or 1, (2) the number of sweeps (1 sweep = N moves)
                   used for the optimization, (3) the number of samples collected during optimization (<= the number of sweeps), (4) the target acceptance ratio for particle
                   moves and (5) the target acceptance ratio for volume moves (which must be specified also if `npt` is not used). Default: `opt 1 1000 10 0.5 0.5` 
+                  
+* **Output on screen**: The keyword `out` can be used to specify how often to print on screen the information regarding the current sweep. `out` requires one numerical value
+                        which specifies how often to print on screen. Default: `out 0`
 
 * **Order parameter**: The order parameter (as defined by [Lechner and Dellago](https://aip.scitation.org/doi/full/10.1063/1.2977970?casa_token=Pq7x6pG7HZAAAAAA%3ASDGRrjz3OL1_tOC1qLBvvrGSDBdJEBMMDUxZcJSoyTAOEBNouzPmfF23Z25dh7R4D91fsr_0dEJw)) can be computed with the keyword `ql` which requires three 
                         numerical values: (1) The order of the order parameter, (2) The cutoff distance for the neighbor interaction (typically 1.5 is a good choice) and (3)
@@ -89,18 +94,17 @@ The key-words and the numerical inputs which are expected for each key-word are 
 
 * **Random number generator**: The random number generator used by hsmc is the [Marsenne Twister implemented in the GNU Scientific Library](https://www.gnu.org/software/gsl/doc/html/rng.html). The see used to initialize the random number generator can be specified with the keyword `seed`. Default: `seed 0`. 
 
-* **Restart files**: The keyword `restart_write` can be used to specify how often to write restart files to the disk. `restart_write` requires one numerical value which is   
-                      the interval (in number of sweeps) after which a restart file is written. The restart files are in binary format and have the name *restart_%.bin*,                           where % is the sweep at which the file is written.  Default:  `restart_write 0` (no restart file is written)
+* **Restart files**: The keywords `restart_write` and `restart_read` can be used to specify how to write and read restart files. `restart_write` requires one  numerical value                      which is  the interval (in number of sweeps) after which a restart file is written. The restart files are in binary format and have the name                                  *restart_%.bin*, where % is the sweep at which the file is written.  `restart_read` can be used to read a restart file and start a simulation from where                      another previous simulations had left off. If the optmizer is invoked it might modify the maximum displacements read from the restart file and, hence, it                      might not allow a perfect restart. `restart_read` requires two numerical values: (1) The activation flag (0 or 1) and (2) the name of the file used to                        read the restart from (note: it should be a file previously produced with `restart_write`. Default:  `restart_write 0` (no restart file is written),                          `restart_read 0 restart_000000.bin` (no restart is performed)
 
 
 * **Simulation box**: The simulation box is assumed to be a rectangular parallelepiped whose sides are specified by assign a certain amount of building blocks in each 
-                       direction. The building blocks can be either simple cubic (SC) cells or face-centerd cubic (FCC) cells containing, respectively, 1 or 4 particles. 
-                       The type of building block specifies also the starting configuration, i.e SC blocks will prodoce a starting configuration in which the particles are 
-                       arranged on a cubic lattice while FCC blocks will prodoce a starting configuration in which the particles are arranged on a FCC lattice.
-                       The number of building blocks in the x, y and z directions are specified with the key-words `cells_x`, `cells_y` and `cell_z`, while the type for 
-                       the building blocks is specified as `type` followed by 1 for SC blocks or by 2 for FCC blocks. Default:  `cells_x 3`,  `cells_x 3`,  `cells_x 3`,
+                      direction. The building blocks can be either simple cubic (SC) cells or face-centerd cubic (FCC) cells containing, respectively, 1 or 4 particles. 
+                      The type of building block specifies also the starting configuration, i.e SC blocks will prodoce a starting configuration in which the particles are 
+                      arranged on a cubic lattice while FCC blocks will prodoce a starting configuration in which the particles are arranged on a FCC lattice.
+                      The number of building blocks in the x, y and z directions are specified with the key-words `cells_x`, `cells_y` and `cell_z`, while the type for 
+                      the building blocks is specified as `type` followed by 1 for SC blocks or by 2 for FCC blocks. Default:  `cells_x 3`,  `cells_x 3`,  `cells_x 3`,
                        `type 1`
                           
 
-
+* **Sweeps**: The number of sweeps to perform can be specified with the command `sweep_eq` and `sweep_stat`. Both these commands require one numerical value which specifies                 the number of sweeps to perform. `sweep_eq` is used to specify the number of sweeps for equilibration during which no quantity is sampled (except for the                     density in the course of isobaric simulations) and `sweep_stat` is used to specify the number of steps used to collect the statistics for the desired quantities               Default: `sweep_eq 1000`, `sweep_stat 1000`
              
