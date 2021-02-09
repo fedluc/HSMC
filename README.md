@@ -16,7 +16,7 @@ are given below. A full list of the accepted command line arguments can be retri
 
 ## Input file
 
-An example of input file can be retrieved via the command line argument `-e`. In the input file a combination of key-words and numerical values are used in order to specify 
+In the input file a combination of key-words and numerical values are used in order to specify 
 the type of simulation that should be performed. Empty lines are skipped, lines starting with # are treated as comments. For the lines that are neither empty nor comments 
 it is assumed that 
 
@@ -26,7 +26,7 @@ it is assumed that
 * All the input values are given in units in which the length are normalized to the hard-sphere diameter and the energy to k_BT, where k_B is the Boltzmann's constant and 
 T is the temperature.
 
-The key-words and the numerical inputs which are expected for each key-word are listed below:
+An example of input file which lists all the keyword and their respective default values can be retrieved by runnin hsmc with the command line argument `-e`. The key-words and the numerical inputs which are expected for each key-word are illustrated below:
 
 * **Cavity simulations**: Cavity simulations as described by [Torrie and Patey](https://www.tandfonline.com/doi/abs/10.1080/00268977700102821) can be performed if the 
                           keyword `cavity` is used. This keyword requires five numerical values: (1) The probability of moving a cavity, (2) the maximum 
