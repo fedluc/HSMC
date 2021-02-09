@@ -127,13 +127,25 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 
 The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulation the pressure was computed both with the virial (vir) and with the thermodynamic (thermo) approach. For each value of the packing fraction, the pressure obtained with HSMC is compared to what has been obtained by [DeMiguel and Jackson](https://www.tandfonline.com/doi/full/10.1080/00268970601095335) (MJ) and to the prediction of the [Carnahan-Starling](https://aip.scitation.org/doi/abs/10.1063/1.1672048) (CS) equation of state. The numbers in parenthesis denote the standard deviation calculated via the jackknife method
 
-| Packing fraction | CS | HSMC (vir) | MJ (vir) | HSMC (thermo) | MJ (thermo)
+| Packing fraction | Press. (CS) | Press. (HSMC, vir) | Press. (MJ, vir) | Press. (HSMC, thermo) | Press. (MJ, thermo)
 |  :---:  | :---:  | :---:  | :---:  | :---:  | :---:  |
 0.25	|	1.468	|	1.47(37)	|	1.4688(9)	|	1.4(20)	|	1.472(15)
 0.3	|	2.278	|	2.28(47)	|	2.2784(13)	|	2.2(30)	|	2.285(19)
 0.35	|	3.480	|	3.47(77)	|	3.4841(19)	|	3.4(76)	|	3.495(24)
 0.4	|	5.291	|	5.27(95)	|	5.288(3)	|	5.3(97)	|	5.303(29)
 0.45	|	8.066	|	8.0(14)	|	8.030(4)	|	8.(19)	|	8.118(35)
+
+### Isobaric simulations
+
+The table illustrates the results obtained by performing an NpT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulations the pressure was also computed with the thermodynamic (thermo) approach in order to check for self-consistency. For each value of the pressure, the packing fraction obtained with HSMC is compared to what has been obtained by [Brumby et. al](https://www.tandfonline.com/doi/full/10.1080/00268976.2010.530301) (BHMJ). The numbers in parenthesis denote the standard deviation calculated via the jackknife method for the pressure and via the flyvberg analysis for the packing fraction.
+
+| Pressure (input) | Pressure (thermo) | Packing fraction (HSMC) | Packing fraction (BHMJ) 
+|  :---:  | :---:  | :---:  | :---:  |
+1.472	|	1.5(21)	|	0.251	|	0.249(3)
+2.28	|	2.3(38)	|	0.301	|	0.300(2)
+3.471	|	3.5(60)	|	0.350	|	0.349(2)
+5.274	|	5.3(97)	|	0.400	|	0.399(2)
+
 
 ### Chemical potential in the NVT ensemble
 
@@ -145,7 +157,6 @@ The table illustrates the results obtained by performing an NVT simulation with 
 0.3	|	1.77	|	1.754	|	17
 0.5	|	3.832	|	3.856	|	2.2
 0.7	|	7.391	|	6.656	|	0.1
-
 
 
 <img src="examples/cluster_moves.gif" width="300" height="300">
