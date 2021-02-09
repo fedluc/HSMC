@@ -19,65 +19,38 @@ void print_example(){
 
   char example[] = 
     
-    "# This is an input file for hsmc\n"
-    "# Lines starting with # or empty lines are skipped\n\n"
+    "# This is an input file to compute the pressure via the virial route in the   \n"
+    "# canonical (NVT) ensemble. The simulation is performed at density 0.5/sigma^3,\n"
+    "# with 1000 particles 1e6 sweeps for equilibration and 1e6 sweeps for statistics\n"
+    "# Configuration and restart files are written every 1e5 sweeps, output on screen\n"
+    "# is printed every 1e4 sweeps\n\n"
     "# Density\n"
-    "# (for npt calculations the density is only used to specify\n" 
-    "# the starting configuration)\n"
-    "rho 0.8\n\n"
-    "# Number of cells along the x, y and z directions\n"
-    "# The cells are used a building block of the simulation box\n"
-    "cells_x 5\n" 
-    "cells_y 5\n"
-    "cells_z 5\n\n"
-    "# Type of cells\n"
-    "# 1: simple cubic, 1 particle per cell\n"
-    "# 2: face-centered cubic, 4 particles per cell\n"
-    "type 2\n\n"
-    "# Neighbor list (minumum size of cell list)\n"
-    "neigh_list 1.05\n\n"
-    "# Maximum displacement for particles moves\n"
+    "rho 0.5\n\n"
+    "# Simulation box\n"
+    "cells_x 10\n" 
+    "cells_y 10\n"
+    "cells_z 10\n"
+    "type 1\n\n"
+    "# Neighbor list\n"
+    "neigh_list 1.0 10\n\n"
+    "# Maximum particle displacement\n"
     "dr_max 0.05\n\n"
-    "# Parameters for NpT calculations (pressure, maximum volume deformation\n"
-    "# the default is npt 0, which corresponds to an NVT simulations)\n"
-    "npt 2.5 0.001\n\n"
-    "# Optmization\n"
-    "# (activation flag (0 or 1), sweeps used during optimization\n"
-    "# samples collected (<= sweeps), target acceptance ratio for particles moves\n"
-    "# target acceptance ratio for volume deformations)\n"
+    "# Optmizer\n"
     "opt 1 1000 10 0.5 0.5\n\n"
-    "# Pressure via virial (resolution, saving interval\n"
-    "# note: available only for NVT simulations)\n"
+    "# Pressure via virial\n"
     "press_virial 0.002 10 \n\n"
-    "# Pressure via thermodynamics (resolution, max relative compression, saving interval)\n"
-    "press_thermo 0.0001 0.002 10 \n\n"
-    "# Order parameter (order, cutoff distance, saving interval)\n"
-    "ql 6 1.5 1 \n\n"
-    "# Chemical potential via Widom insertions (insertions, saving interval)\n"
-    "widom 100 5 \n\n"
-    "# Radial distribution function (resolution, cutoff, saving interval\n"
-    "number of samples per output file)\n"
-    "rdf 0.01 5 10 128\n\n"
-    "# Cavity simulations (probability of moving a cavity, maximum and minimum distance,\n"
-    "# saving interval, potential resolution)\n"
-    "cavity 0.1 1.2 0.0 4 0.01\n\n"
-    "# Cluster moves (activation flag (0 or 1), number of cluster moves per sweep,\n"
-    "number of standard NVT steps to perturb the perfect crystal used at initialization)\n"
-    "cluster 0 1 10000\n\n"
     "# Seed for random number generator\n"
     "seed 124787\n\n"
-    "# Write restart data (saving interval)\n"
-    "restart_write 1024\n\n"
-    "# Read restart data (activation flag (0 or 1), name with restart file\n"
-    "# restart_read 1 restart_04096.bin\n\n"
-    "# Write configuration to file (saving interval, samples per file)\n"
-    "config_write 1024 256\n\n"
-    "# Number of sweeps for equilibration (for N particles, 1 sweep = N moves)\n"
-    "sweep_eq 10000\n\n"
+    "# Write restart data\n"
+    "restart_write 100000\n\n"
+    "# Write configuration to file\n"
+    "config_write 100000 100\n\n"
+    "# Number of sweeps for equilibration\n"
+    "sweep_eq 1000000\n\n"
     "# Number of sweeps for statistics\n"
-    "sweep_stat 10000\n\n"
-    "# Output interval (how often to print status on screen)\n"
-    "out 100\n\n";
+    "sweep_stat 1000000\n\n"
+    "# Output interval\n"
+    "out 10000\n\n";
 
    
     printf(example);
@@ -95,21 +68,22 @@ void read_input_file(char *filename){
   ssize_t line_size;
 
   // Initialize input structure 
-  G_IN.rho = 0;
-  G_IN.nx = 0;
-  G_IN.ny = 0;
-  G_IN.nz = 0;
-  G_IN.type = 0;
+  G_IN.rho = 0.5;
+  G_IN.nx = 3;
+  G_IN.ny = 3;
+  G_IN.nz = 3;
+  G_IN.type = 1;
   G_IN.neigh_dr = 1.0;
   G_IN.neigh_max_part = 10;
-  G_IN.dr_max = 0;
+  G_IN.dr_max = 0.05;
   G_IN.sweep_eq = 0;
   G_IN.sweep_stat = 0;
   G_IN.output_int = 0;
   G_IN.cavity_pcav = 0;
-  G_IN.cavity_maxdr = 0;
+  G_IN.cavity_maxdr = 1.2;
   G_IN.cavity_mindr = 0;
-  G_IN.cavity_sample_int = 0;
+  G_IN.cavity_out_dr = 0.01;
+  G_IN.cavity_sample_int = 100;
   G_IN.cluster_flag = 0;
   G_IN.cluster_moves_sweep = 1;
   G_IN.cluster_init_step = 10000;
@@ -117,27 +91,28 @@ void read_input_file(char *filename){
   G_IN.restart_write = 0;
   G_IN.config_write = 0;
   G_IN.config_samples = 128;
-  G_IN.pressv_dr = 0;
+  G_IN.pressv_dr = 0.01;
   G_IN.pressv_sample_int = 0;
-  G_IN.presst_dxi = 0;
-  G_IN.presst_xi_max = 0;
+  G_IN.presst_dxi = 0.0001;
+  G_IN.presst_xi_max = 0.002;
   G_IN.presst_sample_int = 0;
   G_IN.press = 0;
-  G_IN.dv_max = 0;
+  G_IN.dv_max = 0.001;
   G_IN.opt_flag = 1;
   G_IN.opt_sweeps = 1000;
   G_IN.opt_samples = 10;
   G_IN.opt_part_target = 0.5;
   G_IN.opt_vol_target = 0.5;
   G_IN.seed = 0;
-  G_IN.ql_order = -1;
-  G_IN.ql_rmax = 0;
+  G_IN.ql_order = 6;
+  G_IN.ql_rmax = 1.5;
   G_IN.ql_sample_int = 0;
   G_IN.mu_sample_int = 0;
-  G_IN.mu_insertions = 0;
-  G_IN.rdf_dr = 0;
+  G_IN.mu_insertions = 100;
+  G_IN.rdf_dr = 0.01;
+  G_IN.rdf_rmax = 10;
   G_IN.rdf_sample_int = 0;
-  G_IN.rdf_samples = 128;
+  G_IN.rdf_samples = 100;
 
   // Open file
   printf("Reading input data from %s ...\n",filename);
