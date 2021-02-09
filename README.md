@@ -108,3 +108,14 @@ An example of input file for a simple simulation in the canonical ensemble can b
 
 * **Sweeps**: The number of sweeps to perform can be specified with the command `sweep_eq` and `sweep_stat`. Both these commands require one numerical value which specifies                 the number of sweeps to perform. `sweep_eq` is used to specify the number of sweeps for equilibration during which no quantity is sampled (except for the                     density in the course of isobaric simulations) and `sweep_stat` is used to specify the number of steps used to collect the statistics for the desired quantities               Default: `sweep_eq 1000`, `sweep_stat 1000`
              
+## Post-processing
+
+The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains some python modules that can be utilized to analyze the output produced by hsmc.
+
+* hsmc_cavity: analyze output for the cavity simulations
+* hsmc_chem_pot: analyze output for the chemical potential obtained via the Widom insertion method
+* hsmc_density: analyze output for the density during the isobaric simulations
+* hsmc_op: analyze output for the order parameter
+* hsmc_pressure: analyze output for the pressure calculations. This module can be used to analyze the results for both virial and thermodynamic calculations.
+* hsmc_rdf: compute the average radial distribution function from the rdf files produced by hsmc
+* hsmc_stat: this module contains a series of tools for the statistical analysis of the hsmc results. These tools include the [blocking method discussed by Flyvberg](https://doi.org/10.1063/1.457480)
