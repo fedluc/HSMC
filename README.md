@@ -123,9 +123,9 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 
 ## Examples
 
-# Pressure calculation in the NVT ensemble
+### Pressure calculation in the NVT ensemble
 
-The table illustrates the results obtained by performing an NVT simulation with 256 particles. In the course of the simulation the pressure was computed both with the virial (vir) and with the thermodynamic (thermo) approach. For each value of the packing fraction, the pressure obtained with HSMC is compared to what has been obtained by [DeMiguel and Jackson](https://www.tandfonline.com/doi/full/10.1080/00268970601095335) (MJ) and to the prediction of the [Carnahan-Starling](https://aip.scitation.org/doi/abs/10.1063/1.1672048) (CS) equation of state.
+The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulation the pressure was computed both with the virial (vir) and with the thermodynamic (thermo) approach. For each value of the packing fraction, the pressure obtained with HSMC is compared to what has been obtained by [DeMiguel and Jackson](https://www.tandfonline.com/doi/full/10.1080/00268970601095335) (MJ) and to the prediction of the [Carnahan-Starling](https://aip.scitation.org/doi/abs/10.1063/1.1672048) (CS) equation of state. The numbers in parenthesis denote the standard deviation calculated via the jackknife method
 
 | Packing fraction | CS | HSMC (vir) | MJ (vir) | HSMC (thermo) | MJ (thermo)
 |  :---:  | :---:  | :---:  | :---:  | :---:  | :---:  |
@@ -135,6 +135,16 @@ The table illustrates the results obtained by performing an NVT simulation with 
 0.4	|	5.291	|	5.27(95)	|	5.288(3)	|	5.3(97)	|	5.303(29)
 0.45	|	8.066	|	8.0(14)	|	8.030(4)	|	8.(19)	|	8.118(35)
 
+### Chemical potential in the NVT ensemble
+
+The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 16777216 for statistics. In the course of the simulation the chemical potential was computed via the Widom insertion method. For each value of the density, the chemical potential obtained with HSMC is compared to what has been obtained by [Adams](https://www.tandfonline.com/doi/abs/10.1080/00268977400102551). The last column reports the percentual of attempted insertions that were accepted, the very small acceptance ratio at the highest density signals that the widom method becomes inaquate for the calculation of the chemical potential
+
+| Density | Adams | HSMC | Accepted insertions (%) |
+|  :---:  | :---:  | :---:  | :---:  |
+0.1	|	0.466	|	0.464	|	62
+0.3	|	1.77	|	1.754	|	17
+0.5	|	3.832	|	3.856	|	2.2
+0.7	|	7.391	|	6.656	|	0.1
 
 
 
