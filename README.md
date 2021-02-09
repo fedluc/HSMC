@@ -26,7 +26,7 @@ it is assumed that
 * All the input values are given in units in which the length are normalized to the hard-sphere diameter and the energy to k_BT, where k_B is the Boltzmann's constant and 
 T is the temperature.
 
-An example of input file which lists all the keyword and their respective default values can be retrieved by runnin hsmc with the command line argument `-e`. The key-words and the numerical inputs which are expected for each key-word are illustrated below:
+An example of input file for a simple simulation in the canonical ensemble can be retrieved by running hsmc with the command line option `-e`. A more complete overview of the key-words and of the numerical inputs which are expected for each key-word is given below.
 
 * **Cavity simulations**: Cavity simulations as described by [Torrie and Patey](https://www.tandfonline.com/doi/abs/10.1080/00268977700102821) can be performed if the 
                           keyword `cavity` is used. This keyword requires five numerical values: (1) The probability of moving a cavity, (2) the maximum 
