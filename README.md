@@ -137,6 +137,11 @@ The table illustrates the results obtained by performing an NVT simulation with 
 
 ### Data analysis via the blocking method
 
+The image illustrates how the blocking method proposed by Flyvberg can be employed to estimate the standard deviation of the samples collected during a simulation. The standard deviation of the average order parameter calculated at three values of the packing fraction (0.25, 0.35, 0.45) is plotted as a function of the number of blocking transformation applied to the system, at each blocking transformation the size of the data-set is halved by averaging the samples in groups of two. When the curve flattens it signifies that the samples have become un-correlated and that the standard deviation can be safely computed via the usual estimators for uncorrelated data. As expected, the correlation "time" increases if the packing fraction increases. Indeed, at packing fraction 0.25 the samples are uncorrelated without using any blocking transformation, while at packing fraction 0.45 it takes 7 blocking transformations to obtain uncorrelated samples. In other words, at packing fraction 0.25 it is possible to collect uncorrelated samples by saving every 16 sweeps, while at packing fraction 0.45 it is necessary to collect one sample every 2048 sweeps in order to have uncorrelated samples.
+
+<img src="examples/blocking_method.svg" width="500" height="500">
+
+
 ### Simulations in the isobaric (NpT) ensemble
 
 The table illustrates the results obtained by performing an NpT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulations the pressure was also computed with the thermodynamic (thermo) approach in order to check for self-consistency. For each value of the pressure, the packing fraction obtained with HSMC is compared to what has been obtained by [Brumby et. al](https://www.tandfonline.com/doi/full/10.1080/00268976.2010.530301) (BHMJ). The numbers in parenthesis denote the standard deviation calculated via the jackknife method for the pressure and via the flyvberg analysis for the packing fraction.
