@@ -174,4 +174,4 @@ The table illustrates the results obtained by performing an NVT simulation with 
 
 The animation shows a series of cluster moves for a simulation with 27 particles at density 0.4. The colored particles correspond to the particles that belong to the cluster and that are rotated around a randomly chosen pivot inside the simulation box.
 
-<img src="examples/cluster_moves.gif" width="300" height="300">
+<img src="examples/cluster_moves.gif" width="400" height="400">
