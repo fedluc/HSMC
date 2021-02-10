@@ -139,13 +139,13 @@ The table illustrates the results obtained by performing an NVT simulation with 
 
 The image illustrates how the blocking method proposed by Flyvberg can be employed to estimate the standard deviation of the samples collected during a simulation. The standard deviation of the average order parameter calculated at three values of the packing fraction (0.25, 0.35, 0.45) is plotted as a function of the number of blocking transformation applied to the system, at each blocking transformation the size of the data-set is halved by averaging the samples in groups of two. When the curve flattens it signifies that the samples have become un-correlated and that the standard deviation can be safely computed via the usual estimators for uncorrelated data. As expected, the correlation "time" increases if the packing fraction increases. Indeed, at packing fraction 0.25 the samples are uncorrelated without using any blocking transformation, while at packing fraction 0.45 it takes 7 blocking transformations to obtain uncorrelated samples. In other words, at packing fraction 0.25 it is possible to collect uncorrelated samples by saving every 16 sweeps, while at packing fraction 0.45 it is necessary to collect one sample every 2048 sweeps in order to have uncorrelated samples.
 
-<img src="examples/blocking_method.svg" width="500" height="500">
+<img src="examples/blocking_method.svg" width="500" height="300">
 
 ### Radial distribution function
 
-The image presents some examples for the radial distribution function obtained at three state points belonging to the liquid phase and at one point in the solid phase. The horizontal axis is in units of the particle's diameter (sigma)
+The image presents some examples for the radial distribution function obtained at three state points belonging to the liquid phase and at one point in the solid phase. The horizontal axis is in units of the particle's diameter (sigma).
 
-<img src="examples/rdf.svg" width="500" height="500">
+<img src="examples/rdf.svg" width="500" height="300">
 
 ### Simulations in the isobaric (NpT) ensemble
 
