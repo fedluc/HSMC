@@ -123,7 +123,7 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 
 ## Examples
 
-### Pressure calculation in the NVT ensemble
+### Pressure calculation in the canonical (NVT) ensemble
 
 The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulation the pressure was computed both with the virial (vir) and with the thermodynamic (thermo) approach. For each value of the packing fraction, the pressure obtained with HSMC is compared to what has been obtained by [DeMiguel and Jackson](https://www.tandfonline.com/doi/full/10.1080/00268970601095335) (MJ) and to the prediction of the [Carnahan-Starling](https://aip.scitation.org/doi/abs/10.1063/1.1672048) (CS) equation of state. The numbers in parenthesis denote the standard deviation calculated via the jackknife method
 
@@ -135,7 +135,9 @@ The table illustrates the results obtained by performing an NVT simulation with 
 0.4	|	5.291	|	5.27(95)	|	5.288(3)	|	5.3(97)	|	5.303(29)
 0.45	|	8.066	|	8.0(14)	|	8.030(4)	|	8.(19)	|	8.118(35)
 
-### Isobaric simulations
+### Data analysis via the blocking method
+
+### Simulations in the isobaric (NpT) ensemble
 
 The table illustrates the results obtained by performing an NpT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulations the pressure was also computed with the thermodynamic (thermo) approach in order to check for self-consistency. For each value of the pressure, the packing fraction obtained with HSMC is compared to what has been obtained by [Brumby et. al](https://www.tandfonline.com/doi/full/10.1080/00268976.2010.530301) (BHMJ). The numbers in parenthesis denote the standard deviation calculated via the jackknife method for the pressure and via the flyvberg analysis for the packing fraction.
 
