@@ -142,7 +142,7 @@ The image illustrates how the blocking method proposed by Flyvberg can be employ
 
 ### Radial distribution function
 
-The image presents some examples for the radial distribution function obtained at three state points belonging to the liquid phase and at one point in the solid phase. The horizontal axis is in units of the particle's diameter (sigma).
+The image presents some examples for the radial distribution function obtained at three state points belonging to the liquid phase and at one point in the solid phase. The horizontal axis represents the inter-particle distance in units of the particle's diameter (sigma).
 
 <img src="examples/rdf.svg" width="500" height="300">
 
