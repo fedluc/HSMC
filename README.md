@@ -152,10 +152,10 @@ The table illustrates the results obtained by performing an NpT simulation with 
 
 | Pressure (input) | Pressure (thermo) | Packing fraction (HSMC) | Packing fraction (BHMJ) 
 |  :---:  | :---:  | :---:  | :---:  |
-1.472	|	1.5(21)	|	0.251	|	0.249(3)
-2.280	|	2.3(38)	|	0.301	|	0.300(2)
-3.471	|	3.5(60)	|	0.350	|	0.349(2)
-5.274	|	5.3(97)	|	0.400	|	0.399(2)
+1.472	|	1.5(21)	|	0.251(8)	|	0.249(3)
+2.280	|	2.3(38)	|	0.30(12)	|	0.300(2)
+3.471	|	3.5(60)	|	0.35(10)	|	0.349(2)
+5.274	|	5.3(97)	|	0.40(12)	|	0.399(2)
 
 
 ### Chemical potential in the NVT ensemble
