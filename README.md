@@ -115,7 +115,7 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 * hsmc_chem_pot: analyze output for the chemical potential obtained via the Widom insertion method
 * hsmc_density: analyze output for the density during the isobaric simulations
 * hsmc_op: analyze output for the order parameter
-* hsmc_pressure: analyze output for the pressure calculations (both virial and thermodynamic).
+* hsmc_pressure: analyze output for the pressure calculations
 * hsmc_rdf: compute the average radial distribution function from the rdf files produced by hsmc
 * hsmc_stat: this module contains a collection of tools for the statistical analysis of the hsmc results. These tools include the [blocking method discussed by Flyvberg](https://doi.org/10.1063/1.457480), the calculation of autocorrelation functions and the jackknife estimate for the standard deviation.
 
@@ -124,7 +124,7 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 
 ### Pressure calculation in the canonical (NVT) ensemble
 
-The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulation the pressure was computed both with the virial (vir) and with the thermodynamic (thermo) approach. For each value of the packing fraction, the pressure obtained with HSMC is compared to what has been obtained by [DeMiguel and Jackson](https://www.tandfonline.com/doi/full/10.1080/00268970601095335) (MJ) and to the prediction of the [Carnahan-Starling](https://aip.scitation.org/doi/abs/10.1063/1.1672048) (CS) equation of state. The numbers in parenthesis denote the standard deviation calculated via the jackknife method
+The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 524288 for statistics. In the course of the simulation the pressure was computed both with the virial (vir) and with the thermodynamic (thermo) approach. For each value of the packing fraction, the pressure obtained with HSMC is compared to what has been obtained by [DeMiguel and Jackson](https://www.tandfonline.com/doi/full/10.1080/00268970601095335) (MJ) and to the prediction of the [Carnahan-Starling](https://aip.scitation.org/doi/abs/10.1063/1.1672048) (CS) equation of state. The numbers in parenthesis denote the standard deviation calculated via the jackknife method.
 
 | Packing fraction | Press. (CS) | Press. (HSMC, vir) | Press. (MJ, vir) | Press. (HSMC, thermo) | Press. (MJ, thermo)
 |  :---:  | :---:  | :---:  | :---:  | :---:  | :---:  |
@@ -160,7 +160,7 @@ The table illustrates the results obtained by performing an NpT simulation with 
 
 ### Chemical potential in the NVT ensemble
 
-The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 16777216 for statistics. In the course of the simulation the chemical potential was computed via the Widom insertion method. For each value of the density, the chemical potential obtained with HSMC is compared to what has been obtained by [Adams](https://www.tandfonline.com/doi/abs/10.1080/00268977400102551). The last column reports the percentual of attempted insertions that were accepted, the very small acceptance ratio at the highest density signals that the widom method becomes inaquate for the calculation of the chemical potential
+The table illustrates the results obtained by performing an NVT simulation with 256 particles, 524288 sweeps for equilibration and 16777216 for statistics. In the course of the simulation the chemical potential was computed via the Widom insertion method. For each value of the density, the chemical potential obtained with HSMC is compared to what has been obtained by [Adams](https://www.tandfonline.com/doi/abs/10.1080/00268977400102551). The last column reports the percentual of attempted insertions that were accepted, the very small acceptance ratio at the highest density signals that the widom method becomes inaquate for the calculation of the chemical potential.
 
 | Density | Adams | HSMC | Accepted insertions (%) |
 |  :---:  | :---:  | :---:  | :---:  |
