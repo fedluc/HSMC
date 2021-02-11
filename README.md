@@ -1,7 +1,7 @@
 # HSMC
 
-hsmc performs Monte Carlo simulations of mono-disperse hard-sphere systems. The default behavior of the code is to perform NVT simulations for which it is possible to monitor
-a number of observables including pressure, chemical potential, radial distribution function and order parameters. The code can also perform simulations in the isobaric ensemble (NpT), cavity simulations as described by [Torrie and Patey](https://www.tandfonline.com/doi/abs/10.1080/00268977700102821) and simulations involving the cluster moves described by [Krauth](https://arxiv.org/abs/cond-mat/0311623). More information about the observables that can be monitored in the course of such simulations are provided in the section "Input file".
+hsmc performs Monte Carlo simulations of mono-disperse hard-sphere systems. The default behavior of the code is to perform simulations in the canonical (NVT) ensemble for which it is possible to monitor
+a number of observables including pressure, chemical potential, radial distribution function and order parameter. The code can also perform simulations in the isobaric ensemble (NpT), cavity simulations as described by [Torrie and Patey](https://www.tandfonline.com/doi/abs/10.1080/00268977700102821) and simulations with the cluster moves described by [Krauth](https://arxiv.org/abs/cond-mat/0311623). More information about the observables that can be monitored in the course of such simulations are provided in the section "Input file".
 
 ## Compiling
 
@@ -12,17 +12,17 @@ that the [GNU scientific library](https://www.gnu.org/software/gsl/) and the [zl
 ## Running
 
 In order to run the program it is necessary to create an input file that is passed through the command line via the argument `-i`. More information about the input file 
-are given below. A full list of the accepted command line arguments can be retrieved via the command line argument `--help`.
+is given below. A full list of the accepted command line arguments can be retrieved via the command line argument `--help`.
 
 ## Input file
 
-In the input file a combination of key-words and numerical values are used in order to specify 
+In the input file key-words and numerical values are used in order to specify 
 the type of simulation that should be performed. Empty lines are skipped, lines starting with # are treated as comments. For the lines that are neither empty nor comments 
 it is assumed that 
 
-* Each line contains at most one key-word, if this is not the case then only the first key-word in the line is read. 
-* When one key-word is specified, then all the numerical valus associated to that key-word are also specified. i.e. it is not possible to use the default value only for some
-  numerical values.
+* Each line contains at most one key-word, if this is not the case then only the first key-word in the line is read
+* When one key-word is specified, then all the numerical values associated to that key-word are also specified. i.e. it is not possible to use the default value only for some
+  numerical values
 * All the input values are given in units in which the length are normalized to the hard-sphere diameter and the energy to k_BT, where k_B is the Boltzmann's constant and 
 T is the temperature.
 
@@ -34,7 +34,7 @@ An example of input file for a simple simulation in the canonical ensemble can b
                           *cavity_distance.dat* while the interaction potential between the cavities is written to *cavity_psi.dat*. For the cavity simulations the                                     calculations of pressure, radial distribution function, chemical potential and order parameter are not available.
                           Default: `cavity 0 1.2 0.0 100 0.01`.
 
-* **Chemical potential**: The chemical potential can be computed via the Widom insertion method via the keyword `widom` which requires two numerical values: (1) The number
+* **Chemical potential**: The chemical potential can be computed via the Widom insertion method if the keyword `widom` is specified. This keyword requires two numerical                                 values: (1) The number
                           of insertions that have to be performed each time the chemical potential is sampled and (2) the sampling interval. The output is written to the 
                           file *chem_pot.dat*. Default: `widom 100 0`.
 
@@ -46,8 +46,7 @@ An example of input file for a simple simulation in the canonical ensemble can b
                      
 * **Configuration**: The keyword `config_write` can be used to write the current configuration to file. `config_write` requires two numerical values: (1) the saving interval                      (in number of sweeps) and (2) the number of configurations to write per file. The configurations are written to files called *config_%.dat.gz* where %                        is a numerical identifier for the file. Default `config_write 0 100`          
 
-* **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density normalized.
-                For NpT simulations this value of the density is only used to assign the total number of particles. Default: `rho 0.5`.
+* **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density. For NpT simulations this value of the density is only used to                    assign the total number of particles. Default: `rho 0.5`.
 
 * **Isobaric calculations**: Isobaric calculations in the NpT ensemble can be performed if the keyword `npt` is specified. If `npt` is not specified then the code runs a
                               a standard isothermal simulation in the NVT ensemble. The keyword `npt` requires two numerical values: (1) the pressure and (2) the maximum 
