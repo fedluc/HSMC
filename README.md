@@ -46,19 +46,19 @@ An example of input file for a simple simulation in the canonical ensemble can b
                      
 * **Configuration**: The keyword `config_write` can be used to write the current configuration to file. `config_write` requires two numerical values: (1) the saving interval                      (in number of sweeps) and (2) the number of configurations to write per file. The configurations are written to files called *config_%.dat.gz* where %                        is a numerical identifier for the file. Default `config_write 0 100`          
 
-* **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density. For NpT simulations this value of the density is only used to                    assign the total number of particles. Default: `rho 0.5`.
+* **Density**: The density is specified via the keyword `rho` followed by a numerical value for the density itself. For NpT simulations the density specified with `rho` is only used to generate the starting configuration (see section "Simulation box"). Default: `rho 0.5`.
 
 * **Isobaric calculations**: Isobaric calculations in the NpT ensemble can be performed if the keyword `npt` is specified. If `npt` is not specified then the code runs a
                               a standard isothermal simulation in the NVT ensemble. The keyword `npt` requires two numerical values: (1) the pressure and (2) the maximum 
                               volume deformation. In the case the optimizer is used (see section "Optimizer") the volume deformation specified with `npt` will only be used 
-                              as an initial guess to the optimization procedure. The density sampled in the course of NpT simulations is written on screen. In the course of
+                              as an initial guess to the optimization procedure. The density sampled in the course of NpT simulations is written on screen (see Section "Output on screen"). In the course of
                               NpT simulations it is possible to monitor the pressure (via the thermodynamic route) and the order parameter.
                               Default: `npt 0 0.001`.                 
                    
 
 * **Maximum particle displacement**: The maximum particle displacement in the course of standard Monte Carlo moves is specified with `dr_max`. In the
-                                     case the optimizer is used (see section "Optimizer") the value speciefied with `opt` will only be used as an initial guess 
-                                     for the optimization procedure. Default `dr_max 0.05`
+                                     case the optimizer is used (see section "Optimizer") the value specified with `opt` will only be used as an initial guess 
+                                     for the optimization procedure. Default `dr_max 0.05`.
                                     
 * **Neighbor list**: For efficient calculations of the particle's interactions, the code uses a neighbor list based on cell lists that scales line O(N), with N being the 
                      number of particles. The cell list is speficied via the keyword `neigh_list` which requires two numerical values: (1) The minimum size of the cells
@@ -66,40 +66,40 @@ An example of input file for a simple simulation in the canonical ensemble can b
                      Default: `neigh_list 1.0 10`
  
 * **Optimizer**: The optimizer is used to optimize the particle and volume displacements in order to obtain a target acceptance ratio (which is typically 50%). The optimizer
-                  is set with the keyword `opt` which requires five numerical values: (1) An activation flag which can be 0 or 1, (2) the number of sweeps (1 sweep = N moves)
+                  is set with the keyword `opt` which requires five numerical values: (1) An activation flag which (0 or 1), (2) the number of sweeps (1 sweep = N moves)
                   used for the optimization, (3) the number of samples collected during optimization (<= the number of sweeps), (4) the target acceptance ratio for particle
                   moves and (5) the target acceptance ratio for volume moves (which must be specified also if `npt` is not used). Default: `opt 1 1000 10 0.5 0.5` 
                   
 * **Output on screen**: The keyword `out` can be used to specify how often to print on screen the information regarding the current sweep. `out` requires one numerical value
-                        which specifies how often to print on screen. Default: `out 0`
+                        which specifies how often to print on screen. Default: `out 0`.
 
 * **Order parameter**: The order parameter (as defined by [Lechner and Dellago](https://aip.scitation.org/doi/full/10.1063/1.2977970?casa_token=Pq7x6pG7HZAAAAAA%3ASDGRrjz3OL1_tOC1qLBvvrGSDBdJEBMMDUxZcJSoyTAOEBNouzPmfF23Z25dh7R4D91fsr_0dEJw)) can be computed with the keyword `ql` which requires three 
                         numerical values: (1) The order of the order parameter, (2) The cutoff distance for the neighbor interaction (typically 1.5 is a good choice) and (3)
-                        the saving interval (in number of sweeps). This keyword compute an average order parameter for the whole system by averaging over the order parameters
-                        of all the particles inside the system. The output is written to the file *oder_param.dat*. Default: `ql 6 1.5 0`.
+                        the saving interval (in number of sweeps). This keyword computes an average order parameter for the whole system by averaging over the order parameters
+                        of all the particles. The output is written to the file *oder_param.dat*. Default: `ql 6 1.5 0`.
 
-* **Pressure (thermodynamic)**: The pressure calculated via the thermodynamic definition (i.e. via virtual volume compressions) can be computed with the keyword                                                `press_thermo` which requires three numerical values: (1) The resolution for volume perturbations, (2) maximimum virtual compression
+* **Pressure (thermodynamic)**: The pressure calculated via the thermodynamic definition (i.e. via virtual volume compressions) can be computed with the keyword                                                `press_thermo`, which requires three numerical values: (1) The resolution for volume perturbations, (2) the maximimum virtual compression
                                   and (3) the sampling interval (in number of sweeps). The output is written to the files *press_thermo.dat* and *density.dat* (the latter
-                                  only for isobaric calcualtions). Default: `press_thermo 0.0001 0.002 0`.
+                                  produced only for isobaric calcualtions). Default: `press_thermo 0.0001 0.002 0`.
 
-* **Pressure (virial)**: The pressure calculated via the virial equation of state (i.e via extrapolating the radial distribution function (RDF) to contact) can be computed                            with the keyword `press_virial` which requires two numerical values: (1) the resolution for the RDF calculation and (2) the sampling intervals (in                             number of sweeps). This calcuation is available only for NVT simulations. The output is written to the file *press_virial.dat*. 
+* **Pressure (virial)**: The pressure calculated via the virial equation of state (i.e via extrapolating the radial distribution function (RDF) to contact) can be computed                            with the keyword `press_virial`, which requires two numerical values: (1) the resolution for the RDF calculation and (2) the sampling interval (in                             number of sweeps). This calcuation is available only for NVT simulations. The output is written to the file *press_virial.dat*. 
                           Default: `press_virial 0.01 0`.
 
 * **Radial distribution function**: The radial distribution function (RDF) can be computed with the keyword `rdf` which requires four numerical values: (1) The resolution
                                     used in the RDF calculation, (2) the cutoff for the RDF calculation (should not be larger than half the smallest simulation box size), 
-                                    (3) the saving interval (in number of sweeps) and (4) the number of samples per output file. All the RDF samples are written to a series                                       of files called *rdf_%.dat.gz* (the total number of files depends on the number of samples that are collected and on the parameter 4 of                                       the keyword). Each sample contains the information extracted from one configuration, so it is advisable to average the RDF samples before 
+                                    (3) the saving interval (in number of sweeps) and (4) the number of samples per output file. All the RDF samples are written to a series                                       of files called *rdf_%.dat.gz* (the total number of files depends on the number of samples that are collected and on numerical parameter 4 ). Each sample contains the information extracted from one configuration, so it is advisable to average the RDF samples before 
                                     using them for any sort of calculation. This calcuation is available only for NVT simulations. 
                                     WARNING: The calculation of the RDF can have a significant impact on performance since it scales like O(N^2). Default: `rdf 0.01 0 10 100`
 
-* **Random number generator**: The random number generator used by hsmc is the [Marsenne Twister implemented in the GNU Scientific Library](https://www.gnu.org/software/gsl/doc/html/rng.html). The see used to initialize the random number generator can be specified with the keyword `seed`. Default: `seed 0`. 
+* **Random number generator**: The random number generator used by hsmc is the [Marsenne Twister implemented in the GNU Scientific Library](https://www.gnu.org/software/gsl/doc/html/rng.html). The seed used to initialize the random number generator can be specified with the keyword `seed`. Default: `seed 0`. 
 
-* **Restart files**: The keywords `restart_write` and `restart_read` can be used to specify how to write and read restart files. `restart_write` requires one  numerical value                      which is  the interval (in number of sweeps) after which a restart file is written. The restart files are in binary format and have the name                                  *restart_%.bin*, where % is the sweep at which the file is written.  `restart_read` can be used to read a restart file and start a simulation from where                      another previous simulations had left off. If the optmizer is invoked it might modify the maximum displacements read from the restart file and, hence, it                      might not allow a perfect restart. `restart_read` requires two numerical values: (1) The activation flag (0 or 1) and (2) the name of the file used to                        read the restart from (note: it should be a file previously produced with `restart_write`. Default:  `restart_write 0` (no restart file is written),                          `restart_read 0 restart_000000.bin` (no restart is performed)
+* **Restart files**: The keywords `restart_write` and `restart_read` can be used to specify how to write and read restart files. `restart_write` requires one  numerical value                      which is  the interval (in number of sweeps) after which a restart file is written. The restart files are in binary format and have the name                                  *restart_%.bin*, where % is the sweep at which the file is written.  `restart_read` can be used to read a restart file and start a simulation from where                      another previous simulations had left off. The optimizer might modify the maximum displacements read from the restart file and, hence, it                      might not allow a perfect restart. `restart_read` requires two numerical values: (1) The activation flag (0 or 1) and (2) the name of the file used to                        read the restart from (note: it should be a file previously produced with `restart_write`). Default:  `restart_write 0` (no restart file is written),                          `restart_read 0 restart_000000.bin` (no restart is performed)
 
 
-* **Simulation box**: The simulation box is assumed to be a rectangular parallelepiped whose sides are specified by assign a certain amount of building blocks in each 
+* **Simulation box**: The simulation box is assumed to be a rectangular parallelepiped whose sides are specified by assigning a certain amount of building blocks in each 
                       direction. The building blocks can be either simple cubic (SC) cells or face-centerd cubic (FCC) cells containing, respectively, 1 or 4 particles. 
                       The type of building block specifies also the starting configuration, i.e SC blocks will prodoce a starting configuration in which the particles are 
-                      arranged on a cubic lattice while FCC blocks will prodoce a starting configuration in which the particles are arranged on a FCC lattice.
+                      arranged on a cubic lattice while FCC blocks will produce a starting configuration in which the particles are arranged on a FCC lattice.
                       The number of building blocks in the x, y and z directions are specified with the key-words `cells_x`, `cells_y` and `cell_z`, while the type for 
                       the building blocks is specified as `type` followed by 1 for SC blocks or by 2 for FCC blocks. Default:  `cells_x 3`,  `cells_x 3`,  `cells_x 3`,
                        `type 1`
@@ -115,9 +115,9 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 * hsmc_chem_pot: analyze output for the chemical potential obtained via the Widom insertion method
 * hsmc_density: analyze output for the density during the isobaric simulations
 * hsmc_op: analyze output for the order parameter
-* hsmc_pressure: analyze output for the pressure calculations. This module can be used to analyze the results for both virial and thermodynamic calculations.
+* hsmc_pressure: analyze output for the pressure calculations (both virial and thermodynamic).
 * hsmc_rdf: compute the average radial distribution function from the rdf files produced by hsmc
-* hsmc_stat: this module contains a series of tools for the statistical analysis of the hsmc results. These tools include the [blocking method discussed by Flyvberg](https://doi.org/10.1063/1.457480), the calculation of autocorrelation functions and the jackknife estimate for the standard deviation.
+* hsmc_stat: this module contains a collection of tools for the statistical analysis of the hsmc results. These tools include the [blocking method discussed by Flyvberg](https://doi.org/10.1063/1.457480), the calculation of autocorrelation functions and the jackknife estimate for the standard deviation.
 
 
 ## Examples
