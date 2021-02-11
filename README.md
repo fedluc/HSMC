@@ -129,9 +129,9 @@ The table illustrates the results obtained by performing an NVT simulation with 
 | Packing fraction | Press. (CS) | Press. (HSMC, vir) | Press. (MJ, vir) | Press. (HSMC, thermo) | Press. (MJ, thermo)
 |  :---:  | :---:  | :---:  | :---:  | :---:  | :---:  |
 0.25	|	1.468	|	1.47(37)	|	1.4688(9)	|	1.4(20)	|	1.472(15)
-0.3	|	2.278	|	2.28(47)	|	2.2784(13)	|	2.2(30)	|	2.285(19)
+0.30	|	2.278	|	2.28(47)	|	2.2784(13)	|	2.2(30)	|	2.285(19)
 0.35	|	3.480	|	3.47(77)	|	3.4841(19)	|	3.4(76)	|	3.495(24)
-0.4	|	5.291	|	5.27(95)	|	5.288(3)	|	5.3(97)	|	5.303(29)
+0.40	|	5.291	|	5.27(95)	|	5.288(3)	|	5.3(97)	|	5.303(29)
 0.45	|	8.066	|	8.0(14)	|	8.030(4)	|	8.(19)	|	8.118(35)
 
 ### Data analysis via the blocking method
@@ -153,7 +153,7 @@ The table illustrates the results obtained by performing an NpT simulation with 
 | Pressure (input) | Pressure (thermo) | Packing fraction (HSMC) | Packing fraction (BHMJ) 
 |  :---:  | :---:  | :---:  | :---:  |
 1.472	|	1.5(21)	|	0.251	|	0.249(3)
-2.28	|	2.3(38)	|	0.301	|	0.300(2)
+2.280	|	2.3(38)	|	0.301	|	0.300(2)
 3.471	|	3.5(60)	|	0.350	|	0.349(2)
 5.274	|	5.3(97)	|	0.400	|	0.399(2)
 
