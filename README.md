@@ -171,6 +171,13 @@ The table illustrates the results obtained by performing an NVT simulation with 
 
 ### Cluster moves
 
-The animation shows a series of cluster moves for a simulation with 27 particles at density 0.4. The colored particles correspond to the particles that belong to the cluster and that are rotated around a randomly chosen pivot inside the simulation box.
+The animation shows a series of cluster moves for a simulation with 27 particles at density 0.4. The colored particles correspond to the particles that belong to the cluster and that are rotated around a randomly chosen pivot inside the simulation box. 
 
 <img src="examples/cluster_moves.gif" width="400" height="400">
+
+The pressures reporeted in the table demonstrate that, despite adopting an entirely different strategy for the particle motion, the cluster moves produce results which are consistent with the standard Monte Carlo moves. All the results reported in the table were obtained with 256 particles, the number in parenthesis denote the standard deviation obtained with the jackknife method.
+
+| Packing fraction  | Press. (standard MC) | Press. (cluster MC)
+|  :---:  | :---:  | :---:  |
+0.25	|	1.47(37)	|	1.46(38)	|	
+0.30	|	2.28(47)	|	2.27(41) 	|	
