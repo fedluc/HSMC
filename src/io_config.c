@@ -62,7 +62,7 @@ void write_restart(int sweep){
   // Write particles information
   part_info_write(fid);
 
-  /* // Write configuration */
+  // Write configuration
   part_conf_write(fid);
 
   // Write random number generator status

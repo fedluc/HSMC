@@ -54,50 +54,50 @@ void hs_nvt() {
   // Set-up the neighbor list
   cell_list_init(true);
 
-  /* // Optmize maximum displacement */
-  /* if (G_IN.opt_flag == 1){ */
-  /*   opt_nvt(); */
-  /*   part_init(); */
-  /*   cell_list_init(false); */
-  /* } */
+  // Optmize maximum displacement
+  if (G_IN.opt_flag == 1){
+    opt_nvt();
+    part_init();
+    cell_list_init(false);
+  }
 
-  /* // Start timing */
-  /* clock_t start = clock(); */
+  // Start timing
+  clock_t start = clock();
 
-  /* // Initialize move counters */
-  /* reset_moves_counters(); */
+  // Initialize move counters
+  reset_moves_counters();
 
-  /* // Run equilibration */
-  /* printf("---------------------------------------------------\n"); */
-  /* printf("Equilibration...\n"); */
-  /* run_nvt(false,0); */
-  /* printf("Equilibration completed.\n"); */
+  // Run equilibration
+  printf("---------------------------------------------------\n");
+  printf("Equilibration...\n");
+  run_nvt(false,0);
+  printf("Equilibration completed.\n");
 
-  /* // Run statistics */
-  /* printf("---------------------------------------------------\n"); */
-  /* printf("Production...\n"); */
-  /* run_nvt(true,G_IN.sweep_eq); */
-  /* printf("Production completed.\n"); */
-  /* clock_t end = clock(); */
+  // Run statistics
+  printf("---------------------------------------------------\n");
+  printf("Production...\n");
+  run_nvt(true,G_IN.sweep_eq);
+  printf("Production completed.\n");
+  clock_t end = clock();
 
-  /* // Print acceptance and rejection percentages */
-  /* int part_moves, acc_part_moves, rej_part_moves; */
-  /* get_moves_counters(&part_moves, &acc_part_moves, &rej_part_moves, */
-  /* 		     NULL, NULL, NULL); */
-  /* printf("---------------------------------------------------\n"); */
-  /* printf("-- Particle moves: %.8e\n", (double)part_moves); */
-  /* printf("   Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves)); */
-  /* printf("   Rejection percentage: %f\n", (double)rej_part_moves/((double)part_moves)); */
+  // Print acceptance and rejection percentages
+  int part_moves, acc_part_moves, rej_part_moves;
+  get_moves_counters(&part_moves, &acc_part_moves, &rej_part_moves,
+  		     NULL, NULL, NULL);
+  printf("---------------------------------------------------\n");
+  printf("-- Particle moves: %.8e\n", (double)part_moves);
+  printf("   Acceptance percentage: %f\n", (double)acc_part_moves/((double)part_moves));
+  printf("   Rejection percentage: %f\n", (double)rej_part_moves/((double)part_moves));
 
   
-  /* // Stop timing */
-  /* printf("Elapsed time: %f seconds\n", */
-  /* 	 (double)(end - start) / CLOCKS_PER_SEC); */
+  // Stop timing
+  printf("Elapsed time: %f seconds\n",
+  	 (double)(end - start) / CLOCKS_PER_SEC);
 
-  /* // Free memory */
-  /* part_free(); */
-  /* cell_list_free(); */
-  /* rng_free(); */
+  // Free memory
+  part_free();
+  cell_list_free();
+  rng_free();
 
 
 }

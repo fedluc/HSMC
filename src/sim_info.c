@@ -222,7 +222,7 @@ void sim_box_info_write(FILE *fid){
 }
 
 void sim_box_info_read(FILE *fid){
-  fread(&sim_box_info, sizeof(p_info), 1, fid);
+  fread(&sim_box_info, sizeof(box_info), 1, fid);
 }
 
 
