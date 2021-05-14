@@ -27,7 +27,7 @@ def rdf(data_dir):
     plt.plot(rdf[:,0],rdf[:,1],'b')
     plt.ylabel('g(x)')
     plt.xlabel('x = r/sigma')
-    #plt.show()
+    plt.show()
 
 # ------ Read  HSMC output for the radial distribution function -----
 
@@ -50,7 +50,7 @@ def read_rdf_output(file_names,lines_header):
         lines_file = len(lines_data)
 
         # Extract number of bins, volume and number of particles
-        [n_bins, vol, n_part]  = [float(kk) for kk in lines_data[3].split()]
+        [sweep, n_bins, vol, n_part]  = [float(kk) for kk in lines_data[3].split()]
         n_bins = int(n_bins)
 
         # Initialize rdf
@@ -77,7 +77,7 @@ def read_rdf_output(file_names,lines_header):
             
             
     # Normalize the rdf
-    rdf_file[:,1] /= n_samples
+    rdf[:,1] /= n_samples
 
     # Define the set of interparticle distances
     rdf[:,0] = rdf_tmp[:,0]
