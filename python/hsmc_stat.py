@@ -46,6 +46,9 @@ def blocking_std(data, plt_flag=True, print_flag=True, jk_flag=False):
     if plt_flag:
         blocking_plot(sigma)
 
+    # Output 
+    return sigma
+
 def blocking_print(sigma):
 
     print('Transformation, variance')
