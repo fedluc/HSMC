@@ -19,9 +19,9 @@
 
 
 // Global variables
-static int part_moves=0, vol_moves=0;
-static int acc_part_moves=0, rej_part_moves=0;
-static int acc_vol_moves=0, rej_vol_moves=0;
+static unsigned long part_moves=0, vol_moves=0;
+static unsigned long acc_part_moves=0, rej_part_moves=0;
+static unsigned long acc_vol_moves=0, rej_vol_moves=0;
 
 // ------ Move one particle ------
 void part_move(){
