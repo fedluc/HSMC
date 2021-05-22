@@ -70,7 +70,9 @@ def lny(intervals,data_dir_lr,data_dir_sr,out_dir=None,
         mask_confine = (rr>=intervals[ii,0]) & (rr<=intervals[ii,1]) 
     
         # Cavity from cavity simulations
-        lny_tmp[mask_confine] = lny_sim(data_dir_sr[ii],rr[mask_confine],file_id_dist,file_id_psi,file_comments,nPart,False)[:,1]
+        lny_tmp[mask_confine] = lny_sim(data_dir_sr[ii],rr[mask_confine],
+                                            file_id_dist,file_id_psi,
+                                            file_comments,nPart,False)[:,1]
 
         # Matching positions
         r_max_match = intervals[ii,1]
@@ -84,7 +86,8 @@ def lny(intervals,data_dir_lr,data_dir_sr,out_dir=None,
         cc = lny_tmp[mask_match] - lny[mask_match]
 
         # Update cavity 
-        lny[mask_confine] = lny_tmp[mask_confine] - np.mean(cc)
+        mask_update = (rr>=intervals[ii,0]) & (rr<=r_min_match) 
+        lny[mask_update] = lny_tmp[mask_update] - np.mean(cc)
         
         # Plot
         plt.plot(rr[mask_match],cc,'bo')
@@ -92,13 +95,12 @@ def lny(intervals,data_dir_lr,data_dir_sr,out_dir=None,
         plt.xlabel('x = r/sigma')
         plt.show()
 
-    mask = rr < 2.0
+    mask = (rr>=0.0) & (rr<=2.0)
     plt.plot(rr[mask],lny[mask],'b')
     plt.ylabel('ln[y(r)]')
     plt.xlabel('x = r/sigma')
     plt.show()
 
-        
     
 
 # ------ Logarithm of the cavity function (simulated system) ------
@@ -112,15 +114,16 @@ def lny_sim(data_dir,grid,file_id_dist='cavity_distance.dat',
 
     # Radial distribution function
     gg = rdf(data_dir,grid,file_id_dist,file_comments,
-             nPart,True,False)
+             nPart,False)
 
     # Remove indeterminate forms
     mask = gg[:,1]<=0
     gg[mask,1] = float("nan")
 
     # Logarithm of the cavity
-    lny = pot
-    lny[:,1] += np.log(gg[:,1])
+    lny = np.zeros((len(pot),2))
+    lny[:,0] = pot[:,0]
+    lny[:,1] = pot[:,1] + np.log(gg[:,1])
 
     # Plot
     if plot:
@@ -162,7 +165,7 @@ def psi(data_dir,grid,file_id='cavity_psi.dat',file_comments='#',
 # ------ Radial distribution function ------
 
 def rdf(data_dir,grid,file_id='cavity_distance.dat',file_comments='#',
-        nPart=1000, normalize=True, plot=False):
+        nPart=1000, plot=False):
 
     # Grid for the rdf extraction
     dr = grid[1] - grid[0]
@@ -180,8 +183,6 @@ def rdf(data_dir,grid,file_id='cavity_distance.dat',file_comments='#',
     rdf = np.zeros((nn,2))
     rdf[:,0] = grid
     rdf[:,1] = hist[0]/(bin_vol*4./nPart)
-    if normalize:
-        rdf[:,1] /= bin_vol*4./nPart
 
     # Plot
     if plot:
