@@ -89,19 +89,29 @@ def lny(intervals,data_dir_lr,data_dir_sr,out_dir=None,
         mask_update = (rr>=intervals[ii,0]) & (rr<=r_min_match) 
         lny[mask_update] = lny_tmp[mask_update] - np.mean(cc)
         
-        # Plot
-        plt.plot(rr[mask_match],cc,'bo')
-        plt.ylabel('Matching constant')
+        # Plot matching constant
+        if plot:
+            plt.plot(rr[mask_match],cc,'bo')
+            plt.ylabel('Matching constant')
+            plt.xlabel('x = r/sigma')
+            plt.show()
+
+    # Plot cavity
+    if plot:
+        mask = (rr>=0.0) & (rr<=2.0)
+        plt.plot(rr[mask],lny[mask],'b')
+        plt.ylabel('ln[y(r)]')
         plt.xlabel('x = r/sigma')
         plt.show()
 
-    mask = (rr>=0.0) & (rr<=2.0)
-    plt.plot(rr[mask],lny[mask],'b')
-    plt.ylabel('ln[y(r)]')
-    plt.xlabel('x = r/sigma')
-    plt.show()
+    # Output
+    out_name = os.path.join(out_dir, 'lny.dat')
+    output = np.zeros((nr,2))
+    output[:,0] = rr
+    output[:,1] = lny
+    np.savetxt(out_name, output, fmt='%.16e')
 
-    
+    return output
 
 # ------ Logarithm of the cavity function (simulated system) ------
 

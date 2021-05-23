@@ -2,6 +2,7 @@ import os, sys
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import scipy.fftpack as fft
 import glob
 import gzip
 import hsmc_stat
@@ -201,4 +202,113 @@ def read_rdf_file(file_name,lines_header=7):
 
     # Output
     return rdf
+
+
+# ------ Compute direct correlation function ------
+
+def dcf(rdf_file,rho,out_dir=None,plot=False):
+
+    # Assign default input
+    if out_dir == None:
+        out_dir = os.getcwd()
+
+    # Load rdf data
+    rdf = np.loadtxt(rdf_file)
+
+    # Grid for Fourier transform
+    rr = rdf[:,0]
+    dr = rr[1] - rr[0]
+    rr = np.arange(dr/2.0,rr[-1]+dr/2,dr)
+    nn = len(rr)
+    dq = math.pi/(nn*dr)
+    qq = np.arange(nn)*dq + dq
+
+    # Total correlation function
+    hh = np.zeros(nn)
+    mask = rr>=1
+    hh[mask] = rdf[:,1]
+    hh -= 1.0
+
+    # Fourier transform of the total correlation function
+    hhft = 4*math.pi*dr/qq * fft.dst(rr*hh,type=2)/2.0
+
+    # Static structure factor (to check)
+    ssf = 1.0 + rho*hhft
+
+    # Fourier transform of the indirect correlation function
+    gammaft = rho*hhft**2.0/(1.0 + rho*hhft)
+
+    # Indirect correlation function
+    gamma = dq/(2*math.pi**2*rr) * fft.dst(qq*gammaft,type=3)/2.0
+
+    # Direct correlation function
+    cc = np.zeros((nn,2))
+    cc[:,0] = rr
+    cc[:,1] = hh - gamma
+
+    # Plot
+    if plot:
+        plt.plot(cc[:,0],cc[:,1],'b')
+        plt.ylabel('c(x)')
+        plt.xlabel('x = r/sigma')
+        plt.show()
+
+    # Output
+    out_name = os.path.join(out_dir, 'dcf.dat')
+    np.savetxt(out_name, cc, fmt='%.16e')
+
+    return rdf,cc,gamma
+
+
+# ------ Compute bridge function ------
+
+def bf(rdf_file,rho,lny_file=None,
+       out_dir=None,plot=False):
+
+    # Assign default input
+    sr_flag = True
+    if lny_file == None:
+        sr_flag = False
+    if out_dir == None:
+        out_dir = os.getcwd()
+
+    # Correlation functions
+    rdf, cc, gamma = dcf(rdf_file,rho,out_dir,False)
+
+    # Grid
+    rr = cc[:,0]
+    nn = len(rr)
+
+    # Cavity function
+    if sr_flag:
+        lny = np.loadtxt(lny_file)
+    else:
+        lny = np.zeros((nn,2))
+        lny[:,0] = rr
+        lny[:,1] = float("nan")
+        mask = rr >= 1.0
+        lny[mask,1] = np.log(rdf[:,1])
+
+    # Bridge function
+    bb = np.zeros((len(rr),2))
+    bb[:,0] = rr
+    bb[:,1] = lny[:,1] - gamma
+
+    if plot:
+        mask = rr<3.0
+        plt.plot(bb[mask,0],-bb[mask,1],'b')
+        plt.ylabel('-B(x)')
+        plt.xlabel('x = r/sigma')
+        plt.show()
+
+        mask = (rr > 1.2) &  (rr<5.0)
+        plt.plot(bb[mask,0],-bb[mask,1],'b')
+        plt.ylabel('-B(x)')
+        plt.xlabel('x = r/sigma')
+        plt.show()
+
+    # Output
+    out_name = os.path.join(out_dir, 'bf.dat')
+    np.savetxt(out_name, bb, fmt='%.16e')
+
 
