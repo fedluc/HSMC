@@ -72,7 +72,7 @@ def lny(intervals,data_dir_lr,data_dir_sr,out_dir=None,
         # Cavity from cavity simulations
         lny_tmp[mask_confine] = lny_sim(data_dir_sr[ii],rr[mask_confine],
                                             file_id_dist,file_id_psi,
-                                            file_comments,nPart,False)[:,1]
+                                            file_comments,nPart,True)[:,1]
 
         # Matching positions
         r_max_match = intervals[ii,1]
@@ -120,11 +120,11 @@ def lny_sim(data_dir,grid,file_id_dist='cavity_distance.dat',
             nPart=1000, plot=False):
 
     # Interaction potential between the cavities
-    pot = psi(data_dir,grid,file_id_psi,file_comments,False)
+    pot = psi(data_dir,grid,file_id_psi,file_comments,True)
 
     # Radial distribution function
     gg = rdf(data_dir,grid,file_id_dist,file_comments,
-             nPart,False)
+             nPart,True)
 
     # Remove indeterminate forms
     mask = gg[:,1]<=0

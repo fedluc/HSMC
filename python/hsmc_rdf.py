@@ -206,7 +206,7 @@ def read_rdf_file(file_name,lines_header=7):
 
 # ------ Compute direct correlation function ------
 
-def dcf(rdf_file,rho,out_dir=None,plot=False):
+def dcf(rdf_file,rho,nPart=13500,out_dir=None,plot=False):
 
     # Assign default input
     if out_dir == None:
@@ -214,6 +214,9 @@ def dcf(rdf_file,rho,out_dir=None,plot=False):
 
     # Load rdf data
     rdf = np.loadtxt(rdf_file)
+
+    # Finite size correction
+    rdf[:,1] = finite_size_correction(rdf[:,1],rho,nPart)
 
     # Grid for Fourier transform
     rr = rdf[:,0]
@@ -262,7 +265,7 @@ def dcf(rdf_file,rho,out_dir=None,plot=False):
 
 # ------ Compute bridge function ------
 
-def bf(rdf_file,rho,lny_file=None,
+def bf(rdf_file,rho,nPart=13500,lny_file=None,
        out_dir=None,plot=False):
 
     # Assign default input
@@ -273,7 +276,7 @@ def bf(rdf_file,rho,lny_file=None,
         out_dir = os.getcwd()
 
     # Correlation functions
-    rdf, cc, gamma = dcf(rdf_file,rho,out_dir,False)
+    rdf, cc, gamma = dcf(rdf_file,rho,nPart,out_dir,False)
 
     # Grid
     rr = cc[:,0]
@@ -312,3 +315,39 @@ def bf(rdf_file,rho,lny_file=None,
     np.savetxt(out_name, bb, fmt='%.16e')
 
 
+def finite_size_correction(rdf,rho,nPart):
+    
+    # Inverse isothermal compressibility
+    mu_T = iic_ew(rho*math.pi/6.0)/rho
+
+    # Finite size corrected rdf
+    rdf *= 1.0 + 1.0/(nPart*mu_T)
+    
+    return rdf
+
+
+def iic_ew(eta):
+
+    # Inverse isothermal compressibility from Erpenbeck-Wood EOS
+    
+    # Compressibility factor
+    zz1 = 0.890851
+    zz2 = 0.8924486
+    zz3 = 0.3430298
+    zz4 = -2.277287
+    zz5 = 1.3262418
+    zz = eta * ( (4.0 +zz1*eta +zz2*eta**2.0 + zz3*eta**3.0)
+                /(1.0 + zz4*eta + zz5*eta**2) )
+    
+    zz_der_1 = ((eta * (zz1 + 2.0*zz2*eta + 3.0*zz3*eta**2.0))/
+              (1 + zz4*eta + zz5*eta**2.0))  
+    zz_der_2 = -((eta * (zz4 + 2.0*zz5*eta) * 
+                  (4.0 + zz1*eta + zz2*eta**2.0 + zz3*eta**3.0))
+                 /(1 + zz4*eta + zz5*eta**2)**2.0) 
+    zz_der_3 = ((4.0 + zz1*eta + zz2*eta**2.0 + zz3*eta**3.0)/
+                (1.0 + zz4*eta + zz5*eta**2.0))
+    zz_der = zz_der_1 + zz_der_2 + zz_der_3
+
+    return 1.0 + eta*zz_der + zz
+
+     
