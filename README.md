@@ -157,6 +157,10 @@ The table illustrates the results obtained by performing an NpT simulation with 
 3.471	|	3.5(60)	|	0.35(10)	|	0.349(2)
 5.274	|	5.3(97)	|	0.40(12)	|	0.399(2)
 
+### Cavity simulations
+
+<img src="examples/cavity.svg" width="500" height="300">
+
 
 ### Chemical potential in the NVT ensemble
 
