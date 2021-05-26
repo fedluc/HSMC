@@ -159,7 +159,7 @@ The table illustrates the results obtained by performing an NpT simulation with 
 
 ### Cavity simulations
 
-The figure presents the logarithm of the cavity function, lny(x), and compares the result of the cavity simulations performed with HSMC (black solid line) to the analytical parameterization proposed by [Henderson and Grundke](https://aip.scitation.org/doi/abs/10.1063/1.431378) (green dashed line) and to the computer simulation results of [Torrie and Patey](https://www.tandfonline.com/doi/abs/10.1080/00268977700102821) (red circles). All the results refer to density 0.8. The HSMC results were obtained with 1000 particles and 4194304 samples.
+The figure presents the logarithm of the cavity function, lny(x), and compares the result of the cavity simulations performed with HSMC (black solid line) to the analytical parameterization proposed by [Henderson and Grundke](https://aip.scitation.org/doi/abs/10.1063/1.431378) (green dashed line) and to the computer simulation results of [Torrie and Patey](https://www.tandfonline.com/doi/abs/10.1080/00268977700102821) (red circles). All the results refer to density 0.8. The HSMC results were obtained with 1000 particles and 4194304 samples. The horizontal axis in the figure represents the inter-particle distance in units of the particle's diameter (sigma).
 
 <img src="examples/cavity.svg" width="500" height="300">
 
