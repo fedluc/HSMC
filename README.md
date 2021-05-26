@@ -116,7 +116,7 @@ The folder [python](https://github.com/fedluc/HSMC/tree/main/python) contains so
 * hsmc_density: analyze output for the density during the isobaric simulations
 * hsmc_op: analyze output for the order parameter
 * hsmc_pressure: analyze output for the pressure calculations
-* hsmc_rdf: compute the average radial distribution function from the rdf files produced by hsmc
+* hsmc_rdf: analyze the radial distribution function (rdf) output produced by hsmc. This includes the possibility to compute the average rdf, to perform the blocking analysis of the rdf samples (see hsmc_stat for more information on this) and to compute other correlation functions which depend on the rdf (static structure factor, direct correlation function and bridge function)
 * hsmc_stat: this module contains a collection of tools for the statistical analysis of the hsmc results. These tools include the [blocking method discussed by Flyvberg](https://doi.org/10.1063/1.457480), the calculation of autocorrelation functions and the jackknife estimate for the standard deviation.
 
 
